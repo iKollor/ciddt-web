@@ -1,0 +1,124 @@
+$easeInOutCubic: cubic-bezier(0.65, 0.05, 0.36, 1);
+$duration: 640ms;
+
+.navbar {
+	width: 100%;
+	height: 100px;
+	display: inline-block;
+	.navbar__container {
+		margin: auto;
+		width: 93%;
+		height: 100%;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		transition: all $duration $easeInOutCubic;
+		.navbar__menu {
+			display: flex;
+			align-items: center;
+			gap: 1rem;
+			transition: all $duration $easeInOutCubic;
+		}
+		.navbar__logo {
+			z-index: 2;
+			a {
+				display: flex;
+				align-items: center;
+				gap: 0.5rem;
+				img.isotipo {
+					width: 40px;
+					height: 40px;
+				}
+				img.logo_texto {
+					width: 50px;
+					height: 13px;
+					opacity: 0;
+					transform: translateX(-50px);
+					transition: all $duration $easeInOutCubic;
+				}
+				&:hover {
+					img.logo_texto {
+						transform: translateX(0);
+						opacity: 1;
+					}
+				}
+			}
+		}
+	}
+	input#menu {
+		display: none;
+	}
+	label {
+		margin: 1rem;
+		.menu-icon {
+			height: 30px;
+			color: #fff;
+		}
+		display: none;
+		position: fixed;
+		top: 1rem;
+		right: 1rem;
+		z-index: 2;
+		cursor: pointer;
+	}
+
+	transition: all $duration $easeInOutCubic;
+}
+
+.navbar.menuBar {
+	label {
+		display: block;
+	}
+	.navbar__container {
+		.navbar__menu {
+			position: absolute;
+			height: 100vh;
+			width: 100%;
+			display: flex;
+			flex-direction: column;
+			justify-content: space-between;
+			background-color: #000;
+			padding: 0px 0;
+			gap: 0;
+			.button-container {
+				width: 100%;
+				flex: 1; // Esto hace que cada botón crezca para ocupar el espacio disponible.
+				display: flex; // Hacemos esto para centrar el contenido del botón.
+				align-items: center;
+				justify-content: center;
+				border-bottom: #fff 1px solid;
+				margin: 0;
+				&:hover,
+				&.selected {
+					background-color: #cd1417;
+					cursor: pointer;
+				}
+				a {
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					width: 100%;
+					height: 100%;
+					text-align: center;
+					font-size: 5vh;
+				}
+			}
+			.button-container:nth-last-child(1) {
+				border-bottom: none;
+			}
+			left: 0;
+			top: 0;
+			//posicion del menu fuera del viewport mientras displaymenu sea false
+			transform: translateX(100%);
+		}
+	}
+}
+
+.navbar.menuBar.displayMenu {
+	.navbar__container {
+		.navbar__menu {
+			transform: translateX(0);
+			transition: all $duration $easeInOutCubic;
+		}
+	}
+}
