@@ -7,7 +7,6 @@ a {
 .button-container {
 	margin: 5px 10px;
 	opacity: 65%;
-	transition: all 150ms ease-in-out;
 
 	&:hover {
 		opacity: 100%;
@@ -17,7 +16,6 @@ a {
 .selected {
 	a {
 		font-weight: 900;
-		transition: all 0.2s ease-in-out;
 	}
 	opacity: 100%;
 	pointer-events: none;

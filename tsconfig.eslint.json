@@ -1,5 +1,4 @@
 {
 	"extends": "./tsconfig.json",
-	"include": [".eslintrc.cjs"],
-	"exclude": ["node_modules", "dist", "src/env.d.ts"]
+	"include": ["**/*.ts", "**/*.tsx", "**/*.astro", ".eslintrc.cjs"]
 }

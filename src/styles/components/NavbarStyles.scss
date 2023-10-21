@@ -1,10 +1,16 @@
-$easeInOutCubic: cubic-bezier(0.65, 0.05, 0.36, 1);
-$duration: 640ms;
+@import '../GlobalVariables.scss';
+@import '../../../fonts/BrutaProExtended/stylesheet.css';
+
+.noAnimate {
+	transition: none !important;
+}
 
 .navbar {
+	z-index: 1000;
 	width: 100%;
 	height: 100px;
 	display: inline-block;
+	position: fixed;
 	.navbar__container {
 		margin: auto;
 		width: 93%;
@@ -12,15 +18,22 @@ $duration: 640ms;
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		transition: all $duration $easeInOutCubic;
 		.navbar__menu {
 			display: flex;
 			align-items: center;
 			gap: 1rem;
-			transition: all $duration $easeInOutCubic;
+			.button-container {
+				a {
+					text-transform: uppercase;
+				}
+			}
 		}
 		.navbar__logo {
-			z-index: 2;
+			&:hover {
+				img.isotipo {
+					rotate: 0deg;
+				}
+			}
 			a {
 				display: flex;
 				align-items: center;
@@ -28,13 +41,23 @@ $duration: 640ms;
 				img.isotipo {
 					width: 40px;
 					height: 40px;
+					transition: rotate $duration $easeInOutCubic;
+					rotate: 180deg;
+					filter: brightness(0) invert(1);
+					&.red {
+						filter: none;
+					}
 				}
 				img.logo_texto {
 					width: 50px;
 					height: 13px;
 					opacity: 0;
 					transform: translateX(-50px);
-					transition: all $duration $easeInOutCubic;
+					transition: transform $duration $easeInOutCubic;
+					filter: brightness(0) invert(1);
+					&.red {
+						filter: none;
+					}
 				}
 				&:hover {
 					img.logo_texto {
@@ -50,10 +73,6 @@ $duration: 640ms;
 	}
 	label {
 		margin: 1rem;
-		.menu-icon {
-			height: 30px;
-			color: #fff;
-		}
 		display: none;
 		position: fixed;
 		top: 1rem;
@@ -61,8 +80,6 @@ $duration: 640ms;
 		z-index: 2;
 		cursor: pointer;
 	}
-
-	transition: all $duration $easeInOutCubic;
 }
 
 .navbar.menuBar {
@@ -72,53 +89,186 @@ $duration: 640ms;
 	.navbar__container {
 		.navbar__menu {
 			position: absolute;
-			height: 100vh;
-			width: 100%;
+			height: 100svh;
+			width: 50%;
 			display: flex;
 			flex-direction: column;
 			justify-content: space-between;
-			background-color: #000;
 			padding: 0px 0;
 			gap: 0;
+			pointer-events: none;
 			.button-container {
 				width: 100%;
-				flex: 1; // Esto hace que cada botón crezca para ocupar el espacio disponible.
-				display: flex; // Hacemos esto para centrar el contenido del botón.
+				flex: 1;
+				display: flex;
 				align-items: center;
 				justify-content: center;
-				border-bottom: #fff 1px solid;
+				border-bottom: $gray 1px solid;
 				margin: 0;
-				&:hover,
-				&.selected {
-					background-color: #cd1417;
+				transform: translateX(200%);
+				opacity: 1;
+				background-color: $bg;
+				transition:
+					transform $duration cubic-bezier(0.23, 0.82, 0.17, 1.03),
+					background-color 0.3s ease 0s,
+					padding-left 0.3s $easeInOutCubic 0s;
+
+				// Añadiendo delay incremental solo para la propiedad transform
+				&:nth-child(1) {
+					transition-delay: 0.05s, 0s, 0s, 0s; // Aquí especifico que el transform tiene 0.1s de delay y el background-color 0s
+				}
+				&:nth-child(2) {
+					transition-delay: 0.1s, 0s, 0s, 0s;
+				}
+				&:nth-child(3) {
+					transition-delay: 0.15s, 0s, 0s, 0s;
+				}
+				&:nth-child(4) {
+					transition-delay: 0.2s, 0s, 0s, 0s;
+				}
+				&:nth-child(5) {
+					transition-delay: 0.25s, 0s, 0s, 0s;
+				}
+
+				&::before {
+					content: '';
+					position: absolute;
+					bottom: 0;
+					left: 0;
+					right: 0;
+					height: 0; // Inicialmente, el "borde" tendrá una altura de 0
+					background-color: $gray; // Color del "borde"
+					z-index: -1; // Coloca el "borde" detrás del contenido del elemento
+					transition:
+						height 0.3s ease,
+						background-color 0.3s ease; // Transición suave
+				}
+				padding-left: 100px;
+				&:hover {
 					cursor: pointer;
+					padding-left: 200px;
+					&::before {
+						background-color: $rojo;
+						height: 100%; // El "borde" crece hacia arriba (hacia el interior del elemento)
+					}
+					a {
+						color: $white;
+						font-weight: 900;
+						&::before {
+							//linea
+							width: 160px;
+						}
+						&::after {
+							//circulo
+							left: 160px;
+						}
+					}
+				}
+				&.selected {
+					cursor: pointer;
+					padding-left: 200px;
+					&::before {
+						background-color: $rojo;
+						height: 100%; // El "borde" crece hacia arriba (hacia el interior del elemento)
+					}
+					a {
+						font-weight: 900;
+						&::before {
+							//linea
+							width: 160px;
+						}
+						&::after {
+							//circulo
+							left: 160px;
+						}
+					}
 				}
 				a {
 					display: flex;
 					align-items: center;
-					justify-content: center;
+					justify-content: start;
 					width: 100%;
 					height: 100%;
-					text-align: center;
-					font-size: 5vh;
+					text-align: left;
+					font-size: 3rem;
+					font-family: 'Bruta Pro Extended', sans-serif;
+					font-weight: 500;
+					text-transform: capitalize;
+					transition: all 0.3;
+					&::before {
+						// Linea
+						content: '';
+						position: absolute;
+						left: 0;
+						width: 60px; // Largo de la linea (debe ser el mismo valor que el left del ::after)
+						height: 5px;
+						background-color: $white; 
+					&::after {
+						// Circulo
+						content: '';
+						position: absolute;
+						left: 60px; // Posiciona el circulo al final de la linea
+						width: 20px;
+						height: 20px;
+						border-radius: 50%;
+						background-color: $white;
+						transition: left 0.3s $easeInOutCubic;
+					}
 				}
 			}
 			.button-container:nth-last-child(1) {
-				border-bottom: none;
+				border-bottom: $white 0 solid;
+				&:hover::before {
+					height: 100%;
+				}
 			}
 			left: 0;
 			top: 0;
-			//posicion del menu fuera del viewport mientras displaymenu sea false
-			transform: translateX(100%);
 		}
 	}
 }
-
 .navbar.menuBar.displayMenu {
 	.navbar__container {
 		.navbar__menu {
-			transform: translateX(0);
-			transition: all $duration $easeInOutCubic;
+			.button-container {
+				transform: translateX(100%);
+				pointer-events: all;
+				&::after {
+					content: '';
+					position: absolute;
+					top: 0;
+					left: -100%;
+					width: 100%;
+					height: 101%;
+					background-color: rgba(27, 27, 27, 0.5);
+					transition: all 0.3s ease;
+					cursor: auto;
+				}
+			}
+		}
+	}
+}
+// responsive design
+@media only screen and (max-width: 768px) {
+}
+@media only screen and (max-width: 1024px) {
+	.navbar.menuBar {
+		.navbar__container {
+			.navbar__menu {
+				width: 100%;
+				.button-container {
+					transform: translateX(100%);
+				}
+			}
+		}
+		&.displayMenu {
+			.navbar__container {
+				.navbar__menu {
+					.button-container {
+						transform: translateX(0);
+					}
+				}
+			}
 		}
 	}
 }

@@ -1,0 +1,42 @@
+// Hamburger Menu
+@import '../../GlobalVariables.scss';
+
+.McButton {
+	$bar-w: 30px;
+	$bar-h: 4px;
+	$bar-color: #f8f8f8;
+	$stretch-factor: 1.4; // Factor de estiramiento, 1.1 estirará las líneas un 10% más
+
+	&.red {
+		b {
+			background-color: $rojo;
+		}
+	}
+
+	position: absolute;
+	top: 1.3rem;
+	right: 1rem;
+	margin-left: -(calc($bar-w / 2));
+	margin-top: -(calc($bar-w / 2));
+	width: $bar-w;
+	height: calc(($bar-w * 3) / 4);
+	cursor: pointer;
+
+	b {
+		position: absolute;
+		left: 0;
+		width: $bar-w;
+		height: $bar-h;
+		background-color: $bar-color;
+
+		&:nth-child(1) {
+			top: 0;
+		}
+		&:nth-child(2) {
+			top: 50%;
+		}
+		&:nth-child(3) {
+			top: 100%;
+		}
+	}
+} // McButton

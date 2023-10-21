@@ -1,7 +1,15 @@
 {
-	"tabWidth": 4,
-	"useTabs": true,
-	"singleQuote": true,
-	"jsxSingleQuote": true,
-	"arrowParens": "avoid"
+    "plugins": ["prettier-plugin-astro"],
+    "overrides": [
+        {
+            "files": "*.astro",
+            "options": {
+                "parser": "astro"
+            }
+        }
+    ],
+    "tabWidth": 4,
+    "printWidth": 120,
+    "useTabs": true,
+    "singleQuote": true
 }

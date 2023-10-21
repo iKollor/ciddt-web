@@ -1,0 +1,28 @@
+---
+// hoja de estilos
+import '../styles/pages/Header.scss';
+
+import { Image } from 'astro:assets';
+
+import Logo from '../../public/svg/logo_text_blanco.svg';
+---
+
+<header>
+	<div class="header__container">
+		<div class="bg__container"></div>
+		<!-- Solo la imagen de fondo aquí -->
+		<div class="bg__container__logo">
+			<Image class={'logo'} src={Logo} alt="Logo" />
+		</div>
+		<div class="bottom__section__container">
+			<div class="anchors left"></div>
+			<div class="leyenda right">
+				<p>
+					El Centro de Investigación y Defensa del Derecho al Trabajo (CIDDT) es una organización que busca
+					promover y defender el derecho al trabajo, a través de la formación, investigación, litigio
+					estratégico y acompañamiento a organizaciones sindicales y personas trabajadoras.
+				</p>
+			</div>
+		</div>
+	</div>
+</header>
