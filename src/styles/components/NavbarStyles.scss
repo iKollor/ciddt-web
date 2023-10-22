@@ -53,7 +53,7 @@
 					height: 13px;
 					opacity: 0;
 					transform: translateX(-50px);
-					transition: transform $duration $easeInOutCubic;
+					transition: all $duration $easeInOutCubic;
 					filter: brightness(0) invert(1);
 					&.red {
 						filter: none;
@@ -90,22 +90,28 @@
 		.navbar__menu {
 			position: absolute;
 			height: 100svh;
-			width: 50%;
+			width: $navbar_menu_width;
 			display: flex;
 			flex-direction: column;
 			justify-content: space-between;
 			padding: 0px 0;
 			gap: 0;
 			pointer-events: none;
+			.footer {
+				height: 40%;
+				width: 100%;
+				background-color: $bg;
+				transform: translateX(100vw);
+				transition: all 0.3s ease 0.3s;
+			}
 			.button-container {
 				width: 100%;
 				flex: 1;
 				display: flex;
 				align-items: center;
 				justify-content: center;
-				border-bottom: $gray 1px solid;
 				margin: 0;
-				transform: translateX(200%);
+				transform: translateX(100vw);
 				opacity: 1;
 				background-color: $bg;
 				transition:
@@ -136,50 +142,50 @@
 					bottom: 0;
 					left: 0;
 					right: 0;
-					height: 0; // Inicialmente, el "borde" tendrá una altura de 0
-					background-color: $gray; // Color del "borde"
+					height: 2%; // Inicialmente, el "borde" tendrá una altura de 3.5
+					background-color: $white; // Color del "borde"
 					z-index: -1; // Coloca el "borde" detrás del contenido del elemento
 					transition:
 						height 0.3s ease,
 						background-color 0.3s ease; // Transición suave
 				}
-				padding-left: 100px;
+				padding-left: 4vw;
 				&:hover {
 					cursor: pointer;
-					padding-left: 200px;
+					padding-left: 7vw;
 					&::before {
 						background-color: $rojo;
 						height: 100%; // El "borde" crece hacia arriba (hacia el interior del elemento)
 					}
 					a {
 						color: $white;
-						font-weight: 900;
+						font-weight: 800;
 						&::before {
 							//linea
-							width: 160px;
+							width: 20%;
 						}
 						&::after {
 							//circulo
-							left: 160px;
+							left: 20%;
 						}
 					}
 				}
 				&.selected {
 					cursor: pointer;
-					padding-left: 200px;
+					padding-left: 7vw;
 					&::before {
 						background-color: $rojo;
 						height: 100%; // El "borde" crece hacia arriba (hacia el interior del elemento)
 					}
 					a {
-						font-weight: 900;
+						font-weight: 800;
 						&::before {
 							//linea
-							width: 160px;
+							width: 20%;
 						}
 						&::after {
 							//circulo
-							left: 160px;
+							left: 20%;
 						}
 					}
 				}
@@ -190,26 +196,28 @@
 					width: 100%;
 					height: 100%;
 					text-align: left;
-					font-size: 3rem;
+					font-size: 2vw;
 					font-family: 'Bruta Pro Extended', sans-serif;
 					font-weight: 500;
 					text-transform: capitalize;
 					transition: all 0.3;
 					&::before {
-						// Linea
+						// Linea inicial
 						content: '';
 						position: absolute;
 						left: 0;
-						width: 60px; // Largo de la linea (debe ser el mismo valor que el left del ::after)
-						height: 5px;
-						background-color: $white; 
+						width: 10%; // Largo de la linea (debe ser el mismo valor que el left del ::after)
+						height: 0.2vw;
+						background-color: $white;
+						transition: width 0.3s $easeInOutCubic;
+					}
 					&::after {
-						// Circulo
+						// Circulo inicial
 						content: '';
 						position: absolute;
-						left: 60px; // Posiciona el circulo al final de la linea
-						width: 20px;
-						height: 20px;
+						left: 10%; // Posiciona el circulo al final de la linea
+						width: 1vw;
+						height: 1vw;
 						border-radius: 50%;
 						background-color: $white;
 						transition: left 0.3s $easeInOutCubic;
@@ -231,43 +239,11 @@
 	.navbar__container {
 		.navbar__menu {
 			.button-container {
-				transform: translateX(100%);
+				transform: translateX(75vw);
 				pointer-events: all;
-				&::after {
-					content: '';
-					position: absolute;
-					top: 0;
-					left: -100%;
-					width: 100%;
-					height: 101%;
-					background-color: rgba(27, 27, 27, 0.5);
-					transition: all 0.3s ease;
-					cursor: auto;
-				}
 			}
-		}
-	}
-}
-// responsive design
-@media only screen and (max-width: 768px) {
-}
-@media only screen and (max-width: 1024px) {
-	.navbar.menuBar {
-		.navbar__container {
-			.navbar__menu {
-				width: 100%;
-				.button-container {
-					transform: translateX(100%);
-				}
-			}
-		}
-		&.displayMenu {
-			.navbar__container {
-				.navbar__menu {
-					.button-container {
-						transform: translateX(0);
-					}
-				}
+			.footer {
+				transform: translateX(75vw);
 			}
 		}
 	}

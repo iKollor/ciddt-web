@@ -2,6 +2,7 @@
 import '../styles/GlobalStyles.astro';
 
 import Navbar from '../components/Navbar';
+import Equipo from '../layouts/Equipo.astro';
 import Header from '../layouts/Header.astro';
 import Nosotros from '../layouts/Nosotros.astro';
 ---
@@ -14,11 +15,18 @@ import Nosotros from '../layouts/Nosotros.astro';
 	</head>
 	<body>
 		<Navbar client:only />
-		<Header />
 		<main>
-			<section>
-				<Nosotros />
-			</section>
+			<div id="main-container">
+				<section id="Header">
+					<Header />
+				</section>
+				<section id="Nosotros">
+					<Nosotros />
+				</section>
+				<section id="Equipo">
+					<Equipo />
+				</section>
+			</div>
 		</main>
 	</body>
 	<style lang="scss">

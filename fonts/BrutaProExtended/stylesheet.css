@@ -19,47 +19,47 @@
 }
 
 @font-face {
-	font-family: 'Bruta Pro Extended Expanded';
+	font-family: 'Bruta Pro Extended';
 	src:
 		url('BrutaProExtended-Bold.woff2') format('woff2'),
 		url('BrutaProExtended-Bold.woff') format('woff');
-	font-weight: bold;
+	font-weight: 700;
 	font-style: normal;
 	font-display: swap;
 }
 
 @font-face {
-	font-family: 'Bruta Pro Extended Expanded';
+	font-family: 'Bruta Pro Extended';
 	src:
 		url('BrutaProExtended-BoldItalic.woff2') format('woff2'),
 		url('BrutaProExtended-BoldItalic.woff') format('woff');
-	font-weight: bold;
+	font-weight: 700;
 	font-style: italic;
 	font-display: swap;
 }
 
 @font-face {
-	font-family: 'Bruta Pro Extended Ex Bold It';
+	font-family: 'Bruta Pro Extended';
 	src:
 		url('BrutaProExtended-ExtraBoldItalic.woff2') format('woff2'),
 		url('BrutaProExtended-ExtraBoldItalic.woff') format('woff');
-	font-weight: bold;
+	font-weight: 800;
 	font-style: italic;
 	font-display: swap;
 }
 
 @font-face {
-	font-family: 'Bruta Pro Extended Extra';
+	font-family: 'Bruta Pro Extended';
 	src:
 		url('BrutaProExtended-ExtraBold.woff2') format('woff2'),
 		url('BrutaProExtended-ExtraBold.woff') format('woff');
-	font-weight: bold;
+	font-weight: 800;
 	font-style: normal;
 	font-display: swap;
 }
 
 @font-face {
-	font-family: 'Bruta Pro Extended Extra';
+	font-family: 'Bruta Pro Extended';
 	src:
 		url('BrutaProExtended-ExtraLight.woff2') format('woff2'),
 		url('BrutaProExtended-ExtraLight.woff') format('woff');
@@ -69,7 +69,7 @@
 }
 
 @font-face {
-	font-family: 'Bruta Pro Extended Ex Light It';
+	font-family: 'Bruta Pro Extended';
 	src:
 		url('BrutaProExtended-ExtraLightItalic.woff2') format('woff2'),
 		url('BrutaProExtended-ExtraLightItalic.woff') format('woff');
@@ -109,7 +109,7 @@
 }
 
 @font-face {
-	font-family: 'Bruta Pro Extended Expanded';
+	font-family: 'Bruta Pro Extended';
 	src:
 		url('BrutaProExtended-RegularItalic.woff2') format('woff2'),
 		url('BrutaProExtended-RegularItalic.woff') format('woff');
@@ -119,7 +119,7 @@
 }
 
 @font-face {
-	font-family: 'Bruta Pro Extended Semi';
+	font-family: 'Bruta Pro Extended';
 	src:
 		url('BrutaProExtended-SemiBold.woff2') format('woff2'),
 		url('BrutaProExtended-SemiBold.woff') format('woff');
@@ -129,7 +129,7 @@
 }
 
 @font-face {
-	font-family: 'Bruta Pro Extended Sm Bold It';
+	font-family: 'Bruta Pro Extended';
 	src:
 		url('BrutaProExtended-SemiBoldItalic.woff2') format('woff2'),
 		url('BrutaProExtended-SemiBoldItalic.woff') format('woff');

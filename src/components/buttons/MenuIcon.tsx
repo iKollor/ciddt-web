@@ -1,8 +1,10 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import '../../styles/components/buttons/MenuIcon.scss';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Velocity from 'velocity-animate';
+
+import { isMenuClosed, isMenuOpen } from '../../pushBody';
 
 export function HamburgerMenu({ className }: { className?: string }) {
 	// Referencias a los elementos del DOM
@@ -12,10 +14,31 @@ export function HamburgerMenu({ className }: { className?: string }) {
 	const McBar3Ref = useRef<HTMLElement | null>(null); // barra 3 (hijo)
 
 	// definición de estados
-	const [isActive, setIsActive] = useState(false); // Estado para saber si el menu está activo o no
 	const [isClickable, setIsClickable] = useState(true); // Estado para saber si el botón es clickeable o no
 	const [isScaled, setIsScaled] = useState(false); // Estado para saber si el botón ya tiene la transformación de scaleX aplicada
 	const [isTouchDevice, setIsTouchDevice] = useState(false); // Estado para saber si el dispositivo es táctil o no
+
+	useEffect(() => {
+		const handleScroll = () => {
+			// Si el menú está abierto y luego hace scroll hacia arriba el boton aplica la animación de cerrar el menú
+
+			if (isMenuOpen.get() && !isMenuClosed.get()) {
+				if (window.scrollY === 0) {
+					// boton menu abierto
+					Velocity(McButtonRef.current, 'reverse');
+
+					Velocity(McBar3Ref.current, { rotateZ: '0deg' }, { duration: 800, easing: [500, 20] });
+
+					Velocity(McBar3Ref.current, { top: '100%' }, { duration: 200, easing: 'swing' });
+
+					Velocity(McBar1Ref.current, 'reverse', { delay: 800 });
+
+					console.log('scroll en 0');
+				}
+			}
+		};
+		window.addEventListener('scroll', handleScroll);
+	});
 
 	// Agrega y quita las transiciones de los elementos
 	const setTransition = (element: HTMLElement | null) => {
@@ -34,13 +57,13 @@ export function HamburgerMenu({ className }: { className?: string }) {
 	// Agrega y quita la transformación de scaleX
 	const handleEnter = () => {
 		// Apply scaleX transformation to McButtonRef
-		if (!isScaled && !isTouchDevice && !isActive) {
+		if (!isScaled && !isTouchDevice && !isMenuOpen.get()) {
 			setTransition(McButtonRef.current);
 			if (McButtonRef.current != null) McButtonRef.current.style.transform += ' scaleX(1.4)';
 			setIsScaled(true); // Estado para evitar que se aplique una y otra vez la transformación
 		}
 		// Apply scaleX transformation to the children of McButtonRef
-		if (!isScaled && !isTouchDevice && isActive) {
+		if (!isScaled && !isTouchDevice && isMenuOpen.get()) {
 			if (McButtonRef.current != null) {
 				const children = Array.from(McButtonRef.current.children) as HTMLElement[];
 				for (let i = 0; i < children.length; i++) {
@@ -87,10 +110,9 @@ export function HamburgerMenu({ className }: { className?: string }) {
 		// Verificar si el botón es clickeable
 		if (!isClickable) return;
 		// Cambiar el estado del botón
-		setIsActive(!isActive);
 
-		if (!isActive) {
-			// menu cerrado
+		if (isMenuClosed.get()) {
+			// boton menu abierto
 			Velocity(McBar1Ref.current, { top: '50%' }, { duration: 200, easing: 'swing' });
 
 			Velocity(McBar3Ref.current, { top: '50%' }, { duration: 200, easing: 'swing' });
@@ -99,7 +121,7 @@ export function HamburgerMenu({ className }: { className?: string }) {
 
 			Velocity(McButtonRef.current, { rotateZ: '135deg' }, { duration: 800, delay: 200, easing: [500, 20] });
 		} else {
-			// menu abierto
+			// boton menu cerrado
 			Velocity(McButtonRef.current, 'reverse');
 
 			Velocity(McBar3Ref.current, { rotateZ: '0deg' }, { duration: 800, easing: [500, 20] });
@@ -118,7 +140,7 @@ export function HamburgerMenu({ className }: { className?: string }) {
 
 	return (
 		<b
-			className={`McButton ${isActive ? 'active' : ''} ${className}`}
+			className={`McButton ${isMenuOpen.get() ? 'active' : ''} ${className}`}
 			onClick={handleClick}
 			ref={McButtonRef}
 			onMouseEnter={handleEnter}
