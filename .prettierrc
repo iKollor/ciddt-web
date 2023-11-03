@@ -11,5 +11,6 @@
 	"tabWidth": 4,
 	"printWidth": 120,
 	"useTabs": true,
-	"singleQuote": true
+	"singleQuote": true,
+	"endOfLine": "auto"
 }

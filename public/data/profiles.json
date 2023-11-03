@@ -1,0 +1,72 @@
+[
+	{
+		"nombre": "Jim Parker",
+		"edad": 30,
+		"detalles": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+		"urlFotoPerfil": "jim.jpeg",
+		"cargo": "Ingeniero de Software"
+	},
+	{
+		"nombre": "Marie Adams",
+		"edad": 28,
+		"detalles": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+		"urlFotoPerfil": "marie.jpeg",
+		"cargo": "Gerente de Proyecto"
+	},
+	{
+		"nombre": "Joy Estrada",
+		"edad": 35,
+		"detalles": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+		"urlFotoPerfil": "joy.jpeg",
+		"cargo": "Diseñadora UX"
+	},
+	{
+		"nombre": "Isai Tobar",
+		"edad": 30,
+		"detalles": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+		"urlFotoPerfil": "jim.jpeg",
+		"cargo": "Ingeniero de Software"
+	},
+	{
+		"nombre": "Ana Adams",
+		"edad": 28,
+		"detalles": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+		"urlFotoPerfil": "marie.jpeg",
+		"cargo": "Gerente de Proyecto"
+	},
+	{
+		"nombre": "Ericka Estrada",
+		"edad": 35,
+		"detalles": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+		"urlFotoPerfil": "joy.jpeg",
+		"cargo": "Diseñadora UX"
+	},
+	{
+		"nombre": "Jose parker",
+		"edad": 30,
+		"detalles": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+		"urlFotoPerfil": "jim.jpeg",
+		"cargo": "Ingeniero de Software"
+	},
+	{
+		"nombre": "Miriam Contreras",
+		"edad": 28,
+		"detalles": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+		"urlFotoPerfil": "marie.jpeg",
+		"cargo": "Gerente de Proyecto"
+	},
+	{
+		"nombre": "Carla Molina",
+		"edad": 35,
+		"detalles": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+		"urlFotoPerfil": "joy.jpeg",
+		"cargo": "Diseñadora UX"
+	},
+	{
+		"nombre": "Alexander",
+		"edad": 35,
+		"detalles": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+		"urlFotoPerfil": "joy.jpeg",
+		"cargo": "Diseñadora UX"
+	}
+]

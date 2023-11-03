@@ -1,0 +1,109 @@
+@import '../GlobalVariables.scss';
+
+.carrusel__container {
+	display: grid;
+	grid-template-columns: 16.67% 33.33% 50%;
+	flex: 0 0 100%; // Cada carrusel tiene un flex-basis de 100% del ancho del contenedor
+	width: 100%;
+	box-sizing: border-box;
+	height: 100%;
+
+	.profile__container {
+		overflow: hidden;
+		height: 100%;
+		cursor: grab;
+		position: relative;
+		display: flex;
+		align-items: flex-end;
+		background-position: center;
+		background-repeat: no-repeat;
+		background-size: cover;
+		color: $white;
+		border-radius: 40px;
+		filter: blur(0);
+		transition: filter 0.2s ease-in-out;
+		// efecto blanco y negro
+		// se crea un pseudo elemento para que el filtro no afecte a los hijos
+		&::before {
+			border-radius: 40px;
+			position: absolute;
+			content: '';
+			inset: 0;
+			background-image: inherit; // hereda el valor del padre
+			background-position: inherit;
+			background-repeat: inherit;
+			background-size: inherit;
+			filter: grayscale(100%) contrast(0.9);
+		}
+		.profile__data {
+			position: relative;
+			width: 90%;
+			margin: 20px auto;
+			h1,
+			h2,
+			h3 {
+				margin-block-start: 0;
+				margin-block-end: 0;
+			}
+			.profile__name__age {
+				display: flex;
+				font-size: 1.5rem;
+				align-items: flex-start;
+				flex-direction: row;
+				.edad {
+					margin-left: 10px;
+					opacity: 0.5;
+				}
+			}
+			.profile__position {
+				.position {
+					font-weight: 400;
+					font-size: 15px;
+					opacity: 0.5;
+					line-height: 0.5;
+				}
+			}
+			.profile__details {
+				font-size: 20px;
+				font-weight: 300;
+			}
+		}
+		&.estado2 {
+			filter: blur(2px);
+			.profile__data {
+				text-align: center;
+				.profile__name__age {
+					justify-content: center;
+					.edad {
+						display: none;
+					}
+				}
+				.profile__details {
+					display: none;
+				}
+			}
+		}
+		&.estado3 {
+			filter: blur(3px);
+			.profile__data {
+				text-align: center;
+				.profile__name__age {
+					justify-content: center;
+					.edad {
+						display: none;
+					}
+				}
+				.profile__position {
+					display: none;
+				}
+				.profile__details {
+					display: none;
+				}
+			}
+		}
+		&:hover {
+			filter: blur(0);
+		}
+		margin: 0 10px;
+	}
+}

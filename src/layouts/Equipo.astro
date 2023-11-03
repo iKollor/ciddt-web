@@ -1,10 +1,21 @@
-<>
-	<div class="nosotros__container"></div>
+---
+import '../styles/pages/Equipo.scss';
 
-	<style lang="scss">
-		.nosotros__container {
-			height: 100vh;
-			background-color: #1d1d1b;
-		}
-	</style>
+import Carrousel from '../components/Carrousel';
+---
+
+<>
+	<div class="equipo__container">
+		<div class="divisor1">
+			<div class="text__container">
+				<p>Con experiencia y empatía, defendemos cada empleo.</p>
+			</div>
+			<div class="circles">
+				<span class="circle selected"></span><span class="circle"></span><span class="circle"></span>
+			</div>
+		</div>
+		<div class="divisor2">
+			<Carrousel client:only />
+		</div>
+	</div>
 </>

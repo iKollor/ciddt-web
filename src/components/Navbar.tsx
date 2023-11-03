@@ -31,6 +31,10 @@ export default function Navbar() {
 		const handleResize = () => {
 			setIsMobile(window.innerWidth <= 768);
 		};
+
+		// ejecutores
+		handleScroll();
+		handleResize();
 		window.addEventListener('scroll', handleScroll);
 		window.addEventListener('resize', handleResize);
 

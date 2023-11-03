@@ -2,7 +2,7 @@
 	"extends": ["plugin:prettier/recommended", "plugin:import/recommended"],
 	"ignorePatterns": ["*.html"],
 	"rules": {
-		"prettier/prettier": ["error", { "tabWidth": 4, "printWidth": 120 }]
+		"prettier/prettier": ["error", { "tabWidth": 4, "printWidth": 120, "endOfLine": "auto" }]
 	},
 	"parser": "@typescript-eslint/parser",
 	"parserOptions": {

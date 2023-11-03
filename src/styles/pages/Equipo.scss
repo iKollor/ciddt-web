@@ -1,0 +1,41 @@
+@import '../GlobalVariables.scss';
+
+.equipo__container {
+	height: 100vh;
+	background-color: $bg;
+	display: flex;
+	flex-direction: row;
+	padding: 40px 40px 40px 40px;
+	width: 100%;
+	.divisor1 {
+		width: 20%;
+		margin-top: 50px;
+		.text__container {
+			font-size: 2rem;
+			color: $white;
+			font-weight: 700;
+		}
+		.circles {
+			display: flex;
+			flex-direction: row;
+			width: 100%;
+			.circle {
+				width: 10px;
+				height: 10px;
+				border-radius: 50%;
+				background-color: $white;
+				margin-right: 20px;
+				cursor: pointer;
+				&.selected {
+					background-color: $rojo;
+				}
+			}
+		}
+	}
+	.divisor2 {
+		width: 80%;
+		display: flex;
+		align-items: center;
+		flex-wrap: nowrap;
+	}
+}

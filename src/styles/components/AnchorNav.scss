@@ -1,0 +1,35 @@
+@import '../../../fonts/BrutaProExtended/stylesheet.css';
+@import '../GlobalVariables.scss';
+
+.anchorNav__container {
+	position: fixed;
+	font-family: 'Bruta Pro Extended', sans-serif;
+	left: 0;
+	bottom: 0;
+
+	z-index: 1000;
+
+	ul {
+		margin-inline-start: 0;
+		margin-block-start: 0;
+
+		.anchorNav__buttons__container {
+			list-style: none;
+
+			a {
+				text-transform: uppercase;
+				color: transparent;
+				font-weight: 900;
+				-webkit-text-stroke: 0.07vw $bg;
+				font-size: 3.2vw;
+				line-height: 0.8;
+				transition: all ease 0.3s;
+
+				&:hover {
+					color: $rojo !important;
+					-webkit-text-stroke: 0 $bg;
+				}
+			}
+		}
+	}
+}

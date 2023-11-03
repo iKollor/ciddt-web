@@ -4,6 +4,9 @@
 		"jsx": "react-jsx",
 		"jsxImportSource": "react",
 		"moduleResolution": "Node",
-		"strict": true
+		"strict": true,
+		"lib": ["DOM", "ES2022"],
+		"resolveJsonModule": true,
+		"esModuleInterop": true
 	}
 }

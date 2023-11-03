@@ -1,14 +1,82 @@
 ---
+import '../styles/pages/Nosotros.scss';
 
+import { Image } from 'astro:assets';
+
+import Imagen from '../../public/2x/nosotros.jpg';
 ---
 
 <>
-	<div class="nosotros__container"></div>
-
-	<style lang="scss">
-		.nosotros__container {
-			height: 100vh;
-			background-color: #f8f8f8;
-		}
-	</style>
+	<div class="nosotros__container">
+		<div class="divisor1">
+			<div class="text__container">
+				<p>Defendemos tus derechos laborales en cada desafío presente</p>
+			</div>
+		</div>
+		<div class="divisor2">
+			<div class="img__container">
+				<Image class="image" src={Imagen} alt="Nosotros" />
+			</div>
+		</div>
+		<div class="divisor3">
+			<div class="text__container__arriba">
+				<p>
+					La pandemia por COVID-19 llevó a empresas y gobiernos a adoptar políticas de flexibilización
+					laboral, resultando en la precarización de muchos trabajadores. Ante este desafiante escenario y la
+					notable ausencia de espacios para debatir y proteger el derecho al trabajo, establecimos una
+					organización comprometida en resguardar, asesorar y defender los derechos laborales. <br />
+					<br />Además, nos propusimos fortalecer y apoyar activamente a las organizaciones sindicales del
+					país, brindando herramientas y capacitación en estos tiempos críticos.
+				</p>
+			</div>
+			<div class="text__container">
+				<h1>Comunidad.</h1>
+				<h1>Trabajo.</h1>
+				<h1>Conciencia.</h1>
+			</div>
+		</div>
+	</div>
 </>
+
+<script type="module">
+	// Función para ajustar el tamaño de la fuente de '.divisor3 .text__container h1'
+	function adjustFontSize() {
+		const container = document.getElementById('main-container');
+		if (container) {
+			// Calcula 5vw en relación al ancho completo de la ventana, no del contenedor
+			const initialFontSize = window.innerWidth * 0.05;
+			// Obtén el ancho actual del contenedor
+			const containerWidth = container.offsetWidth;
+			// Ajusta el tamaño de fuente en relación al ancho del contenedor
+			const fontSize = (initialFontSize / window.innerWidth) * containerWidth;
+			// Aplica el tamaño de fuente a cada h1
+			const h1s = container.querySelectorAll('.divisor3 .text__container h1');
+			h1s.forEach((h1) => {
+				// @ts-ignore
+				h1.style.fontSize = `${fontSize}px`;
+			});
+		}
+	}
+
+	// Detectar cuando el tamaño de 'main-container' cambia usando ResizeObserver si está disponible
+	if ('ResizeObserver' in window) {
+		const ro = new ResizeObserver((entries) => {
+			for (let entry of entries) {
+				adjustFontSize();
+			}
+		});
+		const container = document.getElementById('main-container');
+		if (container) {
+			ro.observe(container);
+		}
+	} else {
+		// Fallback para navegadores que no soportan ResizeObserver
+		// @ts-ignore
+		window.addEventListener('resize', adjustFontSize);
+	}
+
+	// Asegurarte de ejecutar la función al cargar la página
+	document.addEventListener('DOMContentLoaded', () => {
+		adjustFontSize();
+	});
+</script>

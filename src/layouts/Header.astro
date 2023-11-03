@@ -5,6 +5,7 @@ import '../styles/pages/Header.scss';
 import { Image } from 'astro:assets';
 
 import Logo from '../../public/svg/logo_text_blanco.svg';
+import AnchorNav from '../components/AnchorNav';
 ---
 
 <header class="">
@@ -15,7 +16,9 @@ import Logo from '../../public/svg/logo_text_blanco.svg';
 			<Image class="logo" src={Logo} alt="Logo" />
 		</div>
 		<div class="bottom__section__container">
-			<div class="anchors left"></div>
+			<div class="anchors left">
+				<AnchorNav client:only />
+			</div>
 			<div class="leyenda right">
 				<p>
 					El Centro de Investigación y Defensa del Derecho al Trabajo (CIDDT) es una organización que busca

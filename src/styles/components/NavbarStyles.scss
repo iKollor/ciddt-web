@@ -102,7 +102,8 @@
 				width: 100%;
 				background-color: $bg;
 				transform: translateX(100vw);
-				transition: all 0.3s ease 0.3s;
+				transition: all $duration cubic-bezier(0.23, 0.82, 0.17, 1.03);
+				transition-delay: 0.3s;
 			}
 			.button-container {
 				width: 100%;
@@ -149,10 +150,10 @@
 						height 0.3s ease,
 						background-color 0.3s ease; // Transición suave
 				}
-				padding-left: 4vw;
+				padding-left: 15%;
 				&:hover {
 					cursor: pointer;
-					padding-left: 7vw;
+					padding-left: 25%;
 					&::before {
 						background-color: $rojo;
 						height: 100%; // El "borde" crece hacia arriba (hacia el interior del elemento)
@@ -172,7 +173,7 @@
 				}
 				&.selected {
 					cursor: pointer;
-					padding-left: 7vw;
+					padding-left: 25%;
 					&::before {
 						background-color: $rojo;
 						height: 100%; // El "borde" crece hacia arriba (hacia el interior del elemento)
@@ -239,11 +240,11 @@
 	.navbar__container {
 		.navbar__menu {
 			.button-container {
-				transform: translateX(75vw);
+				transform: translateX(99.75vw - $navbar_menu_width);
 				pointer-events: all;
 			}
 			.footer {
-				transform: translateX(75vw);
+				transform: translateX(99.75vw - $navbar_menu_width);
 			}
 		}
 	}

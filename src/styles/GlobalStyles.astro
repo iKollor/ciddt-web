@@ -3,6 +3,7 @@
 	@import 'GlobalVariables.scss';
 	html {
 		font-family: 'Gelion', sans-serif;
+		scroll-behavior: smooth;
 	}
 	a {
 		text-decoration: none;
@@ -20,7 +21,6 @@
 		transition: width 0.6s ease-in-out;
 	}
 
-	$scrollbar_width_px: 11px;
 	.pushed {
 		transition: width 0.6s ease-in-out;
 		width: calc(100% - #{$navbar_menu_width} + #{$scrollbar_width_px}) !important;

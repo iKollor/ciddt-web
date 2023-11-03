@@ -1,0 +1,78 @@
+@import '../../../fonts/BrutaProExtended/stylesheet.css';
+@import '../GlobalVariables.scss';
+
+.nosotros__container {
+	height: 100vh;
+	width: 100%;
+	background-color: #f8f8f8;
+	display: flex;
+	flex-direction: row;
+	padding: 0 40px 0 40px;
+	.divisor1 {
+		//texto
+		width: 25%;
+		.text__container {
+			margin-top: 150px;
+			font-size: 2.5rem;
+			font-weight: 700;
+			line-height: 1;
+			color: $rojo;
+		}
+	}
+	.divisor2 {
+		//imagen
+		width: 25%;
+		height: auto;
+		overflow: hidden;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		.img__container {
+			width: 100%;
+			height: 90%;
+			.image {
+				border-radius: 5%;
+				width: 100%;
+				height: 100%;
+				object-fit: cover;
+				filter: contrast(0.7) saturate(1.2);
+			}
+		}
+	}
+	.divisor3 {
+		//frases
+		width: 50%;
+		height: 90%;
+		display: flex;
+		flex-direction: column;
+		justify-content: flex-end;
+		margin: auto;
+		position: relative;
+		.text__container {
+			margin: auto;
+			width: 100%;
+			h1 {
+				margin: 0;
+				text-align: right;
+				font-family: 'Bruta Pro Extended';
+				font-weight: 900;
+				font-size: clamp(2rem, 5vw, 10rem); // Valor máximo aumentado para pruebas
+				line-height: 1.1;
+				color: $bg;
+			}
+			margin-bottom: 0;
+		}
+		.text__container__arriba {
+			position: absolute;
+			margin: auto;
+			top: 50px;
+			left: -10%;
+			width: 100%;
+			p {
+				font-size: 20px;
+				font-weight: 400;
+				color: $bg;
+			}
+		}
+	}
+}
