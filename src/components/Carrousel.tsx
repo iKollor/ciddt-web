@@ -2,45 +2,40 @@
 
 import '../styles/components/Carrousel.scss';
 
+import { useStore } from '@nanostores/react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
-import profilesData from '../../public/data/profiles.json';
+import { type Profile } from '../interfaces/Profile';
+import { chunkIndex } from '../stores/userStore';
 import ArrowIcon from './buttons/ArrowIcon';
 import ProfileCard from './ProfileCard';
 
-const Carrusel: React.FC = () => {
-	const [currentChunkIndex, setCurrentChunkIndex] = useState(0); // Índice del grupo actual de perfiles
-	const profileRefs = useRef<Array<HTMLElement | null>>([]);
+interface CarruselProps {
+	profilesData: Profile[];
+}
+
+const Carrusel: React.FC<CarruselProps> = ({ profilesData }) => {
+	const chunkSize = 3;
+	const $chunkIndex = useStore(chunkIndex);
+	const [currentChunkData, setCurrentChunkData] = useState(() => profilesData.slice(0, chunkSize));
 	const [profileClasses, setProfileClasses] = useState(['estado1', 'estado2', 'estado3']);
 	const [lastClickedIndex, setLastClickedIndex] = useState<number | null>(null);
 	const [isButtonDisabled, setIsButtonDisabled] = useState(false);
 
-	const chunkSize = 3;
-	// Función para obtener el chunk actual basado en currentChunkIndex
-	const getCurrentChunk = () => {
-		const startIndex = currentChunkIndex * chunkSize;
-		return profilesData.slice(startIndex, startIndex + chunkSize);
-	};
-
-	// Función para avanzar al siguiente grupo de perfiles
 	const nextStep = () => {
-		// Deshabilita el botón para prevenir clics adicionales
-		setIsButtonDisabled(true);
+		if (isButtonDisabled) return; // Prevenir múltiples clics si ya está deshabilitado
+		setIsButtonDisabled(true); // Deshabilitar el botón inmediatamente al hacer clic
 
-		setCurrentChunkIndex((prevIndex) => {
-			const maxIndex = Math.ceil(profilesData.length / chunkSize) - 1;
-			console.log(currentChunkIndex);
-			return prevIndex + 1 > maxIndex ? 0 : prevIndex + 1;
-		});
+		const maxIndex = Math.ceil(profilesData.length / chunkSize) - 1;
+		const newIndex = $chunkIndex + 1 > maxIndex ? 0 : $chunkIndex + 1;
+		chunkIndex.set(newIndex);
+		setCurrentChunkData(profilesData.slice(newIndex * chunkSize, (newIndex + 1) * chunkSize));
 
-		// Vuelve a habilitar el botón después de un delay
 		setTimeout(() => {
-			setIsButtonDisabled(false);
+			setIsButtonDisabled(false); // Rehabilita el botón después de un retraso
 		}, 500);
 	};
-
-	const currentChunk = getCurrentChunk();
 
 	const variants = {
 		initial: {
@@ -60,31 +55,42 @@ const Carrusel: React.FC = () => {
 		},
 	};
 
-	const handleCardClick = (index: number) => {
-		const newProfileClasses = [...profileClasses]; // Copia el estado actual
-		// Asumiendo que 'estado1' es grande, 'estado2' es mediano y 'estado3' es pequeño
-		if (index === 0) {
-			newProfileClasses.splice(index, 1, 'estado1');
-			newProfileClasses.splice(1, 1, 'estado2');
-			newProfileClasses.splice(2, 1, 'estado3');
-		} else if (index === 1) {
-			newProfileClasses.splice(index, 1, 'estado1');
-			newProfileClasses.splice(0, 1, 'estado2');
-			newProfileClasses.splice(2, 1, 'estado3');
-		} else {
-			newProfileClasses.splice(index, 1, 'estado1');
-			newProfileClasses.splice(0, 1, 'estado3');
-			newProfileClasses.splice(1, 1, 'estado2');
+	const handleCardClick = (clickedIndex: number) => {
+		// Estado inicial para todos los perfiles.
+		const newProfileClasses = ['estado3', 'estado3', 'estado3'];
+
+		// Asigna 'estado1' al perfil clickeado.
+		newProfileClasses[clickedIndex] = 'estado1';
+
+		// Determina los estados para los otros índices basados en el índice clickeado.
+		switch (clickedIndex) {
+			case 0:
+				newProfileClasses[1] = 'estado2'; // El siguiente perfil será 'estado2'.
+				// newProfileClasses[2] ya es 'estado3' por defecto.
+				break;
+			case 1:
+				newProfileClasses[0] = 'estado3'; // El perfil anterior será 'estado3'.
+				newProfileClasses[2] = 'estado2'; // El siguiente perfil será 'estado2'.
+				break;
+			case 2:
+				newProfileClasses[0] = 'estado3'; // El perfil anterior será 'estado3'.
+				newProfileClasses[1] = 'estado2'; // El otro perfil será 'estado2'.
+				break;
+			default:
+				console.log('ups something gone wrong D:');
+				// En caso de un índice inesperado, no cambiar ningún estado.
+				break;
 		}
-		setProfileClasses(newProfileClasses); // Actualiza el estado con las nuevas clases
-		setLastClickedIndex(index);
+
+		setProfileClasses(newProfileClasses);
+		setLastClickedIndex(clickedIndex);
 	};
 
-	// Modifica esta función para restablecer al estado por defecto para tres perfiles
 	const updateProfileClasses = (currentProfiles: string | any[]) => {
 		// Si hay tres perfiles, restablece solo los que estaban en 'hide'
 		if (currentProfiles.length === 3) {
 			setProfileClasses((prevClasses) => {
+				// cls=class, idx=index
 				return prevClasses.map((cls, idx) => {
 					if (cls === 'hide') {
 						// Asigna 'estado3' al último elemento si fue el último en ser oculto, sino 'estado2'
@@ -101,24 +107,23 @@ const Carrusel: React.FC = () => {
 	};
 
 	useEffect(() => {
-		const currentProfiles = getCurrentChunk();
-		updateProfileClasses(currentProfiles);
-	}, [currentChunkIndex]);
+		setCurrentChunkData(profilesData.slice($chunkIndex * chunkSize, ($chunkIndex + 1) * chunkSize));
+		updateProfileClasses(profilesData.slice($chunkIndex * chunkSize, ($chunkIndex + 1) * chunkSize));
+	}, [$chunkIndex, lastClickedIndex]);
 
 	return (
 		<>
 			<AnimatePresence initial={false} mode="wait">
 				<motion.div
 					className="carrusel__container"
-					key={currentChunkIndex}
+					key={$chunkIndex}
 					variants={variants}
 					initial="initial"
 					animate="animate"
 					exit="exit"
 				>
-					{currentChunk.map((profile, index) => (
+					{currentChunkData.map((profile, index) => (
 						<ProfileCard
-							ref={(el) => (profileRefs.current[index] = el)}
 							key={index}
 							profile={profile}
 							index={index}

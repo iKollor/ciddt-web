@@ -141,11 +141,11 @@ $nextButtonSize: 40px;
 	justify-content: center;
 	align-items: center;
 	cursor: pointer;
-	transition: opacity 0.2s ease;
+	transition: opacity 0.25s ease;
 }
 .nextButton.disabled {
 	pointer-events: none; /* Esto previene clics y otras interacciones */
 	cursor: default; /* Esto establece el cursor a la forma predeterminada */
 	/* Aquí puedes añadir estilos adicionales para cuando el botón esté deshabilitado */
-	opacity: 0.5; /* Ejemplo para cambiar la opacidad del botón deshabilitado */
+	opacity: 0.2; /* Ejemplo para cambiar la opacidad del botón deshabilitado */
 }

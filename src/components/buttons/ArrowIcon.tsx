@@ -4,7 +4,12 @@ import '../../styles/components/buttons/ArrowIcon.scss';
 
 import { motion } from 'framer-motion';
 
-function ArrowIcon() {
+interface ArrowIconProps {
+	className?: string;
+	onAnimationComplete?: () => void;
+}
+
+const ArrowIcon: React.FC<ArrowIconProps> = ({ className, onAnimationComplete }) => {
 	const variants = {
 		hover: {
 			x: 5,
@@ -34,13 +39,14 @@ function ArrowIcon() {
 				whileTap="clicked"
 				fill="none"
 				stroke="#fff"
-				className="arrowIcon"
+				className={`arrowIcon ${className ?? ''}`}
 				viewBox="0 0 24 24"
+				onAnimationComplete={onAnimationComplete}
 			>
 				<path d="M9 18l6-6-6-6" />
 			</motion.svg>
 		</>
 	);
-}
+};
 
 export default ArrowIcon;

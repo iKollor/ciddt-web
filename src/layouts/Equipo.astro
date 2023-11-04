@@ -1,6 +1,9 @@
 ---
 import '../styles/pages/Equipo.scss';
 
+// Import your profiles data
+import profilesData from '../../public/data/profiles.json';
+import NavigationButtons from '../components/buttons/NavigationButtons';
 import Carrousel from '../components/Carrousel';
 ---
 
@@ -10,12 +13,10 @@ import Carrousel from '../components/Carrousel';
 			<div class="text__container">
 				<p>Con experiencia y empatía, defendemos cada empleo.</p>
 			</div>
-			<div class="circles">
-				<span class="circle selected"></span><span class="circle"></span><span class="circle"></span>
-			</div>
+			<NavigationButtons Data={profilesData} client:only />
 		</div>
 		<div class="divisor2">
-			<Carrousel client:only />
+			<Carrousel profilesData={profilesData} client:only />
 		</div>
 	</div>
 </>

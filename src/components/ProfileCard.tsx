@@ -3,20 +3,14 @@
 import { motion } from 'framer-motion';
 import { forwardRef, useEffect, useRef, useState } from 'react';
 
-interface Profile {
-	urlFotoPerfil: string;
-	cargo: string;
-	nombre: string;
-	edad: number;
-	detalles: string;
-}
+import { type Profile } from '../interfaces/Profile';
 
 interface ProfileCardProps {
 	profile: Profile;
 	index: number;
 	state?: string;
-	onClick?: any;
-	onLoad?: any;
+	onClick?: () => void;
+	onLoad?: () => void;
 	ref?: any;
 }
 
