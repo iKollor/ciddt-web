@@ -1,15 +1,11 @@
 @import '../GlobalVariables.scss';
 
 .carrusel__container {
-	display: grid;
-	grid-template-columns: 16.67% 33.33% 50%;
-	flex: 0 0 100%; // Cada carrusel tiene un flex-basis de 100% del ancho del contenedor
+	display: flex;
 	width: 100%;
-	box-sizing: border-box;
 	height: 100%;
 
 	.profile__container {
-		overflow: hidden;
 		height: 100%;
 		cursor: grab;
 		position: relative;
@@ -68,7 +64,17 @@
 				font-weight: 300;
 			}
 		}
+		&.hide {
+			display: none;
+		}
+		&.estado0 {
+			width: 100%;
+		}
+		&.estado1 {
+			width: 50%;
+		}
 		&.estado2 {
+			width: 33.33%;
 			filter: blur(2px);
 			.profile__data {
 				text-align: center;
@@ -84,6 +90,7 @@
 			}
 		}
 		&.estado3 {
+			width: 16.67%;
 			filter: blur(3px);
 			.profile__data {
 				text-align: center;
@@ -101,9 +108,22 @@
 				}
 			}
 		}
+		&.only1 {
+			filter: blur(0);
+		}
 		&:hover {
 			filter: blur(0);
 		}
 		margin: 0 10px;
 	}
+}
+
+$nextButtonSize: 40px;
+.nextButton {
+	width: $nextButtonSize;
+	height: $nextButtonSize;
+	display: flex; // Esto y las siguientes dos líneas aseguran que el contenido se centre
+	justify-content: center;
+	align-items: center;
+	cursor: pointer;
 }
