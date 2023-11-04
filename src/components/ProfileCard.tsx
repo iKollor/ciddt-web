@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 
 import { motion } from 'framer-motion';
-import { forwardRef } from 'react';
+import { forwardRef, useEffect, useRef, useState } from 'react';
 
 interface Profile {
 	urlFotoPerfil: string;
@@ -20,9 +20,13 @@ interface ProfileCardProps {
 	ref?: any;
 }
 
-const ProfileCard = forwardRef<HTMLDivElement, ProfileCardProps>(({ profile, index, state, onClick, onLoad }, ref) => {
+const ProfileCard = forwardRef<HTMLDivElement, ProfileCardProps>(({ profile, index, state, onClick, onLoad }, _ref) => {
 	const soloNombre = profile.nombre.split(' ')[0];
-	const getWidth = (stateClass) => {
+	const [isOverflow, setIsOverflow] = useState(false);
+	const nameRef = useRef<HTMLHeadingElement>(null);
+	const profileContainerRef = useRef<HTMLDivElement>(null);
+
+	const getWidth = (stateClass: string | undefined) => {
 		switch (stateClass) {
 			case 'estado1':
 				return '50%';
@@ -34,11 +38,30 @@ const ProfileCard = forwardRef<HTMLDivElement, ProfileCardProps>(({ profile, ind
 				return '33.33%'; // Un valor por defecto
 		}
 	};
+
+	useEffect(() => {
+		// Comprobación de desbordamiento
+		const checkOverflow = () => {
+			if (nameRef.current != null && profileContainerRef.current != null) {
+				setIsOverflow(nameRef.current.clientWidth + 10 > profileContainerRef.current.clientWidth);
+			}
+		};
+
+		// Ejecuta la comprobación al montar y cada vez que el estado cambie
+		checkOverflow();
+
+		// Opcionalmente, agregar un event listener para ajustes de tamaño
+		window.addEventListener('resize', checkOverflow);
+		return () => {
+			window.removeEventListener('resize', checkOverflow);
+		};
+	}, [state, nameRef]);
+
 	// Asegúrate de que la clase 'state3' haga que la tarjeta se oculte o se vuelva muy pequeña
 	return (
 		<motion.div
-			ref={ref}
-			className={`profile__container ${state}`}
+			ref={profileContainerRef}
+			className={`profile__container ${state} ${isOverflow && state === 'estado3' ? 'rotate' : ''}`}
 			key={index}
 			style={{ backgroundImage: `url(/data/${profile.urlFotoPerfil})` }}
 			onClick={onClick}
@@ -48,7 +71,7 @@ const ProfileCard = forwardRef<HTMLDivElement, ProfileCardProps>(({ profile, ind
 			transition={{
 				width: {
 					type: 'spring',
-					damping: 10,
+					damping: 15,
 					stiffness: 100,
 					restDelta: 0.001,
 				},
@@ -59,7 +82,9 @@ const ProfileCard = forwardRef<HTMLDivElement, ProfileCardProps>(({ profile, ind
 					<h3 className="position">{profile.cargo}</h3>
 				</div>
 				<div className="profile__name__age">
-					<h1 className="nombre">{state === 'estado3' ? soloNombre : profile.nombre}</h1>
+					<h1 ref={nameRef} className={`nombre ${isOverflow ? 'vertical' : ''}`}>
+						{state === 'estado3' ? soloNombre : profile.nombre}
+					</h1>
 					<h1 className="edad">{profile.edad}</h1>
 				</div>
 				<div className="profile__details">{profile.detalles}</div>

@@ -14,6 +14,7 @@ const Carrusel: React.FC = () => {
 	const profileRefs = useRef<Array<HTMLElement | null>>([]);
 	const [profileClasses, setProfileClasses] = useState(['estado1', 'estado2', 'estado3']);
 	const [lastClickedIndex, setLastClickedIndex] = useState<number | null>(null);
+	const [isButtonDisabled, setIsButtonDisabled] = useState(false);
 
 	const chunkSize = 3;
 	// Función para obtener el chunk actual basado en currentChunkIndex
@@ -24,11 +25,19 @@ const Carrusel: React.FC = () => {
 
 	// Función para avanzar al siguiente grupo de perfiles
 	const nextStep = () => {
+		// Deshabilita el botón para prevenir clics adicionales
+		setIsButtonDisabled(true);
+
 		setCurrentChunkIndex((prevIndex) => {
 			const maxIndex = Math.ceil(profilesData.length / chunkSize) - 1;
 			console.log(currentChunkIndex);
 			return prevIndex + 1 > maxIndex ? 0 : prevIndex + 1;
 		});
+
+		// Vuelve a habilitar el botón después de un delay
+		setTimeout(() => {
+			setIsButtonDisabled(false);
+		}, 500);
 	};
 
 	const currentChunk = getCurrentChunk();
@@ -72,7 +81,7 @@ const Carrusel: React.FC = () => {
 	};
 
 	// Modifica esta función para restablecer al estado por defecto para tres perfiles
-	const updateProfileClasses = (currentProfiles) => {
+	const updateProfileClasses = (currentProfiles: string | any[]) => {
 		// Si hay tres perfiles, restablece solo los que estaban en 'hide'
 		if (currentProfiles.length === 3) {
 			setProfileClasses((prevClasses) => {
@@ -122,9 +131,11 @@ const Carrusel: React.FC = () => {
 				</motion.div>
 			</AnimatePresence>
 			<i
-				className="nextButton"
+				className={`nextButton ${isButtonDisabled ? 'disabled' : ''}`}
 				onClick={() => {
-					nextStep();
+					if (!isButtonDisabled) {
+						nextStep();
+					}
 				}}
 			>
 				<ArrowIcon />
