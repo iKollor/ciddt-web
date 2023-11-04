@@ -4,9 +4,6 @@
 	display: flex;
 	width: 100%;
 	height: 100%;
-	.profile__container .nombre.vertical {
-		transform: rotate(90deg);
-	}
 	.profile__container {
 		height: 100%;
 		cursor: grab;
@@ -99,6 +96,9 @@
 		&.estado3.rotate {
 			.profile__data {
 				height: 100%;
+				.nombre.vertical {
+					transform: rotate(90deg);
+				}
 			}
 		}
 		&.estado3 {

@@ -20,11 +20,11 @@ interface ProfileCardProps {
 	ref?: any;
 }
 
-const ProfileCard = forwardRef<HTMLDivElement, ProfileCardProps>(({ profile, index, state, onClick, onLoad }, _ref) => {
+const ProfileCard = forwardRef<HTMLDivElement, ProfileCardProps>(({ profile, index, state, onClick, onLoad }, ref) => {
 	const soloNombre = profile.nombre.split(' ')[0];
 	const [isOverflow, setIsOverflow] = useState(false);
 	const nameRef = useRef<HTMLHeadingElement>(null);
-	const profileContainerRef = useRef<HTMLDivElement>(null);
+	const containerRef = useRef<HTMLDivElement>(null);
 
 	const getWidth = (stateClass: string | undefined) => {
 		switch (stateClass) {
@@ -40,27 +40,33 @@ const ProfileCard = forwardRef<HTMLDivElement, ProfileCardProps>(({ profile, ind
 	};
 
 	useEffect(() => {
-		// Comprobación de desbordamiento
-		const checkOverflow = () => {
-			if (nameRef.current != null && profileContainerRef.current != null) {
-				setIsOverflow(nameRef.current.clientWidth + 10 > profileContainerRef.current.clientWidth);
-			}
-		};
+		const container = containerRef.current;
+		const nameElement = nameRef.current;
 
-		// Ejecuta la comprobación al montar y cada vez que el estado cambie
-		checkOverflow();
+		if (container != null && nameElement != null) {
+			// Esta es la función que verifica si hay desbordamiento
+			const checkOverflow = () => {
+				setIsOverflow(nameElement.scrollWidth > container.clientWidth);
+			};
 
-		// Opcionalmente, agregar un event listener para ajustes de tamaño
-		window.addEventListener('resize', checkOverflow);
-		return () => {
-			window.removeEventListener('resize', checkOverflow);
-		};
-	}, [state, nameRef]);
+			// Crea un nuevo ResizeObserver que llame a checkOverflow cuando el contenedor cambie de tamaño
+			const resizeObserver = new ResizeObserver(() => {
+				checkOverflow();
+			});
 
-	// Asegúrate de que la clase 'state3' haga que la tarjeta se oculte o se vuelva muy pequeña
+			// Inicia la observación
+			resizeObserver.observe(container);
+
+			// Asegúrate de desconectar el ResizeObserver cuando el componente se desmonte
+			return () => {
+				resizeObserver.disconnect();
+			};
+		}
+	}, []); // Se ejecuta solo cuando el componente se monta
+
 	return (
 		<motion.div
-			ref={profileContainerRef}
+			ref={ref}
 			className={`profile__container ${state} ${isOverflow && state === 'estado3' ? 'rotate' : ''}`}
 			key={index}
 			style={{ backgroundImage: `url(/data/${profile.urlFotoPerfil})` }}
@@ -77,7 +83,7 @@ const ProfileCard = forwardRef<HTMLDivElement, ProfileCardProps>(({ profile, ind
 				},
 			}}
 		>
-			<div className="profile__data">
+			<div ref={containerRef} className="profile__data">
 				<div className="profile__position">
 					<h3 className="position">{profile.cargo}</h3>
 				</div>
