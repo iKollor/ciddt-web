@@ -1,0 +1,23 @@
+---
+import Navbar from '../components/Navbar';
+import Equipo from '../layouts/HeroSections/Equipo.astro';
+import Header from '../layouts/HeroSections/Header.astro';
+import Nosotros from '../layouts/HeroSections/Nosotros.astro';
+---
+
+<>
+	<Navbar client:only />
+	<main>
+		<div id="main-container">
+			<section id="header" class="section-container blanco">
+				<Header />
+			</section>
+			<section id="nosotros" class="section-container blanco">
+				<Nosotros />
+			</section>
+			<section id="equipo" class="section-container negro">
+				<Equipo />
+			</section>
+		</div>
+	</main>
+</>

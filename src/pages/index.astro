@@ -1,10 +1,7 @@
 ---
 import '../styles/GlobalStyles.astro';
 
-import Navbar from '../components/Navbar';
-import Equipo from '../layouts/Equipo.astro';
-import Header from '../layouts/Header.astro';
-import Nosotros from '../layouts/Nosotros.astro';
+import Hero from './Hero.astro';
 ---
 
 <html lang="en">
@@ -14,24 +11,11 @@ import Nosotros from '../layouts/Nosotros.astro';
 		<title>CIDDT</title>
 	</head>
 	<body>
-		<Navbar client:only />
-		<main>
-			<div id="main-container">
-				<section id="header" class="section-container blanco">
-					<Header />
-				</section>
-				<section id="nosotros" class="section-container blanco">
-					<Nosotros />
-				</section>
-				<section id="equipo" class="section-container negro">
-					<Equipo />
-				</section>
-			</div>
-		</main>
+		<Hero />
+		<style lang="scss">
+			body {
+				background-color: #f8f8f8;
+			}
+		</style>
 	</body>
-	<style lang="scss">
-		body {
-			background-color: #f8f8f8;
-		}
-	</style>
 </html>
