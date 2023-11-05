@@ -103,8 +103,8 @@ export default function Navbar() {
 					/>
 					<NavButton href="/#posts" text="Posts" isAnimated={$isMenuClosed && shouldDisplayMenuIcon} />
 					<NavButton href="/#gallery" text="Galería" isAnimated={$isMenuClosed && shouldDisplayMenuIcon} />
-					<NavButton href="/#contact" text="Contacto" isAnimated={$isMenuClosed && shouldDisplayMenuIcon} />
 					<NavButton href="/#services" text="Servicios" isAnimated={$isMenuClosed && shouldDisplayMenuIcon} />
+					<NavButton href="/#contact" text="Contacto" isAnimated={$isMenuClosed && shouldDisplayMenuIcon} />
 					<div
 						className={classNames('footer', {
 							noAnimate: $isMenuClosed && shouldDisplayMenuIcon,

@@ -83,10 +83,17 @@ const Carrusel: React.FC<CarruselProps> = ({ profilesData }) => {
 		}
 	};
 
+	// Este efecto se encarga de actualizar el trozo de datos actual
+	// cuando el índice del trozo cambia.
 	useEffect(() => {
 		setCurrentChunkData(profilesData.slice($chunkIndex * chunkSize, ($chunkIndex + 1) * chunkSize));
+	}, [$chunkIndex, profilesData, chunkSize]);
+
+	// Este efecto se encarga de actualizar las clases de perfil
+	// cuando el índice del trozo clickeado cambia.
+	useEffect(() => {
 		updateProfileClasses(profilesData.slice($chunkIndex * chunkSize, ($chunkIndex + 1) * chunkSize));
-	}, [$chunkIndex]);
+	}, [$chunkIndex, profilesData, chunkSize]);
 
 	return (
 		<>

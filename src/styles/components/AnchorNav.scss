@@ -5,7 +5,7 @@
 	position: fixed;
 	font-family: 'Bruta Pro Extended', sans-serif;
 	left: 0;
-	bottom: 0;
+	bottom: 1rem;
 
 	z-index: 1000;
 
@@ -20,12 +20,13 @@
 				text-transform: uppercase;
 				color: transparent;
 				font-weight: 900;
-				-webkit-text-stroke: 0.07vw $bg;
+				-webkit-text-stroke-width: 0.07vw;
 				font-size: 3.2vw;
 				line-height: 0.8;
 				transition: all ease 0.3s;
 
-				&:hover {
+				&:hover,
+				&.destacado {
 					color: $rojo !important;
 					-webkit-text-stroke: 0 $bg;
 				}

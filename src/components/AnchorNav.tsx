@@ -2,59 +2,97 @@
 
 import '../styles/components/AnchorNav.scss';
 
-// eslint-disable-next-line import/no-named-as-default
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { useCallback, useEffect } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
 
-gsap.registerPlugin(ScrollTrigger);
+// style const
+const COLORS = {
+	negro: '#1d1d1b',
+	blanco: '#f8f8f8',
+};
+const minScale = 0.8;
+const maxScale = 1;
 
 function AnchorNav() {
-	useEffect(() => {}, []);
-	const handleAnchorClick = useCallback(
-		(e: { stopPropagation: () => void; currentTarget: { classList: { add: (arg0: string) => void } } }) => {
-			// Detener propagación para evitar que otros manejadores de eventos interfieran
-			e.stopPropagation();
+	const scrollMarkerRef = useRef(null);
+	const { scrollYProgress } = useScroll({
+		target: scrollMarkerRef,
+		offset: ['end start', 'start start'],
+	});
+	const { scrollY } = useScroll();
+	const scale = useTransform(scrollYProgress, [maxScale, minScale, 0], [maxScale, minScale, minScale]);
+	const [textStrokeColor, setTextStrokeColor] = useState<string>();
+	const [highlightedId, setHighlightedId] = useState<string | null>(null);
+	const navRef = useRef<HTMLDivElement>(null);
 
-			// Obtener todos los anchors
-			const anchors = document.querySelectorAll('.anchorNav__container a');
-			// Elimina la clase 'destacado' de cualquier otro anchor
-			anchors.forEach((a) => {
-				a.classList.remove('destacado');
-			});
+	useEffect(() => {
+		const sections = Array.from(document.querySelectorAll<HTMLElement>('.section-container'));
+		const checkOverlap = () => {
+			const currentNav = navRef.current;
+			if (currentNav == null) return;
 
-			// Añade la clase 'destacado' al anchor clickeado
-			e.currentTarget.classList.add('destacado');
-		},
-		[],
-	);
+			const navRect = currentNav.getBoundingClientRect();
+			let newStrokeColor = COLORS.negro;
+			let currentHighlightedId: string | null = null;
+
+			for (const section of sections) {
+				const isWhite = section.classList.contains('blanco');
+				const isBlack = section.classList.contains('negro');
+				const rect = section.getBoundingClientRect();
+				const isOverlapping = !(
+					navRect.right < rect.left ||
+					navRect.left > rect.right ||
+					navRect.bottom < rect.top ||
+					navRect.top > rect.bottom
+				);
+
+				if (isOverlapping) {
+					newStrokeColor = isWhite ? COLORS.negro : isBlack ? COLORS.blanco : newStrokeColor;
+					if (currentHighlightedId == null) {
+						currentHighlightedId = section.id;
+						break; // Si encontramos una sección superpuesta, no necesitamos seguir buscando
+					}
+				}
+			}
+
+			setTextStrokeColor(newStrokeColor);
+			setHighlightedId(currentHighlightedId);
+		};
+
+		checkOverlap();
+
+		const scrollListener = () => {
+			requestAnimationFrame(checkOverlap);
+		};
+
+		scrollY.on('change', scrollListener);
+
+		return () => {
+			scrollY.clearListeners();
+		};
+	}, []); // If 'sections' is dynamic, it should be a dependency here
 
 	return (
 		<>
-			<div className="anchorNav__container">
+			<div // marcador invisible que ocupara todo el alto (100vh) al principio de la pantalla para medir el scroll
+				ref={scrollMarkerRef}
+				style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100vh', pointerEvents: 'none' }}
+			/>
+			<motion.div className="anchorNav__container" ref={navRef} style={{ scale, transformOrigin: 'left bottom' }}>
 				<ul>
-					<li className="anchorNav__buttons__container">
-						<a href="#nosotros" onClick={handleAnchorClick}>
-							Nosotros
-						</a>
-					</li>
-					<li className="anchorNav__buttons__container">
-						<a href="#equipo" onClick={handleAnchorClick}>
-							Equipo
-						</a>
-					</li>
-					<li className="anchorNav__buttons__container">
-						<a href="#momentos" onClick={handleAnchorClick}>
-							Momentos
-						</a>
-					</li>
-					<li className="anchorNav__buttons__container">
-						<a href="#servicios" onClick={handleAnchorClick}>
-							Servicios
-						</a>
-					</li>
+					{['nosotros', 'equipo', 'momentos', 'servicios'].map((id) => (
+						<li className="anchorNav__buttons__container" key={id}>
+							<motion.a
+								href={`#${id}`}
+								style={{ WebkitTextStrokeColor: textStrokeColor }}
+								className={highlightedId === id ? 'destacado' : ''}
+							>
+								{id.charAt(0).toUpperCase() + id.slice(1)}
+							</motion.a>
+						</li>
+					))}
 				</ul>
-			</div>
+			</motion.div>
 		</>
 	);
 }
