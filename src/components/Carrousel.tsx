@@ -6,8 +6,8 @@ import { useStore } from '@nanostores/react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 
+import { animationFinished, chunkIndex } from '../hooks/carrouselStores';
 import { type Profile } from '../interfaces/Profile';
-import { animationFinished, chunkIndex } from '../stores/userStore';
 import ArrowIcon from './buttons/ArrowIcon';
 import ProfileCard from './ProfileCard';
 

@@ -5,9 +5,9 @@
 	position: fixed;
 	font-family: 'Bruta Pro Extended', sans-serif;
 	left: 0;
-	bottom: 1rem;
+	bottom: 0;
 
-	z-index: 1000;
+	z-index: 1;
 
 	ul {
 		margin-inline-start: 0;
@@ -23,7 +23,9 @@
 				-webkit-text-stroke-width: 0.07vw;
 				font-size: 3.2vw;
 				line-height: 0.8;
-				transition: all ease 0.3s;
+				transition:
+					-webkit-text-stroke-color ease 0.3s,
+					color ease 0.3s;
 
 				&:hover,
 				&.destacado {

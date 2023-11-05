@@ -68,5 +68,12 @@
 		"detalles": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
 		"urlFotoPerfil": "joy.jpeg",
 		"cargo": "Diseñadora UX"
+	},
+	{
+		"nombre": "Jose parker",
+		"edad": 30,
+		"detalles": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+		"urlFotoPerfil": "jim.jpeg",
+		"cargo": "Ingeniero de Software"
 	}
 ]

@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/strict-boolean-expressions */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { useStore } from '@nanostores/react';
 import { motion, useAnimation } from 'framer-motion';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
-import { animationFinished, chunkIndex } from '../../stores/userStore';
+import { animationFinished, chunkIndex } from '../../hooks/carrouselStores';
 
 interface NavigationButtonsProps {
 	Data: any[];
@@ -14,6 +15,7 @@ const NavigationButtons: React.FC<NavigationButtonsProps> = ({ Data, className }
 	const $chunkIndex = useStore(chunkIndex);
 	const $animationFinished = useStore(animationFinished);
 	const progressBarControls = useAnimation();
+	const containerRef = useRef(null);
 
 	useEffect(() => {
 		const updateCircles = () => {
@@ -65,25 +67,59 @@ const NavigationButtons: React.FC<NavigationButtonsProps> = ({ Data, className }
 	const startProgressBarAnimation = () => {
 		void progressBarControls.start({
 			width: '100%',
-			transition: { duration: intervalTimeSec + 1, ease: 'linear' },
+			transition: {
+				duration: intervalTimeSec + 1,
+				ease: 'linear',
+			},
 		});
 	};
 
 	useEffect(() => {
-		// Reinicia la animación de la barra de progreso
-		progressBarControls.set({ width: 0 });
-		startProgressBarAnimation();
+		let indexInterval: number | NodeJS.Timeout | null | undefined = null;
 
-		// Intervalo para cambiar al siguiente índice y reiniciar la barra de progreso
-		const indexInterval = setInterval(() => {
-			const nextIndex = ($chunkIndex + 1) % numberOfCircles;
-			progressBarControls.set({ width: 0 }); // Reinicia la barra de progreso
-			startProgressBarAnimation(); // Reinicia la animación de la barra de progreso
-			chunkIndex.set(nextIndex); // Establece el siguiente índice
-		}, intervalTime);
+		const startInterval = () => {
+			// Reinicia la animación de la barra de progreso
+			progressBarControls.set({ width: 0 });
+			startProgressBarAnimation();
 
+			// Establece el intervalo
+			indexInterval = setInterval(() => {
+				const nextIndex = ($chunkIndex + 1) % numberOfCircles;
+				progressBarControls.set({ width: 0 }); // Reinicia la barra de progreso
+				startProgressBarAnimation(); // Reinicia la animación de la barra de progreso
+				chunkIndex.set(nextIndex); // Establece el siguiente índice
+			}, intervalTime);
+		};
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				const [entry] = entries;
+				if (entry.isIntersecting) {
+					startInterval();
+				} else {
+					// Si no está intersectando, limpia el intervalo
+					if (indexInterval) {
+						clearInterval(indexInterval);
+					}
+				}
+			},
+			{
+				threshold: 1,
+			},
+		);
+
+		if (containerRef.current) {
+			observer.observe(containerRef.current);
+		}
+
+		// Limpieza: desconectar el observer y limpiar el intervalo
 		return () => {
-			clearInterval(indexInterval); // Limpia el intervalo cuando el componente se desmonte
+			if (containerRef.current) {
+				observer.disconnect();
+			}
+			if (indexInterval) {
+				clearInterval(indexInterval);
+			}
 		};
 	}, [$chunkIndex]); // Dependencia en $chunkIndex para reiniciar la animación cuando cambie
 
@@ -97,7 +133,7 @@ const NavigationButtons: React.FC<NavigationButtonsProps> = ({ Data, className }
 	};
 
 	return (
-		<div>
+		<div ref={containerRef}>
 			<motion.span
 				className="line"
 				style={progressBarStyle}

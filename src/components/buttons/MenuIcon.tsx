@@ -4,7 +4,7 @@ import '../../styles/components/buttons/MenuIcon.scss';
 import { useEffect, useRef, useState } from 'react';
 import Velocity from 'velocity-animate';
 
-import { isMenuClosed, isMenuOpen } from '../../pushBody';
+import { isMenuClosed, isMenuOpen } from '../../hooks/pushBody';
 
 export function HamburgerMenu({ className }: { className?: string }) {
 	// Referencias a los elementos del DOM

@@ -5,8 +5,8 @@ import { useStore } from '@nanostores/react';
 import { motion } from 'framer-motion';
 import { forwardRef, useEffect, useRef, useState } from 'react';
 
+import { animationFinished } from '../hooks/carrouselStores';
 import { type Profile } from '../interfaces/Profile';
-import { animationFinished } from '../stores/userStore';
 
 interface ProfileCardProps {
 	profile: Profile;
@@ -14,7 +14,7 @@ interface ProfileCardProps {
 	state?: string;
 	onClick?: () => void;
 	onLoad?: () => void;
-	ref?: any;
+	ref?: any; // me da pereza buscar el tipo
 }
 
 const ProfileCard = forwardRef<HTMLDivElement, ProfileCardProps>(({ profile, index, state, onClick, onLoad }, ref) => {

@@ -6,7 +6,7 @@ import classNames from 'classnames';
 import { useEffect, useState } from 'react';
 
 import NavButton from '../components/buttons/NavButton';
-import { isMenuClosed, isMenuOpen } from '../pushBody'; //
+import { isMenuClosed, isMenuOpen } from '../hooks/pushBody'; //
 import MenuIcon from './buttons/MenuIcon';
 
 export default function Navbar() {
@@ -53,6 +53,19 @@ export default function Navbar() {
 		}
 	}, [shouldDisplayMenuIcon]);
 
+	const variants = {
+		initial: {
+			x: 200,
+			opacity: 0,
+		},
+		animate: {
+			x: 0,
+			opacity: 1,
+		},
+	};
+
+	const animationDelay = 0.2;
+
 	return (
 		<nav className={classNames('navbar', { menuBar: shouldDisplayMenuIcon }, { displayMenu: $isMenuOpen })}>
 			<div className="navbar__container">
@@ -95,16 +108,29 @@ export default function Navbar() {
 					</a>
 				</div>
 				<div className={classNames('navbar__menu')}>
-					<NavButton
-						href="/#home"
-						text="Inicio"
-						isAnimated={$isMenuClosed && shouldDisplayMenuIcon}
-						isSelected
-					/>
-					<NavButton href="/#posts" text="Posts" isAnimated={$isMenuClosed && shouldDisplayMenuIcon} />
-					<NavButton href="/#gallery" text="Galería" isAnimated={$isMenuClosed && shouldDisplayMenuIcon} />
-					<NavButton href="/#services" text="Servicios" isAnimated={$isMenuClosed && shouldDisplayMenuIcon} />
-					<NavButton href="/#contact" text="Contacto" isAnimated={$isMenuClosed && shouldDisplayMenuIcon} />
+					{['inicio', 'posts', 'galería', 'servicios', 'contacto'].map((id, idx) => (
+						<NavButton
+							href={`/${id}`}
+							text={id.charAt(0).toUpperCase() + id.slice(1)}
+							isAnimated={$isMenuClosed && shouldDisplayMenuIcon}
+							key={idx}
+							variants={variants}
+							animate="animate"
+							initial="initial"
+							transition={{
+								x: {
+									delay: 1 + idx * animationDelay,
+									type: 'spring',
+									stiffness: 100,
+									damping: 15,
+									restDelta: 0.001,
+								},
+								opacity: {
+									delay: 1 + idx * animationDelay,
+								},
+							}}
+						/>
+					))}
 					<div
 						className={classNames('footer', {
 							noAnimate: $isMenuClosed && shouldDisplayMenuIcon,
