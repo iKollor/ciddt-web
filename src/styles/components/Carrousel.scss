@@ -49,6 +49,7 @@
 				font-size: 1.5rem;
 				align-items: flex-start;
 				flex-direction: row;
+				text-transform: capitalize;
 				.edad {
 					margin-left: 10px;
 					opacity: 0.5;
@@ -148,4 +149,8 @@ $nextButtonSize: 40px;
 	cursor: default; /* Esto establece el cursor a la forma predeterminada */
 	/* Aquí puedes añadir estilos adicionales para cuando el botón esté deshabilitado */
 	opacity: 0.2; /* Ejemplo para cambiar la opacidad del botón deshabilitado */
+}
+.circle.disable {
+	pointer-events: none;
+	cursor: default;
 }

@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { useStore } from '@nanostores/react';
-import { motion } from 'framer-motion';
+import { motion, useAnimation } from 'framer-motion';
 import { useEffect } from 'react';
 
-import { chunkIndex } from '../../stores/userStore';
+import { animationFinished, chunkIndex } from '../../stores/userStore';
 
 interface NavigationButtonsProps {
 	Data: any[];
@@ -12,6 +12,8 @@ interface NavigationButtonsProps {
 
 const NavigationButtons: React.FC<NavigationButtonsProps> = ({ Data, className }) => {
 	const $chunkIndex = useStore(chunkIndex);
+	const $animationFinished = useStore(animationFinished);
+	const progressBarControls = useAnimation();
 
 	useEffect(() => {
 		const updateCircles = () => {
@@ -29,9 +31,6 @@ const NavigationButtons: React.FC<NavigationButtonsProps> = ({ Data, className }
 		// Call the update function when the component mounts
 		updateCircles();
 
-		// Set up a subscription to chunkIndex changes if you're using a state management library
-		// Otherwise, you can rely on the $chunkIndex dependency to trigger the update
-		// If you're using nanostores, it might look like this:
 		const unsubscribe = chunkIndex.subscribe(updateCircles);
 
 		// Clean up the subscription when the component unmounts
@@ -56,15 +55,62 @@ const NavigationButtons: React.FC<NavigationButtonsProps> = ({ Data, className }
 		unselected: { backgroundColor: '#f8f8f8', scale: 0.9, opacity: 0.8 }, // Color y escala en estado no seleccionado
 	};
 
-	const numberOfCircles = Math.ceil(Data.length / 3);
+	const numberOfCircles = Math.ceil(Data.length / 3); // tamaño del chunk
+
+	// Tiempo de espera antes de pasar al siguiente índice
+	const intervalTime = 10000; // 10 segundos
+	const intervalTimeSec = intervalTime / 1000;
+
+	// Función para iniciar la animación de la barra de progreso
+	const startProgressBarAnimation = () => {
+		void progressBarControls.start({
+			width: '100%',
+			transition: { duration: intervalTimeSec + 1, ease: 'linear' },
+		});
+	};
+
+	useEffect(() => {
+		// Reinicia la animación de la barra de progreso
+		progressBarControls.set({ width: 0 });
+		startProgressBarAnimation();
+
+		// Intervalo para cambiar al siguiente índice y reiniciar la barra de progreso
+		const indexInterval = setInterval(() => {
+			const nextIndex = ($chunkIndex + 1) % numberOfCircles;
+			progressBarControls.set({ width: 0 }); // Reinicia la barra de progreso
+			startProgressBarAnimation(); // Reinicia la animación de la barra de progreso
+			chunkIndex.set(nextIndex); // Establece el siguiente índice
+		}, intervalTime);
+
+		return () => {
+			clearInterval(indexInterval); // Limpia el intervalo cuando el componente se desmonte
+		};
+	}, [$chunkIndex]); // Dependencia en $chunkIndex para reiniciar la animación cuando cambie
+
+	// Estilos para la barra de progreso
+	const progressBarStyle = {
+		height: '3px',
+		backgroundColor: '#f8f8f8',
+		width: '100%', // Establece el ancho completo para permitir la animación
+		display: 'block', // 'block' para permitir que el ancho se aplique correctamente
+		marginBottom: '10px',
+	};
 
 	return (
-		<>
+		<div>
+			<motion.span
+				className="line"
+				style={progressBarStyle}
+				initial={{ width: 0 }}
+				animate={progressBarControls}
+			/>
 			<div className="circles">
 				{Array.from({ length: numberOfCircles }, (_, index) => (
 					<motion.span
 						key={index}
-						className={`circle ${className}`}
+						className={`circle ${className} ${!$animationFinished ? 'enable' : 'disable'} ${
+							$chunkIndex === index ? 'selected' : 'unselected'
+						}`}
 						id={`circle-${index}`}
 						variants={circleVariants}
 						initial="unselected"
@@ -77,7 +123,7 @@ const NavigationButtons: React.FC<NavigationButtonsProps> = ({ Data, className }
 					/>
 				))}
 			</div>
-		</>
+		</div>
 	);
 };
 

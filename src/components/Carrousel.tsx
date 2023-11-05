@@ -7,7 +7,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 
 import { type Profile } from '../interfaces/Profile';
-import { chunkIndex } from '../stores/userStore';
+import { animationFinished, chunkIndex } from '../stores/userStore';
 import ArrowIcon from './buttons/ArrowIcon';
 import ProfileCard from './ProfileCard';
 
@@ -20,39 +20,15 @@ const Carrusel: React.FC<CarruselProps> = ({ profilesData }) => {
 	const $chunkIndex = useStore(chunkIndex);
 	const [currentChunkData, setCurrentChunkData] = useState(() => profilesData.slice(0, chunkSize));
 	const [profileClasses, setProfileClasses] = useState(['estado1', 'estado2', 'estado3']);
-	const [lastClickedIndex, setLastClickedIndex] = useState<number | null>(null);
-	const [isButtonDisabled, setIsButtonDisabled] = useState(false);
+	const $animationFinished = useStore(animationFinished);
 
 	const nextStep = () => {
-		if (isButtonDisabled) return; // Prevenir múltiples clics si ya está deshabilitado
-		setIsButtonDisabled(true); // Deshabilitar el botón inmediatamente al hacer clic
+		if ($animationFinished) return; // Prevenir múltiples clics si ya está deshabilitado
 
 		const maxIndex = Math.ceil(profilesData.length / chunkSize) - 1;
-		const newIndex = $chunkIndex + 1 > maxIndex ? 0 : $chunkIndex + 1;
+		const newIndex = ($chunkIndex + 1) % (maxIndex + 1);
 		chunkIndex.set(newIndex);
 		setCurrentChunkData(profilesData.slice(newIndex * chunkSize, (newIndex + 1) * chunkSize));
-
-		setTimeout(() => {
-			setIsButtonDisabled(false); // Rehabilita el botón después de un retraso
-		}, 500);
-	};
-
-	const variants = {
-		initial: {
-			opacity: 0,
-		},
-		animate: {
-			transition: {
-				opacity: {
-					duration: 0.5,
-				},
-			},
-			opacity: 1,
-			x: 0,
-		},
-		exit: {
-			opacity: 0,
-		},
 	};
 
 	const handleCardClick = (clickedIndex: number) => {
@@ -83,7 +59,6 @@ const Carrusel: React.FC<CarruselProps> = ({ profilesData }) => {
 		}
 
 		setProfileClasses(newProfileClasses);
-		setLastClickedIndex(clickedIndex);
 	};
 
 	const updateProfileClasses = (currentProfiles: string | any[]) => {
@@ -91,10 +66,12 @@ const Carrusel: React.FC<CarruselProps> = ({ profilesData }) => {
 		if (currentProfiles.length === 3) {
 			setProfileClasses((prevClasses) => {
 				// cls=class, idx=index
+				// [idx0, idx1, idx2]
 				return prevClasses.map((cls, idx) => {
-					if (cls === 'hide') {
-						// Asigna 'estado3' al último elemento si fue el último en ser oculto, sino 'estado2'
-						return idx === 2 && lastClickedIndex !== null ? 'estado3' : 'estado2';
+					if (cls === 'hide' && idx === 2) {
+						return 'estado3';
+					} else if (cls === 'hide' && idx === 1) {
+						return 'estado2';
 					}
 					return cls;
 				});
@@ -109,19 +86,12 @@ const Carrusel: React.FC<CarruselProps> = ({ profilesData }) => {
 	useEffect(() => {
 		setCurrentChunkData(profilesData.slice($chunkIndex * chunkSize, ($chunkIndex + 1) * chunkSize));
 		updateProfileClasses(profilesData.slice($chunkIndex * chunkSize, ($chunkIndex + 1) * chunkSize));
-	}, [$chunkIndex, lastClickedIndex]);
+	}, [$chunkIndex]);
 
 	return (
 		<>
 			<AnimatePresence initial={false} mode="wait">
-				<motion.div
-					className="carrusel__container"
-					key={$chunkIndex}
-					variants={variants}
-					initial="initial"
-					animate="animate"
-					exit="exit"
-				>
+				<motion.div className="carrusel__container" key={$chunkIndex}>
 					{currentChunkData.map((profile, index) => (
 						<ProfileCard
 							key={index}
@@ -136,9 +106,9 @@ const Carrusel: React.FC<CarruselProps> = ({ profilesData }) => {
 				</motion.div>
 			</AnimatePresence>
 			<i
-				className={`nextButton ${isButtonDisabled ? 'disabled' : ''}`}
+				className={`nextButton ${$animationFinished ? 'disabled' : ''}`}
 				onClick={() => {
-					if (!isButtonDisabled) {
+					if (!$animationFinished) {
 						nextStep();
 					}
 				}}

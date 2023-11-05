@@ -1,9 +1,12 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 
+import { useStore } from '@nanostores/react';
 import { motion } from 'framer-motion';
 import { forwardRef, useEffect, useRef, useState } from 'react';
 
 import { type Profile } from '../interfaces/Profile';
+import { animationFinished } from '../stores/userStore';
 
 interface ProfileCardProps {
 	profile: Profile;
@@ -19,6 +22,7 @@ const ProfileCard = forwardRef<HTMLDivElement, ProfileCardProps>(({ profile, ind
 	const [isOverflow, setIsOverflow] = useState(false);
 	const nameRef = useRef<HTMLHeadingElement>(null);
 	const containerRef = useRef<HTMLDivElement>(null);
+	const $animationFinished = useStore(animationFinished);
 
 	const getWidth = (stateClass: string | undefined) => {
 		switch (stateClass) {
@@ -58,6 +62,26 @@ const ProfileCard = forwardRef<HTMLDivElement, ProfileCardProps>(({ profile, ind
 		}
 	}, []); // Se ejecuta solo cuando el componente se monta
 
+	const variants = {
+		hover: { boxShadow: '0px 25px 50px 0px rgb(255, 255, 255, 0.08)' },
+		initial: {
+			x: 400,
+			width: getWidth(state),
+			opacity: 0,
+		},
+		animate: {
+			x: 0,
+			width: getWidth(state),
+			pointerEvents: 'auto',
+			opacity: 1,
+		},
+		exit: {
+			x: -400,
+			pointerEvents: 'none',
+			opacity: 0,
+		},
+	};
+
 	return (
 		<motion.div
 			ref={ref}
@@ -66,14 +90,42 @@ const ProfileCard = forwardRef<HTMLDivElement, ProfileCardProps>(({ profile, ind
 			style={{ backgroundImage: `url(/data/${profile.urlFotoPerfil})` }}
 			onClick={onClick}
 			onLoad={onLoad}
-			initial={{ width: getWidth(state) }}
-			animate={{ width: getWidth(state) }} // Ancho animado con Framer Motion
+			// @ts-expect-error
+			variants={variants}
+			initial="initial"
+			animate="animate"
+			exit="exit"
+			whileHover="hover"
+			onAnimationStart={() => {
+				animationFinished.set(!$animationFinished);
+			}}
+			onAnimationEnd={() => {
+				if ($animationFinished) {
+					animationFinished.set(!$animationFinished);
+				}
+			}}
+			onTap={() => {
+				animationFinished.set($animationFinished);
+			}}
 			transition={{
+				opacity: {
+					delay: index * 0.1,
+				},
+				x: {
+					delay: index * 0.1,
+					type: 'spring',
+					stiffness: 100,
+					damping: 15,
+				},
 				width: {
 					type: 'spring',
 					damping: 15,
 					stiffness: 100,
 					restDelta: 0.001,
+				},
+				boxShadow: {
+					ease: 'easeIn',
+					duration: 0.15,
 				},
 			}}
 		>
