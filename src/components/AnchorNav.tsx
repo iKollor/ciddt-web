@@ -10,7 +10,7 @@ const COLORS = {
 	negro: '#1d1d1b',
 	blanco: '#f8f8f8',
 };
-const minScale = 0.8;
+const minScale = 0.4;
 const maxScale = 1;
 
 function AnchorNav() {
@@ -29,6 +29,16 @@ function AnchorNav() {
 		stiffness: 100,
 		damping: 15,
 	});
+	const marginValue = useTransform(scrollYProgress, [0.9, 0.5], [0, 20]);
+	const marginValueSpring = useSpring(marginValue, {
+		stiffness: 100,
+		damping: 15,
+	});
+	const lineHeightValue = useTransform(scrollYProgress, [0.9, 0.5], [0.8, 1.2]);
+	const lineHeightValueSpring = useSpring(lineHeightValue, {
+		stiffness: 100,
+		damping: 15,
+	});
 
 	useEffect(() => {
 		const updateScale = () => {
@@ -42,6 +52,11 @@ function AnchorNav() {
 		updateScale(); // También invocamos directamente la función en caso de que la página ya esté cargada
 
 		const checkOverlap = () => {
+			console.log('scrollYProgress: ' + scrollYProgress.get());
+			console.log('margin: ' + marginValue.get());
+			console.log('lineHeight: ' + lineHeightValue.get());
+			console.log('scale: ' + scaleSpring.get());
+
 			const currentNav = navRef.current;
 			if (currentNav == null) return;
 
@@ -85,7 +100,7 @@ function AnchorNav() {
 			scrollY.clearListeners();
 			window.removeEventListener('load', updateScale);
 		};
-	}, []);
+	}, [scrollYProgress]);
 
 	const variants = {
 		initial: {
@@ -98,7 +113,7 @@ function AnchorNav() {
 		},
 	};
 
-	const animationDelay = 0.5;
+	const animationDelay = 0.3;
 
 	return (
 		<>
@@ -110,7 +125,18 @@ function AnchorNav() {
 				className="anchorNav__container"
 				ref={navRef}
 				initial={{ scale: 1 }}
-				style={{ scale: scaleSpring, transformOrigin: 'left bottom' }}
+				style={{
+					margin: marginValueSpring,
+					scale: scaleSpring,
+					transformOrigin: 'left bottom',
+				}}
+				transition={{
+					margin: {
+						type: 'spring',
+						stiffness: 100,
+						damping: 15,
+					},
+				}}
 			>
 				<ul>
 					{['nosotros', 'equipo', 'momentos', 'servicios'].map((id, idx) => (
@@ -135,8 +161,21 @@ function AnchorNav() {
 						>
 							<motion.a
 								href={`#${id}`}
-								style={{ WebkitTextStrokeColor: textStrokeColor }}
+								style={{
+									WebkitTextStrokeColor: textStrokeColor,
+									fontSize: highlightedId === id ? '7vw' : '3vw', // Aquí se asume que quieres una escala de 1 cuando está destacado
+									lineHeight: lineHeightValueSpring,
+								}}
 								className={highlightedId === id ? 'destacado' : ''}
+								transition={{
+									fontSize: {
+										type: 'spring',
+										stiffness: 100,
+										damping: 15,
+										restDelta: 0.001,
+										duration: 1,
+									},
+								}}
 							>
 								{id.charAt(0).toUpperCase() + id.slice(1)}
 							</motion.a>

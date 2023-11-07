@@ -14,6 +14,7 @@ interface Props {
 	animate?: VariantLabels;
 	transition?: Transition;
 	key: string | number;
+	index: string;
 }
 
 const NavButton: React.FC<Props> = ({
@@ -26,6 +27,7 @@ const NavButton: React.FC<Props> = ({
 	transition,
 	variants,
 	key,
+	index,
 }) => {
 	const buttonClass = classNames('button-container', {
 		selected: isSelected,
@@ -40,6 +42,7 @@ const NavButton: React.FC<Props> = ({
 			transition={transition}
 			variants={variants}
 			key={key}
+			id={index}
 		>
 			<a href={href}>{text}</a>
 		</motion.div>

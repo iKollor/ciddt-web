@@ -104,7 +104,7 @@ const NavigationButtons: React.FC<NavigationButtonsProps> = ({ Data, className }
 				}
 			},
 			{
-				threshold: 1,
+				threshold: 0.5,
 			},
 		);
 

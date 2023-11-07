@@ -25,12 +25,16 @@
 				line-height: 0.8;
 				transition:
 					-webkit-text-stroke-color ease 0.3s,
-					color ease 0.3s;
+					color ease 0.3s,
+					font-size 0.5s ease-in-out;
 
 				&:hover,
 				&.destacado {
 					color: $rojo !important;
 					-webkit-text-stroke: 0 $bg;
+				}
+				&.destacado {
+					font-size: 5vw;
 				}
 			}
 		}

@@ -114,6 +114,7 @@ export default function Navbar() {
 							text={id.charAt(0).toUpperCase() + id.slice(1)}
 							isAnimated={$isMenuClosed && shouldDisplayMenuIcon}
 							key={idx}
+							index={id}
 							variants={variants}
 							animate="animate"
 							initial="initial"

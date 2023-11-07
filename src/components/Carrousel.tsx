@@ -77,7 +77,7 @@ const Carrusel: React.FC<CarruselProps> = ({ profilesData }) => {
 				});
 			});
 		} else if (currentProfiles.length === 2) {
-			setProfileClasses(['estado1', 'estado1', 'hide']);
+			setProfileClasses(['estado1', 'estado2', 'hide']);
 		} else if (currentProfiles.length === 1) {
 			setProfileClasses(['estado1', 'hide', 'hide']);
 		}
