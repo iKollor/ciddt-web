@@ -1,4 +1,4 @@
-import { loginWithEmail, loginWithFacebook } from '../../backend/login';
+import { loginWithEmail, loginWithFacebook } from '../../../shared/login';
 
 document.addEventListener('DOMContentLoaded', () => {
 	const loginForm = document.getElementById('login-form');
