@@ -108,7 +108,7 @@ export default function Navbar() {
 					</a>
 				</div>
 				<div className={classNames('navbar__menu')}>
-					{['inicio', 'posts', 'galería', 'servicios', 'contacto'].map((id, idx) => (
+					{['inicio', 'posts', 'blog', 'servicios', 'contacto'].map((id, idx) => (
 						<NavButton
 							href={`/${id}`}
 							text={id.charAt(0).toUpperCase() + id.slice(1)}

@@ -21,18 +21,27 @@
 		"@nanostores/react": "^0.7.1",
 		"@types/react": "^18.2.29",
 		"@types/react-dom": "^18.2.14",
-		"astro": "^3.3.2",
-		"babel-plugin-macros": "^3.1.0",
+		"astro": "^3.5.2",
+		"axios": "^1.6.1",
 		"classnames": "^2.3.2",
+		"depcheck": "^1.4.7",
+		"dotenv": "^16.3.1",
+		"express": "^4.18.2",
+		"firebase": "^10.6.0",
+		"firebase-admin": "^11.11.0",
 		"framer-motion": "10.16.4",
 		"gsap": "^3.12.2",
+		"jsonwebtoken": "^9.0.2",
+		"loader-utils": "^3.2.1",
 		"nanostores": "^0.9.4",
+		"nodemailer": "^6.9.7",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",
 		"velocity-animate": "^1.5.2"
 	},
 	"devDependencies": {
 		"@types/node": "^20.8.10",
+		"@types/nodemailer": "^6.4.14",
 		"@types/velocity-animate": "^2.0.1",
 		"@typescript-eslint/eslint-plugin": "^6.8.0",
 		"@typescript-eslint/parser": "^6.8.0",
@@ -53,7 +62,7 @@
 		"prettier": "^3.0.3",
 		"prettier-plugin-astro": "^0.12.0",
 		"sass": "^1.69.4",
-		"springer": "^0.0.1",
+		"tailwindcss": "^3.3.5",
 		"typescript": "^5.2.2"
 	}
 }

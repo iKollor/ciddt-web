@@ -24,7 +24,7 @@ function AnchorNav() {
 	const [highlightedId, setHighlightedId] = useState('');
 	const navRef = useRef<HTMLDivElement>(null);
 	const sections = Array.from(document.querySelectorAll<HTMLElement>('.section-container'));
-	const scale = useTransform(scrollYProgress, [1, 0], [maxScale, minScale]);
+	const scale = useTransform(scrollYProgress, [1, 0.5], [maxScale, minScale]);
 	const scaleSpring = useSpring(scale, {
 		stiffness: 100,
 		damping: 15,

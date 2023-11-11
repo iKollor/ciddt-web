@@ -31,13 +31,16 @@ import AnchorNav from '../../components/AnchorNav';
 	</div>
 	<script>
 		import { gsap } from 'gsap';
-		import Springer from 'springer';
-		const spring = Springer(0.2, 0.8);
+
+		function customSpring(progress: number, strength = 1.5, endAt = 1): number {
+			return Math.pow(2, -10 * progress) * Math.sin(((progress - endAt / 4) * (2 * Math.PI)) / endAt) + 1;
+		}
+
 		gsap.to('.bg__container, .bg__container__logo', {
 			delay: 1,
 			height: '70%',
 			duration: 2,
-			ease: spring,
+			ease: (progress) => customSpring(progress, 0.1, 0.4),
 		});
 		gsap.to('.bg__container', {
 			duration: 2,
