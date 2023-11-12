@@ -4,6 +4,6 @@ import { verifyUser, registerUser } from './controllers.js';
 const router = Router();
 
 router.post('/verify-user', verifyUser);
-router.post('/registro', registerUser);
+router.get('/registro', registerUser);
 
 export default router;

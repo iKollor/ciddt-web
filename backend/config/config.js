@@ -1,8 +1,8 @@
 // config.js
-import dotenv from 'dotenv';
 import { createTransport } from 'nodemailer';
+import { config } from 'dotenv';
 
-dotenv.config();
+config(); // dotenv initializer
 
 export const env = {
 	JWT_SECRET: process.env.JWT_SECRET,

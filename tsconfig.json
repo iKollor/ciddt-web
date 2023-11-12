@@ -1,12 +1,18 @@
 {
 	"extends": "astro/tsconfigs/base",
 	"compilerOptions": {
+		"baseUrl": ".",
 		"jsx": "react-jsx",
 		"jsxImportSource": "react",
 		"moduleResolution": "Node",
 		"strict": true,
 		"lib": ["DOM", "ES2022"],
 		"resolveJsonModule": true,
-		"esModuleInterop": true
+		"esModuleInterop": true,
+		"paths": {
+			"@app/*": ["frontend/src/app/*"],
+			"@shared/*": ["shared/*"],
+			"@public/*": ["frontend/public/*"]
+		}
 	}
 }
