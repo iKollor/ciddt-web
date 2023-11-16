@@ -11,6 +11,7 @@ export const env = {
 	CLIENT_URL: process.env.CLIENT_URL,
 	CLIENT_MAIL: process.env.CLIENT_MAIL,
 	MAIL_SERVICE: process.env.MAIL_SERVICE,
+	SERVER_URL: process.env.SERVER_URL,
 };
 
 // Configuración de Nodemailer

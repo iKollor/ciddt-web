@@ -19,7 +19,7 @@ export function generateToken(userId) {
 	return jwt.sign(payload, env.JWT_SECRET, options);
 }
 
-export async function saveToken(userId, token) {
+export async function saveToken(userId, token, name) {
 	// Crea y ajusta el objeto Date
 	const now = new Date();
 	now.setHours(now.getHours() + 1);
@@ -27,6 +27,7 @@ export async function saveToken(userId, token) {
 	const expireAt = Timestamp.fromDate(now);
 
 	const tokenDoc = {
+		name: name,
 		userId: userId,
 		token: token,
 		used: false,

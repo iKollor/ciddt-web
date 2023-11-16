@@ -7,16 +7,26 @@ export default {
 	theme: {
 		extend: {
 			colors: {
-				...defaultColors,
+				red: {
+					DEFAULT: '#db001c',
+					400: '#db001c',
+					700: '#b60019',
+				},
 				white: '#f8f8f8',
-				dark: '#1d1d1b',
-				gray: '#b0b0b0',
-				red: '#db001c',
-				dark_red: '#b60019',
-				blue: '#0096ec',
-				dark_blue: '#0075b9',
-				yellow: '#eab308',
-				green: '#4ade80',
+				gray: {
+					DEFAULT: '#b0b0b0',
+					400: '#b0b0b0',
+				},
+				black: '#1d1d1b',
+				blue: {
+					DEFAULT: '#0096ec',
+				},
+				green: {
+					DEFAULT: '#4ade80',
+				},
+				yellow: {
+					DEFAULT: '#eab308',
+				},
 			},
 		},
 		fontFamily: {
@@ -24,5 +34,10 @@ export default {
 		},
 	},
 	plugins: [],
+	safelist: [
+		{
+			pattern: /(bg|text|border)-(transparent|current|red-400|red-700|white|gray-400|black)/,
+		},
+	],
 	darkMode: 'class',
 };

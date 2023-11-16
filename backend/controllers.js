@@ -49,7 +49,7 @@ export async function verifyUser(req, res) {
 
 		// Si no hay token o el token ha expirado, proceder con la creación de un nuevo token
 		const token = generateToken(userId);
-		const registrationLink = `${env.CLIENT_URL}/registro?token=${token}`;
+		const registrationLink = `${env.CLIENT_URL}/ciddt-admin/registro?token=${token}`;
 		const mailOptions = {
 			from: `"CIDDT-WEB Registro de Usuario" <${env.MAILER_EMAIL}>`,
 			to: env.CLIENT_MAIL,
@@ -57,7 +57,7 @@ export async function verifyUser(req, res) {
 			text: `Un nuevo usuario con el nombre ${name}, el ID ${userId} y el correo ${email} quiere registrarse.\n Para completar su registro, haz clic en el siguiente enlace: ${registrationLink}`,
 		};
 		await transporter.sendMail(mailOptions);
-		await saveToken(userId, token); // Guarda el token en Firestore
+		await saveToken(userId, token, name); // Guarda el token en Firestore
 		res.status(200).json({ message: 'Correo enviado para completar el registro' });
 		console.log('Correo enviado para completar el registro');
 	} catch (error) {
@@ -78,7 +78,7 @@ export async function registerUser(req, res) {
 		const nonceUsed = await checkNonceUsed(token);
 		if (nonceUsed) {
 			console.error(`Token ya utilizado o inválido`);
-			return res.status(401).send('Token ya utilizado o inválido');
+			return res.status(401).json({ message: 'Token ya utilizado o inválido' });
 		}
 
 		// Marca el nonce como usado
@@ -86,9 +86,9 @@ export async function registerUser(req, res) {
 
 		// Lógica de registro con decoded.userId
 		console.log(`Registro exitoso para userId: ${decoded.userId}`);
-		res.status(200).send('Registro exitoso: ' + decoded.userId);
+		res.status(200).json({ message: 'Registro exitoso', userId: decoded.userId });
 	} catch (error) {
 		console.error(`Error al verificar el token: ${error.message}`);
-		res.status(401).send('Token inválido o expirado');
+		res.status(401).json({ message: 'Token inválido o expirado' });
 	}
 }

@@ -23,6 +23,7 @@
 		"@nanostores/react": "^0.7.1",
 		"@types/react": "^18.2.29",
 		"@types/react-dom": "^18.2.14",
+		"alpinejs": "^3.13.2",
 		"astro": "^3.5.2",
 		"autoprefixer": "^10.4.16",
 		"axios": "^1.6.1",

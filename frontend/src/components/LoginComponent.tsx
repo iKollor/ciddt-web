@@ -64,7 +64,7 @@ export const LoginComponent = () => {
 								type="email"
 								autoComplete="email"
 								required
-								className="block w-full rounded-md border-0 py-1.5 text-gray shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+								className="block w-full rounded-md border-0 py-1.5 px-1.5 text-gray shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
 								onChange={(e) => {
 									setEmail(e.target.value);
 								}}
@@ -85,7 +85,7 @@ export const LoginComponent = () => {
 								type="password"
 								autoComplete="current-password"
 								required
-								className="block w-full rounded-md border-0 py-1.5 text-gray shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+								className="block w-full rounded-md border-0 py-1.5 px-1.5 text-gray shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
 								onChange={(e) => {
 									setPassword(e.target.value);
 								}}
@@ -96,19 +96,19 @@ export const LoginComponent = () => {
 					<div>
 						<button
 							type="submit"
-							className="flex w-full justify-center rounded-md bg-red px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-dark_red focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition"
+							className="flex w-full justify-center rounded-md bg-red px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-red-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition"
 						>
-							Iniciar Sesion
+							Iniciar Sesión
 						</button>
 					</div>
 				</form>
 				<div className="mt-10 text-center text-sm text-gray-500">
 					<button
-						className="bg-blue hover:bg-dark_blue text-white font-bold py-2 px-4 rounded inline-flex items-center transition"
+						className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded inline-flex items-center transition"
 						id="fb-login-button"
 						onClick={handleFacebookLogin}
 					>
-						<i className="fab fa-facebook-f mr-2"></i> Registrate o Inicia Sesión con Facebook
+						<i className="fab fa-facebook-f mr-2"></i> Regístrate o Inicia Sesión con Facebook
 					</button>
 					<p className="text-gray text-sm mt-5 text-center">
 						Antes de registrarse por primera vez por Facebook se enviara un correo al administrador

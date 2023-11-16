@@ -16,10 +16,12 @@ const Popup: React.FC<popUp> = ({ message, type, title }) => {
 
 	const handleClose = (): void => {
 		setIsLocalOpen(false); // Inicia la animación de salida
+		showPopup.set(false);
 	};
 
 	// Definir clases base y específicas por tipo
-	const baseClass = 'absolute text-left top-20 flex rounded-lg p-4 mb-4 text-sm w-96 min-h-24 center';
+	const baseClass =
+		'absolute text-left top-20 flex rounded-lg p-4 mb-4 text-sm max-w-[400px] min-w-[250px] min-h-24 center';
 	const typeClasses = {
 		info: 'bg-dark_blue text-white',
 		danger: 'bg-red text-white',
@@ -95,14 +97,14 @@ const Popup: React.FC<popUp> = ({ message, type, title }) => {
 					role="alert"
 				>
 					{icons[type]} {/* Muestra el icono correspondiente al tipo */}
-					<p className="w-full">
+					<p className="w-full mr-5">
 						<span className="font-medium">{title}</span> <br />
 						{message}
 					</p>
 					<div className="relative">
-						<motion.button
+						<motion.a
 							onClick={handleClose}
-							className="w-3 h-3 absolute ml-2 mr-2 right-0"
+							className="w-3 h-3 absolute ml-2 mr-2 right-0 cursor-pointer"
 							id="button"
 							initial={{
 								stroke: '#fff',
@@ -125,7 +127,7 @@ const Popup: React.FC<popUp> = ({ message, type, title }) => {
 									fillRule="evenodd"
 								/>
 							</svg>
-						</motion.button>
+						</motion.a>
 					</div>
 				</motion.div>
 			)}
