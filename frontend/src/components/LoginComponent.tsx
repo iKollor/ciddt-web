@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 
-import { useStore } from '@nanostores/react';
 import { loginWithEmail, loginWithFacebook } from '@shared/login';
 import { useState } from 'react';
 
@@ -11,8 +10,6 @@ import Popup from './buttons/Popup';
 export const LoginComponent = () => {
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
-
-	const $showPopup = useStore(showPopup);
 
 	const [popupType, setPopupType] = useState<ResponseCode | undefined>(undefined);
 	const [popupTitle, setPopupTitle] = useState('');
@@ -49,8 +46,8 @@ export const LoginComponent = () => {
 
 	return (
 		<>
-			<div className="mt-5 sm:mx-auto sm:w-full sm:max-w-sm">
-				<form className="space-y-6" action="#" id="login-form" method="POST" onSubmit={handleLogin}>
+			<div className="mt-5 sm:mx-auto sm:w-full sm:max-w-sm flex flex-col items-center content-center">
+				<form className="space-y-6 w-full" action="#" id="login-form" method="POST" onSubmit={handleLogin}>
 					<div>
 						<div className="flex items-center justify-between">
 							<label htmlFor="email" className="block text-sm font-medium leading-6 text-gray">
@@ -114,9 +111,7 @@ export const LoginComponent = () => {
 						Antes de registrarse por primera vez por Facebook se enviara un correo al administrador
 					</p>
 				</div>
-				{$showPopup && popupType !== undefined && (
-					<Popup type={popupType} title={popupTitle} message={popupMessage} />
-				)}
+				{popupType !== undefined && <Popup type={popupType} title={popupTitle} message={popupMessage} />}
 			</div>
 		</>
 	);

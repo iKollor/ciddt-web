@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { collection, query, where, getDocs, addDoc, updateDoc, Timestamp } from 'firebase/firestore';
+import { getDoc, doc, setDoc, updateDoc, Timestamp } from 'firebase/firestore';
 import { db } from './config/firebaseConfig.js';
 
 import { env } from './config/config.js';
@@ -26,6 +26,13 @@ export async function saveToken(userId, token, name) {
 	// Crea un Timestamp de Firestore a partir del objeto Date
 	const expireAt = Timestamp.fromDate(now);
 
+	if (userId === undefined || token === undefined || name === undefined) {
+		console.error(
+			`Error: Uno de los valores requeridos es undefined:\nuserId: ${userId}\ntoken: ${token}\nname: ${name}`,
+		);
+		throw new Error('Datos requeridos no proporcionados');
+	}
+
 	const tokenDoc = {
 		name: name,
 		userId: userId,
@@ -34,17 +41,18 @@ export async function saveToken(userId, token, name) {
 		expireAt: expireAt,
 	};
 	console.log(`Guardando token en db para userId: ${userId}`);
-	await addDoc(collection(db, 'registrationTokens'), tokenDoc);
+
+	// Utilizar setDoc para guardar el documento con un ID específico
+	const tokenRef = doc(db, 'registrationTokens', token);
+	await setDoc(tokenRef, tokenDoc);
 }
 
 export async function markNonceAsUsed(token) {
-	const tokensRef = collection(db, 'registrationTokens');
-	const q = query(tokensRef, where('token', '==', token));
-	const querySnapshot = await getDocs(q);
+	const tokenDocRef = doc(db, 'registrationTokens', token);
+	const tokenDocSnapshot = await getDoc(tokenDocRef);
 
-	if (!querySnapshot.empty) {
-		const docRef = querySnapshot.docs[0].ref;
-		await updateDoc(docRef, { used: true });
+	if (tokenDocSnapshot.exists()) {
+		await updateDoc(tokenDocRef, { used: true });
 		console.log(`Nonce marcado como usado para el token: ${token}`);
 	} else {
 		console.log(`No se encontró el token para marcar como usado: ${token}`);
@@ -52,16 +60,15 @@ export async function markNonceAsUsed(token) {
 }
 
 export async function checkNonceUsed(token) {
-	const tokensRef = collection(db, 'registrationTokens');
-	const q = query(tokensRef, where('token', '==', token));
-	const querySnapshot = await getDocs(q);
+	const tokenDocRef = doc(db, 'registrationTokens', token);
+	const tokenDocSnapshot = await getDoc(tokenDocRef);
 
-	if (!querySnapshot.empty) {
-		const doc = querySnapshot.docs[0];
-		console.log(`Token encontrado, usado: ${doc.data().used}, token: ${token}`);
-		return doc.data().used;
+	if (tokenDocSnapshot.exists()) {
+		const docData = tokenDocSnapshot.data();
+		console.log(`Token encontrado, usado: ${docData.used}`);
+		return docData.used;
 	} else {
 		console.log(`Token no encontrado en la base de datos: ${token}`);
-		return false; // Retorna false si el token no existe
+		throw new Error('Token inválido');
 	}
 }

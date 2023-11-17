@@ -80,8 +80,7 @@ function RegisterComponent() {
 		showPopup.set(true);
 	};
 
-	// El que revise este código, créanme que estoy haciendo esto por una razón xd
-	const alpineButton = `<button :class="{'bg-red-400 hover:bg-red-700': isValid(), 'bg-gray-400 cursor-not-allowed': !isValid()}" :disabled="!isValid()" class="mt-3 text-lg font-semibold w-full text-white rounded-lg px-6 py-3 block shadow-xl transition">Register</button>`;
+	const alpineButton = `<!-- El que revise este código, créanme que estoy haciendo esto por una razón (Acabo de usar alpine dentro de un componente de react que a su vez es renderizado por astro XD) --><button :class="{'bg-red-400 hover:bg-red-700': isValid(), 'bg-gray-400 cursor-not-allowed': !isValid()}" :disabled="!isValid()" class="mt-3 text-lg font-semibold w-full text-white rounded-lg px-6 py-3 block shadow-xl transition">Register</button>`;
 
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-expect-error
@@ -106,11 +105,8 @@ function RegisterComponent() {
 
 	return (
 		<>
-			{/* xddd :P */}
 			<div dangerouslySetInnerHTML={{ __html: alpineButton }} />
-			{$showPopup && popupType !== undefined && (
-				<Popup type={popupType} title={popupTitle} message={popupMessage} />
-			)}
+			{popupType !== undefined && <Popup type={popupType} title={popupTitle} message={popupMessage} />}
 		</>
 	);
 }

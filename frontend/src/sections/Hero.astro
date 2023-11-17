@@ -1,8 +1,9 @@
 ---
 import Navbar from '../components/Navbar';
-import Equipo from '../layouts/HeroSections/Equipo.astro';
-import Header from '../layouts/HeroSections/Header.astro';
-import Nosotros from '../layouts/HeroSections/Nosotros.astro';
+import Equipo from './Hero/Equipo.astro';
+import Header from './Hero/Header.astro';
+import Momentos from './Hero/Momentos.astro';
+import Nosotros from './Hero/Nosotros.astro';
 ---
 
 <>
@@ -17,6 +18,9 @@ import Nosotros from '../layouts/HeroSections/Nosotros.astro';
 			</section>
 			<section id="equipo" class="section-container negro">
 				<Equipo />
+			</section>
+			<section id="momentos" class="section-container blanco">
+				<Momentos />
 			</section>
 		</div>
 	</main>

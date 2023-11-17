@@ -29,11 +29,7 @@ function AnchorNav() {
 		stiffness: 100,
 		damping: 15,
 	});
-	const marginValue = useTransform(scrollYProgress, [0.9, 0.5], [0, 20]);
-	const marginValueSpring = useSpring(marginValue, {
-		stiffness: 100,
-		damping: 15,
-	});
+
 	const lineHeightValue = useTransform(scrollYProgress, [0.9, 0.5], [0.8, 1.2]);
 	const lineHeightValueSpring = useSpring(lineHeightValue, {
 		stiffness: 100,
@@ -52,11 +48,6 @@ function AnchorNav() {
 		updateScale(); // También invocamos directamente la función en caso de que la página ya esté cargada
 
 		const checkOverlap = () => {
-			console.log('scrollYProgress: ' + scrollYProgress.get());
-			console.log('margin: ' + marginValue.get());
-			console.log('lineHeight: ' + lineHeightValue.get());
-			console.log('scale: ' + scaleSpring.get());
-
 			const currentNav = navRef.current;
 			if (currentNav == null) return;
 
@@ -126,7 +117,8 @@ function AnchorNav() {
 				ref={navRef}
 				initial={{ scale: 1 }}
 				style={{
-					margin: marginValueSpring,
+					marginLeft: 30,
+					marginBottom: 20,
 					scale: scaleSpring,
 					transformOrigin: 'left bottom',
 				}}

@@ -1,7 +1,7 @@
 /* eslint-disable import/no-named-as-default-member */
 import { generateToken, saveToken, checkNonceUsed, markNonceAsUsed } from './utils.js';
 import jwt from 'jsonwebtoken';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { db } from './config/firebaseConfig.js';
 
 import { env, transporter } from './config/config.js';
@@ -14,26 +14,23 @@ export async function verifyUser(req, res) {
 	console.log('email:', email);
 
 	try {
-		// Primero, verificar si el usuario ya existe
-		const usersRef = collection(db, 'users');
-		const userQuery = query(usersRef, where('userId', '==', userId));
-		const userQuerySnapshot = await getDocs(userQuery);
+		// Verificar si el usuario ya existe
+		const userDocRef = doc(db, 'users', userId);
+		const userDocSnapshot = await getDoc(userDocRef);
 
-		if (!userQuerySnapshot.empty) {
+		if (userDocSnapshot.exists()) {
 			// El usuario ya existe en la base de datos
 			res.status(400).json({ message: 'El usuario ya existe' });
 			return;
 		}
 
-		// Luego, verificar si ya existe un token de registro para este usuario
-		const tokensRef = collection(db, 'registrationTokens');
-		const tokenQuery = query(tokensRef, where('userId', '==', userId));
-		const tokenQuerySnapshot = await getDocs(tokenQuery);
+		// Verificar si ya existe un token de registro para este usuario
+		const tokenDocRef = doc(db, 'registrationTokens', userId);
+		const tokenDocSnapshot = await getDoc(tokenDocRef);
 
-		if (!tokenQuerySnapshot.empty) {
+		if (tokenDocSnapshot.exists()) {
 			// Comprobar la fecha de expiración del token
-			const tokenDoc = tokenQuerySnapshot.docs[0];
-			const tokenData = tokenDoc.data();
+			const tokenData = tokenDocSnapshot.data();
 			const now = new Date();
 			if (now < tokenData.expireAt.toDate()) {
 				// El token todavía es válido, enviar mensaje de error
@@ -56,13 +53,13 @@ export async function verifyUser(req, res) {
 			subject: 'Intento de registro de Usuario',
 			text: `Un nuevo usuario con el nombre ${name}, el ID ${userId} y el correo ${email} quiere registrarse.\n Para completar su registro, haz clic en el siguiente enlace: ${registrationLink}`,
 		};
-		await transporter.sendMail(mailOptions);
 		await saveToken(userId, token, name); // Guarda el token en Firestore
+		await transporter.sendMail(mailOptions);
 		res.status(200).json({ message: 'Correo enviado para completar el registro' });
 		console.log('Correo enviado para completar el registro');
 	} catch (error) {
 		console.error('Error al verificar el usuario:', error);
-		res.status(500).json({ message: 'Error interno del servidor' });
+		res.status(500).json({ message: error.message });
 	}
 }
 
@@ -76,7 +73,7 @@ export async function registerUser(req, res) {
 
 		// Verifica si el nonce ya ha sido utilizado
 		const nonceUsed = await checkNonceUsed(token);
-		if (nonceUsed) {
+		if (nonceUsed == true) {
 			console.error(`Token ya utilizado o inválido`);
 			return res.status(401).json({ message: 'Token ya utilizado o inválido' });
 		}

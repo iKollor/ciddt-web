@@ -87,7 +87,7 @@ const ProfileCard = forwardRef<HTMLDivElement, ProfileCardProps>(({ profile, ind
 			ref={ref}
 			className={`profile__container ${state} ${isOverflow && state === 'estado3' ? 'rotate' : ''}`}
 			key={index}
-			style={{ backgroundImage: `url(/data/${profile.urlFotoPerfil})` }}
+			style={{ backgroundImage: `url(/data/profiles/${profile.urlFotoPerfil})` }}
 			onClick={onClick}
 			onLoad={onLoad}
 			// @ts-expect-error

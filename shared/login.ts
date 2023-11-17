@@ -2,20 +2,16 @@
 import {
 	createUserWithEmailAndPassword,
 	FacebookAuthProvider,
-	getAuth,
 	signInWithEmailAndPassword,
 	signInWithPopup,
 	updateProfile,
 } from 'firebase/auth';
-import { collection, doc, getDoc, getDocs, query, setDoc, where } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { type popUp } from 'frontend/src/interfaces/popUp';
 
-import { app, db } from '../backend/config/firebaseConfig';
+import { auth, db } from '../backend/config/firebaseConfig';
 
 const serverUrl = import.meta.env.PUBLIC_SERVER_URL;
-
-// Obtener la instancia de autenticación
-const auth = getAuth(app);
 
 const registerNewUser = async (
 	registrationToken: string,
@@ -35,14 +31,13 @@ const registerNewUser = async (
 			throw new Error(errorMessage);
 		}
 
-		// Consultar Firestore para obtener el nombre asociado con el userId
-		const tokensRef = collection(db, 'registrationTokens');
-		const q = query(tokensRef, where('userId', '==', data.userId));
-		const querySnapshot = await getDocs(q);
+		// Consultar Firestore para obtener el nombre asociado con el token
+		const tokenDocRef = doc(db, 'registrationTokens', registrationToken);
+		const tokenDocSnapshot = await getDoc(tokenDocRef);
 		let displayName = '';
-		querySnapshot.forEach((doc) => {
-			displayName = typeof doc.data().name === 'string' ? doc.data().name : username;
-		});
+		if (tokenDocSnapshot.exists()) {
+			displayName = tokenDocSnapshot.data().name ?? username;
+		}
 
 		// Crear el usuario en Firebase
 		const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -122,8 +117,6 @@ const loginWithFacebook = async (): Promise<popUp> => {
 		const uid = user.uid;
 		const name = user.displayName;
 		const email = user.email ?? '';
-
-		console.log(`${uid} ${name} ${email}`);
 
 		// Verificar si el usuario ya existe en Firestore
 		const docRef = doc(db, 'users', user.uid);

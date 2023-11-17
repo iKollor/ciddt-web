@@ -12,7 +12,9 @@
 		"paths": {
 			"@app/*": ["frontend/src/app/*"],
 			"@shared/*": ["shared/*"],
-			"@public/*": ["frontend/public/*"]
+			"@public/*": ["frontend/public/*"],
+			"@components/*": ["frontend/src/components/*"],
+			"@styles/*": ["frontend/src/styles/*"]
 		}
 	}
 }
