@@ -6,6 +6,9 @@ export default {
 	content: ['./frontend/src/**/*.{html,js,astro,ts,tsx,jsx}'],
 	theme: {
 		extend: {
+			dropShadow: {
+				custom: '5px 5px 0px #1d1d1b',
+			},
 			colors: {
 				red: {
 					DEFAULT: '#db001c',

@@ -1,5 +1,7 @@
 ---
+import Navbar from '@components/ciddt-admin/Navbar';
 
+const { title } = Astro.props;
 ---
 
 <!doctype html>
@@ -7,9 +9,10 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>CIDDT | Admin Panel</title>
+		<title>CIDDT | {title}</title>
 	</head>
 	<body>
+		<Navbar client:only />
 		<slot />
 	</body>
 </html>

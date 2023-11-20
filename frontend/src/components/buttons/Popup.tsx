@@ -1,22 +1,14 @@
-import '../../input.css';
-
 import { useStore } from '@nanostores/react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { showPopup } from 'frontend/src/hooks/popupStores';
-import { type popUp } from 'frontend/src/interfaces/popUp';
-import { useEffect, useState } from 'react';
+import { popupStore } from 'frontend/src/hooks/popupStores';
+import { type ResponseCode } from 'frontend/src/interfaces/popUp';
 
-const Popup: React.FC<popUp> = ({ message, type, title }) => {
-	const $showPopup = useStore(showPopup);
-	const [isLocalOpen, setIsLocalOpen] = useState(true);
-
-	useEffect(() => {
-		setIsLocalOpen($showPopup);
-	}, [$showPopup]);
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+const Popup = () => {
+	const popupState = useStore(popupStore) as { visible: boolean; message: string; type: ResponseCode; title: string };
 
 	const handleClose = (): void => {
-		setIsLocalOpen(false); // Inicia la animación de salida
-		showPopup.set(false);
+		popupStore.set({ ...popupState, visible: false }); // Actualizar el estado para ocultar el popup
 	};
 
 	// Definir clases base y específicas por tipo
@@ -30,7 +22,7 @@ const Popup: React.FC<popUp> = ({ message, type, title }) => {
 	};
 
 	// Obtener las clases apropiadas para el tipo dado
-	const alertClasses = `popup ${baseClass} ${typeClasses[type]}`;
+	const alertClasses = `popup ${baseClass} ${typeClasses[popupState.type]}`;
 
 	const icons = {
 		info: (
@@ -78,15 +70,8 @@ const Popup: React.FC<popUp> = ({ message, type, title }) => {
 	};
 
 	return (
-		<AnimatePresence
-			onExitComplete={() => {
-				// Si isLocalOpen es false, entonces actualiza el estado global
-				if (!isLocalOpen) {
-					showPopup.set(false);
-				}
-			}}
-		>
-			{isLocalOpen && (
+		<AnimatePresence>
+			{popupState.visible && (
 				<motion.div
 					initial="closed"
 					animate="open"
@@ -96,10 +81,10 @@ const Popup: React.FC<popUp> = ({ message, type, title }) => {
 					id="popup"
 					role="alert"
 				>
-					{icons[type]} {/* Muestra el icono correspondiente al tipo */}
+					{icons[popupState.type]} {/* Muestra el icono correspondiente al tipo */}
 					<p className="w-full mr-5">
-						<span className="font-medium">{title}</span> <br />
-						{message}
+						<span className="font-medium">{popupState.title}</span> <br />
+						{popupState.message}
 					</p>
 					<div className="relative">
 						<motion.a

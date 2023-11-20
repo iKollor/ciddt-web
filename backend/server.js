@@ -19,13 +19,13 @@ app.use(
 );
 
 // Configuración para HTTPS
-const key = fs.readFileSync(path.resolve(__dirname, './config/creds/localhost-key.pem'));
-const cert = fs.readFileSync(path.resolve(__dirname, './config/creds/localhost.pem'));
+const key = fs.readFileSync(path.resolve(__dirname, '../creds/localhost-key.pem'));
+const cert = fs.readFileSync(path.resolve(__dirname, '../creds/localhost.pem'));
 const server = https.createServer({ key, cert }, app);
 
 // Middleware para archivos estáticos
 // eslint-disable-next-line import/no-named-as-default-member
-app.use(express.static(path.join(__dirname, '../dist/')));
+app.use(express.static(path.join(__dirname, '../dist/server/entry.mjs')));
 
 // Usar las rutas definidas en routes.js
 app.use(routes);

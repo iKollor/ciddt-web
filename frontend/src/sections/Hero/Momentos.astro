@@ -1,7 +1,15 @@
 ---
-
+import VerMas from '@components/buttons/VerMas';
+import PostCard from '@components/PostCard';
 ---
 
 <>
-	<div class="momentos__container h-screen"></div>
+	<div class="momentos__container h-screen">
+		<div class="carrousel__container w-full h-5/6 flex flex-row justify-center align-middle items-center">
+			<PostCard />
+		</div>
+		<div class="button__container w-full flex flex-row justify-end items-center">
+			<VerMas client:only />
+		</div>
+	</div>
 </>

@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@astrojs/check": "^0.3.1",
-    "@astrojs/node": "^6.0.3",
+    "@astrojs/node": "^6.0.4",
     "@astrojs/react": "^3.0.5",
     "@astrojs/tailwind": "^5.0.2",
     "@fortawesome/fontawesome-svg-core": "^6.4.2",
@@ -33,6 +33,7 @@
     "depcheck": "^1.4.7",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
+    "feather-icons-react": "^0.6.2",
     "firebase": "^10.6.0",
     "firebase-admin": "^11.11.0",
     "framer-motion": "10.16.4",
@@ -49,6 +50,7 @@
   },
   "devDependencies": {
     "@types/eslint": "^8.44.7",
+    "@types/feather-icons": "^4.29.4",
     "@types/node": "^20.8.10",
     "@types/nodemailer": "^6.4.14",
     "@types/velocity-animate": "^2.0.1",

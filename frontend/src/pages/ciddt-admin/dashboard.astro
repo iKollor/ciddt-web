@@ -1,0 +1,37 @@
+---
+import { getAuth, type UserRecord } from 'firebase-admin/auth';
+import AdminPanelLayout from 'frontend/src/layouts/AdminPanelLayout.astro';
+
+import { app } from '../../firebase/server';
+
+const auth = getAuth(app);
+
+/* Check current session */
+if (!Astro.cookies.has('session')) {
+	return Astro.redirect('/ciddt-admin/login');
+}
+
+let user: UserRecord | null = null;
+
+const sessionCookie = Astro.cookies.get('session')?.value;
+if (sessionCookie != null) {
+	const decodedCookie = await auth.verifySessionCookie(sessionCookie);
+	try {
+		user = await auth.getUser(decodedCookie.uid);
+	} catch (error) {
+		// TODO: Manejar el error, por ejemplo, redirigir si no se encuentra el usuario
+		return Astro.redirect('/ciddt-admin/login');
+	}
+}
+---
+
+<AdminPanelLayout title="dashboard">
+	<picture>
+		<img src=`${user?.providerData[0].photoURL}` alt="user_profilePicture" width={50} height={50} />
+	</picture>
+	<h1>Welcome {user?.displayName}</h1>
+	<p>We are happy to see you here</p>
+	<form action="/api/auth/signout">
+		<button type="submit">Sign out</button>
+	</form>
+</AdminPanelLayout>
