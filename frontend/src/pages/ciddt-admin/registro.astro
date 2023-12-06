@@ -1,6 +1,7 @@
 ---
-import Popup from '@components/buttons/Popup';
+import '../../styles/GlobalVariables.scss';
 
+import Popup from '@components/buttons/Popup';
 const registrationToken = Astro.url.searchParams.get('token');
 
 if (registrationToken == null) {
@@ -14,10 +15,9 @@ if (registrationToken == null) {
 		<meta charset="utf-8" />
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 	</head>
 	<body class="h-screen overflow-hidden flex items-center justify-center bg-black">
-		<script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.js" defer></script>
-
 		<div class="container max-w-full mx-auto md:py-24 px-6">
 			<div class="max-w-sm mx-auto px-6">
 				<div class="relative flex flex-wrap">
@@ -29,7 +29,8 @@ if (registrationToken == null) {
 							</p>
 							<form
 								class="mt-8"
-								x-data="{ username: '', email: '', password: '', password_confirm: '', terms: false, showPasswordValidator: false, isValid: function() { return this.username !== '' && this.email !== '' && this.password === this.password_confirm && this.password.length > 7 && this.terms; }}"
+								x-data="{ username: '', email: '', password: '', password_confirm: '', terms: false, showPasswordValidator: false, init() { this.email = JSON.parse(localStorage.getItem('cachedEmail') || '{}').email || ''; }, isValid() { return this.username !== '' && this.email !== '' && this.password === this.password_confirm && this.password.length > 7 && this.terms; } }"
+								x-init="init()"
 								action="#"
 								id="register-form"
 								method="POST"
@@ -60,6 +61,7 @@ if (registrationToken == null) {
 											placeholder=""
 											class="block w-full rounded-md border-0 py-1.5 px-1.5 text-gray shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
 											required
+											readonly
 										/>
 									</div>
 									<div class="py-1">
@@ -194,8 +196,10 @@ if (registrationToken == null) {
 										type="submit"
 										:class="{'bg-red-400 hover:bg-red-700': isValid(), 'bg-gray-400 cursor-not-allowed': !isValid()}"
 										:disabled="!isValid()"
-										class="mt-3 text-lg font-semibold w-full text-white rounded-lg px-6 py-3 block shadow-xl transition"
-										>Register</button
+										class="flex text-center items-center justify-center mt-3 text-lg font-semibold w-full text-white rounded-lg px-6 py-3 shadow-xl transition"
+									>
+										<span class="loader" id="button__loader"></span>
+										<span class="button__content" id="button__content">Registro</span></button
 									>
 									<Popup client:only />
 								</div>
@@ -209,6 +213,14 @@ if (registrationToken == null) {
 	<script>
 		import { registerNewUser } from 'frontend/src/firebase/login';
 		import { popupStore } from 'frontend/src/hooks/popupStores';
+
+		const buttonContent = document.querySelector('#button__content') as HTMLSpanElement;
+		const buttonLoader = document.querySelector('#button__loader') as HTMLSpanElement;
+
+		const emailInput = document.querySelector('#email') as HTMLInputElement;
+		emailInput.addEventListener('onchange', (e) => {
+			e.preventDefault();
+		});
 
 		const form = document.querySelector('form') as HTMLFormElement;
 		form.addEventListener('submit', async (e) => {
@@ -230,6 +242,8 @@ if (registrationToken == null) {
 				return;
 			} else {
 				try {
+					buttonContent?.setAttribute('style', 'display: none');
+					buttonLoader?.setAttribute('style', 'display: block');
 					const response = await registerNewUser(registrationToken, username, email, password);
 					popupStore.set({
 						visible: true,
@@ -241,13 +255,66 @@ if (registrationToken == null) {
 						window.location.assign('/ciddt-admin/login');
 					}
 				} catch (error: any) {
+					buttonContent?.setAttribute('style', 'display: block');
+					buttonLoader?.setAttribute('style', 'display: none');
 					popupStore.set({
 						visible: true,
 						message: error.message || 'Ocurrió un error desconocido',
 						type: 'danger',
 						title: 'Error en Registro',
 					});
+				} finally {
+					buttonContent?.setAttribute('style', 'display: block');
+					buttonLoader?.setAttribute('style', 'display: none');
 				}
+			}
+		});
+	</script>
+	<script>
+		document.addEventListener('DOMContentLoaded', () => {
+			const registrationToken = new URLSearchParams(window.location.search).get('token');
+			if (!registrationToken) {
+				window.location.href = '/ciddt-admin/login';
+			}
+
+			const serverUrl = import.meta.env.PUBLIC_SERVER_URL;
+			const emailInput = document.getElementById('email') as HTMLInputElement;
+
+			async function fetchEmail() {
+				try {
+					const response = await fetch(`${serverUrl}/verifyToken?token=${registrationToken}`);
+					if (response.ok) {
+						const data = await response.json();
+						emailInput.value = data.email;
+
+						// Almacenar en localStorage junto con el token como un objeto JSON
+						localStorage.setItem(
+							'cachedEmail',
+							JSON.stringify({ email: data.email, token: registrationToken }),
+						);
+					} else {
+						throw new Error('Error fetching email');
+					}
+				} catch (error) {
+					console.error(error);
+					localStorage.removeItem('cachedEmail');
+					window.location.href = '/ciddt-admin/login';
+				}
+			}
+
+			try {
+				const cachedData = JSON.parse(localStorage.getItem('cachedEmail') || '{}');
+
+				// Verificar si el email almacenado corresponde al token actual
+				if (cachedData.token === registrationToken && cachedData.email) {
+					emailInput.value = cachedData.email;
+				} else {
+					fetchEmail();
+				}
+			} catch (error) {
+				console.error('Error parsing cached email from localStorage:', error);
+				// Si hay un error en el parseo, se hace fetch del email
+				fetchEmail();
 			}
 		});
 	</script>

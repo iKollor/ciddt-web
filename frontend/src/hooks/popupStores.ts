@@ -1,8 +1,10 @@
 import { atom } from 'nanostores';
 
-export const popupStore = atom({
+import type { popUp } from '../interfaces/popUp';
+
+export const popupStore = atom<popUp>({
 	visible: false,
-	type: '',
+	type: 'danger',
 	title: '',
 	message: '',
 });

@@ -12,4 +12,7 @@ export default defineConfig({
 	}),
 	srcDir: 'frontend/src',
 	publicDir: 'frontend/public',
+	image: {
+		remotePatterns: [{ protocol: 'https' }],
+	},
 });

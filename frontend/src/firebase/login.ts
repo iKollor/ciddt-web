@@ -3,6 +3,7 @@ import {
 	createUserWithEmailAndPassword,
 	deleteUser,
 	FacebookAuthProvider,
+	linkWithCredential,
 	signInWithPopup,
 	updateProfile,
 	type User,
@@ -15,6 +16,7 @@ import { auth, db } from './client';
 
 const serverUrl = import.meta.env.PUBLIC_SERVER_URL;
 
+// ------------------------------------------ Funciones principales ---------------------------------------------------------
 const registerNewUser = async (
 	registrationToken: string,
 	username: string,
@@ -22,10 +24,15 @@ const registerNewUser = async (
 	password: string,
 ): Promise<popUp> => {
 	try {
+		// Crear el usuario en Firebase
+		const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+		const firebaseUser = userCredential.user;
+
 		// Verificar el token con el backend
-		const response = await fetch(`${serverUrl}/registro?token=${registrationToken}`);
+		const response = await fetch(`${serverUrl}/registro?token=${registrationToken}&email=${email}`);
 		const data = await response.json();
 		if (!response.ok) {
+			await safeDeleteUser(firebaseUser);
 			const errorMessage =
 				typeof data.message === 'string'
 					? data.message
@@ -34,39 +41,43 @@ const registerNewUser = async (
 		}
 
 		// Consultar Firestore para obtener el nombre asociado con el token
-		const tokenDocRef = doc(db, 'registrationTokens', registrationToken);
+		const tokenDocRef = doc(db, 'registrationTokens', data.userId);
 		const tokenDocSnapshot = await getDoc(tokenDocRef);
-		let displayName = '';
-		if (tokenDocSnapshot.exists()) {
-			displayName = tokenDocSnapshot.data().name ?? username;
-		}
+		const displayName = tokenDocSnapshot.exists() ? tokenDocSnapshot.data().name ?? username : username;
+		const accessToken = tokenDocSnapshot.exists() ? tokenDocSnapshot.data().accessToken : null;
 
-		// Crear el usuario en Firebase
-		const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+		// Crear una credencial de Facebook con el accessToken
+		const facebookCredential = FacebookAuthProvider.credential(accessToken);
+
+		// Vincular la cuenta de Facebook con el usuario recién creado
+		await linkWithCredential(firebaseUser, facebookCredential);
+		console.log('Cuentas vinculadas');
 
 		// Actualizar el perfil del usuario con el displayName
 		if (displayName !== '') {
-			await updateProfile(userCredential.user, { displayName });
+			await updateProfile(firebaseUser, { displayName });
 		}
-		const firebaseUserId = userCredential.user.uid;
 
 		// Almacenar los datos adicionales del usuario en Firestore
-		await setDoc(doc(db, 'users', data.userId), {
+		await setDoc(doc(db, 'users', firebaseUser.uid), {
 			username,
 			email,
-			userId: firebaseUserId, // Usando el userId del backend
+			userId: firebaseUser.uid, // Usando el userId de Firebase
 			displayName,
 		});
 
 		console.log(`Registro exitoso`);
 		return {
+			visible: true,
 			type: 'success',
 			title: 'Registro Exitoso',
 			message: 'Ya puedes cerrar esta ventana e iniciar sesión',
 		};
 	} catch (error: any) {
-		console.log(`Error en el registro: ${error}`);
+		console.error(`Error en el registro: ${error}`);
+
 		return {
+			visible: true,
 			type: 'danger',
 			title: 'Error inesperado',
 			message: 'Ha ocurrido un error durante el proceso de registro: ' + error,
@@ -74,7 +85,7 @@ const registerNewUser = async (
 	}
 };
 
-const loginWithFacebook = async () => {
+const loginWithFacebook = async (): Promise<popUp> => {
 	const provider = new FacebookAuthProvider();
 
 	// Especificar scopes adicionales
@@ -88,7 +99,6 @@ const loginWithFacebook = async () => {
 	];
 	scopes.forEach((scope) => provider.addScope(scope));
 
-	let userCreated = false;
 	let user: User | null = null;
 
 	try {
@@ -99,14 +109,11 @@ const loginWithFacebook = async () => {
 			throw new Error('No se pudo obtener la credencial de Facebook');
 		}
 
-		console.log(credential.accessToken);
+		const accessToken = credential.accessToken;
+
 		const idToken = await result.user.getIdToken();
 
 		user = result.user;
-
-		userCreated = true;
-
-		console.log(result);
 
 		const docRef = doc(db, 'users', user.uid);
 		const docSnap = await getDoc(docRef);
@@ -124,6 +131,7 @@ const loginWithFacebook = async () => {
 					window.location.assign(response.url);
 				} else {
 					return {
+						visible: true,
 						type: 'danger',
 						title: 'Error en el Inicio de Sesión',
 						message: `Ocurrió un error desconocido`,
@@ -131,66 +139,61 @@ const loginWithFacebook = async () => {
 				}
 			} catch (error: any) {
 				return {
+					visible: true,
 					type: 'danger',
 					title: 'Error en el Inicio de Sesión',
 					message: `${error.message}`,
 				};
 			}
 			return {
+				visible: true,
 				type: 'success',
 				title: 'Cuenta detectada',
 				message: `Bienvenido ${result.user.displayName}`,
 			};
 		} else {
-			return await handleNewUser(user, userCreated);
-		}
-	} catch (error: any) {
-		console.log(`Error al intentar logearse con facebook: ${error}`);
-		return {
-			type: 'danger',
-			title: 'Error en el Inicio de Sesión con Facebook',
-			message: `Hubo un problema al intentar iniciar sesión con Facebook: ${error}`,
-		};
-	}
-};
-
-const handleNewUser = async (user: User, userCreated: boolean) => {
-	try {
-		if (user.email == null) {
-			const email = await requestUserEmail();
-
-			if (email.length > 0) {
-				// Actualiza el correo electrónico del usuario en Firebase
-				const body = JSON.stringify({
-					userUID: user.uid,
-					email,
-				});
-				const response = await fetch(serverUrl + '/updateEmail/', {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body,
-				});
-
-				const data = await response.json();
-
-				if (!response.ok) {
-					const errorMessage =
-						typeof data.message === 'string'
-							? data.message
-							: `Error del servidor: ${response.status} ${response.statusText}`;
-					throw new Error(errorMessage);
-				}
-				console.log('Respuesta del servidor:', data.message);
-			} else {
-				throw new Error('No se proporcionó un correo electrónico válido');
+			if (accessToken != null) {
+				return await handleNewUser(user, accessToken);
 			}
 		}
+	} catch (error: any) {
+		console.log(`Error al intentar ingresar con facebook: ${error}`);
+		if (error === 'FirebaseError: [code=unavailable]: Failed to get document because the client is offline.') {
+			return {
+				visible: true,
+				type: 'danger',
+				title: 'Error en el Inicio de Sesión',
+				message: `No se pudo conectar con el servidor, por favor intente nuevamente en unos segundos o recargue la página`,
+			};
+		}
+		return {
+			visible: true,
+			type: 'danger',
+			title: `Error en el Inicio de Sesión con Facebook`,
+			message: `${error}`,
+		};
+	}
+	return {
+		visible: true,
+		type: 'danger',
+		title: 'Error en el Inicio de Sesión',
+		message: 'Ocurrió un error desconocido',
+	};
+};
+
+const handleNewUser = async (user: User, accessToken: string): Promise<popUp> => {
+	try {
+		let email: string | null = null;
+		if (user.email == null) {
+			email = await requestUserEmail();
+		}
+		const userUID = user.providerData[0].uid;
+
 		const body = JSON.stringify({
-			userId: user.uid,
+			userId: userUID,
 			name: user.displayName,
-			email: user.email,
+			email: user.email ?? email,
+			accessToken,
 		});
 		const response = await fetch(serverUrl + '/verify-user/', {
 			method: 'post',
@@ -207,7 +210,9 @@ const handleNewUser = async (user: User, userCreated: boolean) => {
 		}
 
 		console.log('Respuesta del servidor:', data.message);
+
 		return {
+			visible: true,
 			type: 'warning',
 			title: 'Nuevo usuario detectado',
 			message: `Hola ${user.displayName}, para completar tu registro revisa el link en el correo electrónico del administrador`,
@@ -217,17 +222,25 @@ const handleNewUser = async (user: User, userCreated: boolean) => {
 
 		const { message, date } = parseErrorMessage(error);
 
-		if (userCreated && user != null && date === '') {
-			await safeDeleteUser(user);
-		}
-
 		return {
+			visible: true,
 			type: 'danger',
 			title: 'Error de Registro',
-			message: `${message}${date != null ? ` Por favor, espere hasta ${date} para enviar otro.` : ''}`,
+			message: `${message}${date !== '' ? ` Por favor, espere hasta ${date} para enviar otro.` : ''}`,
 		};
+	} finally {
+		safeDeleteUser(user).catch((e) => {
+			return {
+				visible: true,
+				type: 'danger',
+				title: 'Error al eliminar usuario',
+				message: `${e.message}`,
+			};
+		});
 	}
 };
+
+// ------------------------------------------ Funciones de utilidad ---------------------------------------------------------
 
 const parseErrorMessage = (error: any): { message: string; date: string } => {
 	let errorMessage = 'Error desconocido';

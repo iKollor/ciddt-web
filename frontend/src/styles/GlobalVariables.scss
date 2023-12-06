@@ -6,3 +6,29 @@ $easeInOutCubic: cubic-bezier(0.41, 0.99, 0.43, 1.44);
 $duration: 640ms;
 $navbar_menu_width: 25vw;
 $scrollbar_width_px: 11px;
+
+@keyframes spin {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+.rotate-spin {
+	animation: spin 1s linear infinite;
+}
+
+.loader {
+	width: 24px;
+	height: 24px;
+	border: 5px solid #fff;
+	border-bottom-color: transparent;
+	border-radius: 50%;
+	display: inline-block;
+	box-sizing: border-box;
+	animation: spin 1s linear infinite;
+	margin: 0 20px;
+	display: none;
+}

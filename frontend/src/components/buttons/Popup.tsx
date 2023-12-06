@@ -1,11 +1,10 @@
 import { useStore } from '@nanostores/react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { popupStore } from 'frontend/src/hooks/popupStores';
-import { type ResponseCode } from 'frontend/src/interfaces/popUp';
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const Popup = () => {
-	const popupState = useStore(popupStore) as { visible: boolean; message: string; type: ResponseCode; title: string };
+	const popupState = useStore(popupStore);
 
 	const handleClose = (): void => {
 		popupStore.set({ ...popupState, visible: false }); // Actualizar el estado para ocultar el popup
@@ -13,9 +12,10 @@ const Popup = () => {
 
 	// Definir clases base y específicas por tipo
 	const baseClass =
-		'absolute text-left top-20 flex rounded-lg p-4 mb-4 text-sm max-w-[400px] min-w-[250px] min-h-24 center';
+		'fixed text-left origin-center flex rounded-lg p-4 mb-4 text-sm max-w-[400px] min-w-[250px] min-h-24';
+
 	const typeClasses = {
-		info: 'bg-dark_blue text-white',
+		info: 'bg-blue text-white',
 		danger: 'bg-red text-white',
 		success: 'bg-green text-white',
 		warning: 'bg-yellow text-white',
@@ -59,6 +59,7 @@ const Popup = () => {
 	const popupVariants = {
 		open: {
 			scale: 1,
+			translateX: '-50%',
 			opacity: 1,
 			transition: { type: 'spring', damping: 15, stiffness: 300, restDelta: 0.001 },
 		},
@@ -80,6 +81,7 @@ const Popup = () => {
 					className={alertClasses}
 					id="popup"
 					role="alert"
+					style={{ top: 100, left: '50%', translateX: '-50%' }} // Ajustes de estilo para posicionamiento
 				>
 					{icons[popupState.type]} {/* Muestra el icono correspondiente al tipo */}
 					<p className="w-full mr-5">

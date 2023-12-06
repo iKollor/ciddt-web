@@ -1,0 +1,76 @@
+---
+import AdminPanelLayout from 'frontend/src/layouts/AdminPanelLayout.astro';
+/* Check current session */
+if (!Astro.cookies.has('session')) {
+	return Astro.redirect('/ciddt-admin/login');
+}
+---
+
+<AdminPanelLayout title="Content Manager">
+	<section>
+		<div>
+			<h1 class="font-black text-4xl w-full">Posts</h1>
+			<p class="mt-2 w-full min-h-[50px]">Maneja el contenido de tus posts de las redes sociales aquí</p>
+		</div>
+		<div class="flex flex-col gap-4">
+			<div
+				class="w-full bg-edgewater-800 rounded-md p-6 flex justify-between items-center flex-wrap min-h-[70px]"
+			>
+				<h3 class="flex flex-col items-start justify-center m-2 ml-0">
+					<span class="mr-3 font-semibold text-2xl text-white">Meta</span>
+					<span class="mt-1 text-white text-opacity-70">Maneja el contenido de Facebook e Instagram aquí</span
+					>
+				</h3>
+				<a
+					href=""
+					class="bg-edgewater-600 p-2 rounded-md hover:bg-edgewater-400 transition-all duration-200 ease-in-out"
+				>
+					See other projects</a
+				>
+				<div class="flex-auto mt-8">
+					<div class="overflow-x-auto">
+						<table class="w-full my-0 align-middle border-neutral-200">
+							<thead class="align-bottom">
+								<tr class="font-semibold text-sm text-gray-400 text-opacity-50">
+									<th class="pb-3 text-start min-w-[100px] uppercase">Post</th>
+									<th class="pb-3 text-start min-w-[100px] uppercase">Pagina</th>
+									<th class="pb-3 text-start min-w-[120px] uppercase">Proveedor</th>
+									<th class="pb-3 text-start min-w-[80px] uppercase">Tipo</th>
+									<th class="pb-3 text-start min-w-[120px] uppercase">Descripción</th>
+									<th class="pb-3 text-start min-w-[50px] uppercase">Likes</th>
+									<th class="pb-3 text-start min-w-[100px] uppercase">Creado en</th>
+								</tr>
+							</thead>
+							<tbody>
+								<!-- Aquí irían las filas con los datos de cada objeto en tu JSON -->
+								<!-- Por ejemplo, para el primer objeto: -->
+								<tr class="border-b border-dashed last:border-b-0">
+									<td class="p-3 pl-0">641901761410817</td>
+									<td class="p-3 pl-0">Batambá</td>
+									<td class="p-3 pl-0">Facebook</td>
+									<td class="p-3 pl-0">album</td>
+									<td class="p-3 pl-0">Descripción del post</td>
+									<td class="p-3 pl-0">11</td>
+									<td class="p-3 pl-0">1696525869000</td>
+								</tr>
+								<!-- Repetir para cada objeto en tu JSON -->
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+			<div
+				class="w-full bg-edgewater-800 rounded-md p-6 flex justify-between items-center flex-wrap min-h-[70px]"
+			>
+				<h2 class="text-2xl font-semibold">Twitter</h2>
+				<p>Maneja el contenido de Facebook e Instagram aquí</p>
+			</div>
+			<div
+				class="w-full bg-edgewater-800 rounded-md p-6 flex justify-between items-center flex-wrap min-h-[70px]"
+			>
+				<h2 class="text-2xl font-semibold">Tiktok</h2>
+				<p>Maneja el contenido de Facebook e Instagram aquí</p>
+			</div>
+		</div>
+	</section>
+</AdminPanelLayout>

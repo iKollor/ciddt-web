@@ -1,18 +1,105 @@
 ---
+import Popup from '@components/buttons/Popup';
 import Navbar from '@components/ciddt-admin/Navbar';
+import NavbarHeader from '@components/ciddt-admin/NavbarHeader.astro';
+import { app } from '@firebase/server';
+import { faSpinner } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { ViewTransitions } from 'astro:transitions';
+import { getAuth, type UserRecord } from 'firebase-admin/auth';
+
+const auth = getAuth(app);
+
+let userRecord: UserRecord | null = null;
+
+const sessionCookie = Astro.cookies.get('session')?.value;
+
+if (sessionCookie != null) {
+	const decodedCookie = await auth.verifySessionCookie(sessionCookie);
+	try {
+		userRecord = await auth.getUser(decodedCookie.uid);
+	} catch (error) {
+		console.log('No usuario');
+		return Astro.redirect('/ciddt-admin/login');
+	}
+}
+
+interface Props {
+	title: string;
+}
 
 const { title } = Astro.props;
 ---
 
-<!doctype html>
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>CIDDT | {title}</title>
+		<ViewTransitions />
 	</head>
-	<body>
-		<Navbar client:only />
-		<slot />
+	<body class="bg-edgewater-950 text-white">
+		<div id="loading" class="loading" transition:persist>
+			<div class="flex items-center justify-center w-full h-full">
+				<div class="rotate-spin">
+					<FontAwesomeIcon icon={faSpinner} className="h-32 w-32" client:only />
+				</div>
+			</div>
+		</div>
+
+		{userRecord != null && <NavbarHeader userRecord={userRecord} transition:persist />}
+		{/* incluir nuevos links aqui si es necesario, la ruta del href debe ser absoluta */}
+		<Navbar
+			navLinks={[
+				{ name: 'Dashboard', icon: 'home', href: '/ciddt-admin/dashboard' },
+				{ name: 'Content Manager', icon: 'file-text', href: '/ciddt-admin/content-manager' },
+				{ name: 'Settings', icon: 'settings', href: '/ciddt-admin/settings' },
+				{ name: 'Cerrar Sesión', icon: 'log-out', href: '/api/auth/signout' },
+			]}
+			client:only
+			transition:persist
+		/>
+		<main>
+			<section class="w-full">
+				<div class="m-auto w-3/5">
+					<section class="mt-[150px]">
+						<slot />
+					</section>
+				</div>
+			</section>
+			<Popup client:only transition:persist />
+		</main>
+		<script>
+			import { popupStore } from '../hooks/popupStores';
+			document.addEventListener('astro:before-preparation', () => {
+				document.querySelector('#loading')?.classList.add('show');
+			});
+			document.addEventListener('astro:after-preparation', () => {
+				document.querySelector('#loading')?.classList.remove('show');
+			});
+			document.addEventListener('astro:after-swap', () => {
+				popupStore.set({ visible: false, title: '', message: '', type: 'info' });
+			});
+		</script>
+		<style lang="scss">
+			@import '../styles/GlobalVariables.scss';
+			.loading {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				background-color: rgba(17, 34, 33, 0.6);
+				z-index: 50;
+				opacity: 0;
+				transition: opacity 300ms ease-in-out;
+				pointer-events: none;
+				backdrop-filter: blur(3px) brightness(60%);
+			}
+			.show {
+				opacity: 1 !important;
+				pointer-events: all !important;
+			}
+		</style>
 	</body>
 </html>

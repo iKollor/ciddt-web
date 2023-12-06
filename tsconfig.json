@@ -14,7 +14,9 @@
 			"@shared/*": ["shared/*"],
 			"@public/*": ["frontend/public/*"],
 			"@components/*": ["frontend/src/components/*"],
-			"@styles/*": ["frontend/src/styles/*"]
+			"@styles/*": ["frontend/src/styles/*"],
+			"@firebase/*": ["frontend/src/firebase/*"]
 		}
-	}
+	},
+	"include": ["src/**/*", "frontend/src/**/*", "./astro.config.mjs"]
 }

@@ -1,4 +1,6 @@
 ---
+import '../../styles/GlobalVariables.scss';
+
 import Popup from '@components/buttons/Popup';
 import InputPopup from '@components/ciddt-admin/InputPopup';
 import logo from '@public/svg/isotipo_blanco.svg';
@@ -81,20 +83,22 @@ try {
 
 						<div>
 							<button
+								id="login_button"
 								type="submit"
 								class="flex w-full justify-center rounded-md bg-red px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-red-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition"
 							>
-								Iniciar Sesión
+								<span class="loader" id="button__loader"></span>
+								<span class="button__content" id="button__content"> Iniciar Sesión</span>
 							</button>
 						</div>
 					</form>
 					<div class="mt-10 text-center text-sm text-gray-500">
 						<button
 							class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded inline-flex items-center transition"
-							id="fb-login-button"
+							id="fb_login_button"
 						>
-							<span class="loader" id="button__loader"></span>
-							<span class="button__content" id="button__content">
+							<span class="loader" id="fb_button__loader"></span>
+							<span class="button__content" id="fb_button__content">
 								<i class="fab fa-facebook-f mr-2"></i> Regístrate o Inicia Sesión con Facebook</span
 							>
 						</button>
@@ -117,15 +121,17 @@ try {
 		</div>
 	</body>
 	<script>
-		import { getAuth, inMemoryPersistence, signInWithEmailAndPassword } from 'firebase/auth';
-		import { app } from '../../firebase/client';
+		import { browserLocalPersistence, signInWithEmailAndPassword } from 'firebase/auth';
+		import { auth } from '../../firebase/client';
 		import { popupStore } from 'frontend/src/hooks/popupStores';
 		import { loginWithFacebook } from 'frontend/src/firebase/login';
 
-		const auth = getAuth(app);
-		auth.setPersistence(inMemoryPersistence);
+		auth.setPersistence(browserLocalPersistence);
 
 		const form = document.querySelector('form') as HTMLFormElement;
+		const buttonLogin = document.querySelector('#login_button') as HTMLButtonElement;
+		const buttonContent = document.querySelector('#button__content') as HTMLSpanElement;
+		const buttonLoader = document.querySelector('#button__loader') as HTMLSpanElement;
 
 		form.addEventListener('submit', async (e) => {
 			e.preventDefault();
@@ -137,6 +143,9 @@ try {
 				return;
 			} else if (email != null && password != null) {
 				try {
+					buttonLogin.disabled = true;
+					buttonContent?.setAttribute('style', 'display: none');
+					buttonLoader?.setAttribute('style', 'display: block');
 					const userCredential = await signInWithEmailAndPassword(auth, email, password);
 					const idToken = await userCredential.user.getIdToken();
 					const response = await fetch('/api/auth/signin', {
@@ -147,8 +156,16 @@ try {
 					});
 
 					if (response.redirected) {
+						popupStore.set({
+							visible: true,
+							message: 'Inicio de Sesión Exitoso, bienvenido ' + userCredential.user.displayName,
+							type: 'success',
+							title: 'Inicio de Sesión',
+						});
 						window.location.assign(response.url);
 					} else {
+						buttonContent?.setAttribute('style', 'display: block');
+						buttonLoader?.setAttribute('style', 'display: none');
 						popupStore.set({
 							visible: true,
 							message: 'Ocurrió un error desconocido',
@@ -157,6 +174,19 @@ try {
 						});
 					}
 				} catch (error: any) {
+					buttonContent?.setAttribute('style', 'display: block');
+					buttonLoader?.setAttribute('style', 'display: none');
+					if (
+						error ===
+						'FirebaseError: [code=unavailable]: Failed to get document because the client is offline.'
+					) {
+						return {
+							visible: true,
+							type: 'danger',
+							title: 'Error en el Inicio de Sesión',
+							message: `No se pudo conectar con el servidor, por favor intente nuevamente en unos segundos o recargue la página`,
+						};
+					}
 					popupStore.set({
 						visible: true,
 						message: error.message || 'Ocurrió un error desconocido',
@@ -167,30 +197,40 @@ try {
 			}
 		});
 
-		const FBbutton = document.querySelector('#fb-login-button');
-		const buttonContent = document.querySelector('#button__content');
-		const buttonLoader = document.querySelector('#button__loader');
+		const FBbutton = document.querySelector('#fb_login_button') as HTMLButtonElement;
+		const FBbuttonContent = document.querySelector('#fb_login_button #fb_button__content');
+		const FBbuttonLoader = document.querySelector('#fb_login_button #fb_button__loader');
 
 		const handleFacebookLogin = () => {
 			// Cambia el contenido del botón a un icono de carga
-			buttonContent?.setAttribute('style', 'display: none');
-			buttonLoader?.setAttribute('style', 'display: block');
+			FBbuttonContent?.setAttribute('style', 'display: none');
+			FBbuttonLoader?.setAttribute('style', 'display: block');
 			if (FBbutton != null) {
+				FBbutton.disabled = true;
 				loginWithFacebook()
 					.then((response) => {
 						// Restablece el contenido del botón
-						buttonContent?.setAttribute('style', 'display: block');
-						buttonLoader?.setAttribute('style', 'display: none');
-						popupStore.set({
-							visible: true,
-							message: response.message,
-							type: response.type,
-							title: response.title,
-						});
+						FBbuttonContent?.setAttribute('style', 'display: block');
+						FBbuttonLoader?.setAttribute('style', 'display: none');
+						if (response != null) {
+							popupStore.set({
+								visible: true,
+								message: response.message,
+								type: response.type,
+								title: response.title,
+							});
+						} else {
+							popupStore.set({
+								visible: true,
+								message: 'Ocurrió un error inesperado',
+								type: 'danger',
+								title: 'Error en el Inicio de Sesión',
+							});
+						}
 					})
 					.catch((error) => {
-						buttonContent?.setAttribute('style', 'display: block');
-						buttonLoader?.setAttribute('style', 'display: none');
+						FBbuttonContent?.setAttribute('style', 'display: block');
+						FBbuttonLoader?.setAttribute('style', 'display: none');
 						console.log(error);
 						popupStore.set({
 							visible: true,
@@ -203,27 +243,4 @@ try {
 		};
 		FBbutton?.addEventListener('click', handleFacebookLogin);
 	</script>
-	<style>
-		.loader {
-			width: 24px;
-			height: 24px;
-			border: 5px solid #fff;
-			border-bottom-color: transparent;
-			border-radius: 50%;
-			display: inline-block;
-			box-sizing: border-box;
-			animation: rotation 1s linear infinite;
-			margin: 0 20px;
-			display: none;
-		}
-
-		@keyframes rotation {
-			0% {
-				transform: rotate(0deg);
-			}
-			100% {
-				transform: rotate(360deg);
-			}
-		}
-	</style>
 </html>
