@@ -115,6 +115,36 @@ const loginWithFacebook = async (): Promise<popUp> => {
 
 		user = result.user;
 
+		// verifica primero si el usuario ya tiene un token de larga duración en firestore
+		const tokenRef = doc(db, 'users', user.uid, 'providers', 'facebook'); // Referencia al documento del token
+		const tokenDocSnapshot = await getDoc(tokenRef);
+		if (tokenDocSnapshot.exists()) {
+			const tokenData = tokenDocSnapshot.data();
+			const now = new Date();
+			const tokenExpireAt = tokenData.longLivedTokenExpiresAt.toDate() as Date;
+
+			if (now > tokenExpireAt) {
+				// crea lived token desde la api
+				const response = await fetch(`${serverUrl}/facebook/createLongLivedToken`, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({ accessToken, userId: user.uid }),
+				});
+
+				if (!response.ok) {
+					console.log('ERROR');
+					return {
+						visible: true,
+						type: 'danger',
+						title: 'Error en el Inicio de Sesión',
+						message: `${response.statusText}`,
+					};
+				}
+			}
+		}
+
 		const docRef = doc(db, 'users', user.uid);
 		const docSnap = await getDoc(docRef);
 

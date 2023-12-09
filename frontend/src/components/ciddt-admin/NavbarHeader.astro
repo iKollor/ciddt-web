@@ -68,8 +68,8 @@ const profilePicture =
 							role="menuitem">Ajustes</a
 						>
 						<a
-							href="/api/auth/signout"
-							class="text-gray-700 block px-4 py-2 text-sm hover:bg-gray-200 transition-all w-full"
+							id="logoutButton"
+							class="text-gray-700 block px-4 py-2 text-sm hover:bg-gray-200 transition-all w-full cursor-pointer"
 							role="menuitem">Cerrar Sesión</a
 						>
 					</div>
@@ -79,11 +79,19 @@ const profilePicture =
 	</div>
 </nav>
 <script>
+	import { navigate } from 'astro:transitions/client';
+
 	document.addEventListener('astro:page-load', () => {
 		const dropdownButton = document.querySelector('#dropdownButton');
 		const dropdown = document.querySelector('#dropdown');
+		const logoutButton = document.querySelector('#logoutButton');
 
-		dropdownButton?.addEventListener('click', () => {
+		logoutButton?.addEventListener('click', () => {
+			navigate('/api/auth/signout');
+		});
+
+		dropdownButton?.addEventListener('click', (e) => {
+			e.stopPropagation();
 			// Toggle dropdown height using tailwind classes from 0 to auto and opacity from 0 to 100
 			dropdown?.classList.toggle('h-0');
 			dropdown?.classList.toggle('h-32');

@@ -1,8 +1,81 @@
 ---
+import PostsTable from '@components/ciddt-admin/PostsTable';
+import { db } from '@firebase/client';
+import { auth } from '@firebase/server';
+import { collection, doc, getDoc, getDocs } from 'firebase/firestore';
+import type { UserRecord } from 'firebase-admin/auth';
+import type { Post } from 'frontend/src/interfaces/Post';
+import type { UserPage } from 'frontend/src/interfaces/UserPages';
 import AdminPanelLayout from 'frontend/src/layouts/AdminPanelLayout.astro';
+
 /* Check current session */
 if (!Astro.cookies.has('session')) {
 	return Astro.redirect('/ciddt-admin/login');
+}
+
+async function getUserPages(accessToken: string): Promise<UserPage[]> {
+	const url = `https://graph.facebook.com/v18.0/me?fields=accounts{access_token,id,name}&access_token=${accessToken}`;
+	try {
+		console.log('Fetching user pages');
+		const response = await fetch(url);
+		const data = await response.json();
+		// Asumiendo que 'data.accounts.data' es un array de páginas con los campos necesarios
+		return data.accounts.data.map((page: any) => ({
+			id: page.id,
+			name: page.name,
+			accessToken: page.access_token,
+		}));
+	} catch (error) {
+		console.error('Error fetching user pages:', error);
+		throw error;
+	}
+}
+
+let userRecord: UserRecord | null = null;
+
+let UserPages: UserPage[] | null = Astro.cookies.get('userpages')?.json();
+
+const sessionCookie = Astro.cookies.get('session')?.value;
+
+if (sessionCookie != null) {
+	const decodedCookie = await auth.verifySessionCookie(sessionCookie);
+	try {
+		userRecord = await auth.getUser(decodedCookie.uid);
+		const tokenRef = doc(db, 'users', userRecord.uid, 'providers', 'facebook'); // Referencia al documento del token
+		const tokenDocSnapshot = await getDoc(tokenRef);
+		if (tokenDocSnapshot.exists()) {
+			const tokenDoc = tokenDocSnapshot.data();
+			const longLivedToken = tokenDoc?.longLivedToken;
+			if (longLivedToken != null && UserPages == null) {
+				UserPages = await getUserPages(longLivedToken);
+				console.log('data saved on cookies');
+				Astro.cookies.set('userpages', JSON.stringify(UserPages));
+			}
+		}
+	} catch (error: any) {
+		if (error.code === 'UND_ERR_CONNECT_TIMEOUT') {
+			return;
+		}
+
+		console.log('No usuario');
+		return Astro.redirect('/ciddt-admin/login');
+	}
+}
+
+/* Get fb posts from firebase */
+let fbPosts: Post[] | null = null;
+
+if (userRecord != null) {
+	try {
+		const fbPostsRef = collection(db, 'posts', userRecord.uid, 'facebook');
+		const fbPostsSnapshot = await getDocs(fbPostsRef);
+
+		if (!fbPostsSnapshot.empty) {
+			fbPosts = fbPostsSnapshot.docs.map((doc) => doc.data() as Post);
+		}
+	} catch (error) {
+		console.error('Error al obtener los posts de Facebook:', error);
+	}
 }
 ---
 
@@ -10,7 +83,10 @@ if (!Astro.cookies.has('session')) {
 	<section>
 		<div>
 			<h1 class="font-black text-4xl w-full">Posts</h1>
-			<p class="mt-2 w-full min-h-[50px]">Maneja el contenido de tus posts de las redes sociales aquí</p>
+			<p class="mt-2 w-full min-h-[50px]">
+				Maneja el contenido de tus posts de las redes sociales aquí, podrás traer hasta máximo 10 de tus ultimos
+				posts.
+			</p>
 		</div>
 		<div class="flex flex-col gap-4">
 			<div
@@ -18,46 +94,30 @@ if (!Astro.cookies.has('session')) {
 			>
 				<h3 class="flex flex-col items-start justify-center m-2 ml-0">
 					<span class="mr-3 font-semibold text-2xl text-white">Meta</span>
-					<span class="mt-1 text-white text-opacity-70">Maneja el contenido de Facebook e Instagram aquí</span
+					<span class="mt-1 text-white text-opacity-70"
+						>Maneja el contenido de Facebook e Instagram aquí. <br />
+						 Solo puedes traer los posts de una página a la vez.</span
 					>
 				</h3>
-				<a
-					href=""
-					class="bg-edgewater-600 p-2 rounded-md hover:bg-edgewater-400 transition-all duration-200 ease-in-out"
-				>
-					See other projects</a
-				>
-				<div class="flex-auto mt-8">
-					<div class="overflow-x-auto">
-						<table class="w-full my-0 align-middle border-neutral-200">
-							<thead class="align-bottom">
-								<tr class="font-semibold text-sm text-gray-400 text-opacity-50">
-									<th class="pb-3 text-start min-w-[100px] uppercase">Post</th>
-									<th class="pb-3 text-start min-w-[100px] uppercase">Pagina</th>
-									<th class="pb-3 text-start min-w-[120px] uppercase">Proveedor</th>
-									<th class="pb-3 text-start min-w-[80px] uppercase">Tipo</th>
-									<th class="pb-3 text-start min-w-[120px] uppercase">Descripción</th>
-									<th class="pb-3 text-start min-w-[50px] uppercase">Likes</th>
-									<th class="pb-3 text-start min-w-[100px] uppercase">Creado en</th>
-								</tr>
-							</thead>
-							<tbody>
-								<!-- Aquí irían las filas con los datos de cada objeto en tu JSON -->
-								<!-- Por ejemplo, para el primer objeto: -->
-								<tr class="border-b border-dashed last:border-b-0">
-									<td class="p-3 pl-0">641901761410817</td>
-									<td class="p-3 pl-0">Batambá</td>
-									<td class="p-3 pl-0">Facebook</td>
-									<td class="p-3 pl-0">album</td>
-									<td class="p-3 pl-0">Descripción del post</td>
-									<td class="p-3 pl-0">11</td>
-									<td class="p-3 pl-0">1696525869000</td>
-								</tr>
-								<!-- Repetir para cada objeto en tu JSON -->
-							</tbody>
-						</table>
+				<div class="flex flex-col gap-y-2 justify-center items-end">
+					<div class="flex items-center justify-center">
+						<select id="select_userpages" class="p-2 rounded-md cursor-pointer max-w-[200px]">
+							<option value="default">Selecciona una página</option>
+							{
+								UserPages != null
+									? UserPages.map((page) => <option value={page.id}>{page.name}</option>)
+									: ''
+							}
+						</select>
 					</div>
+					<button
+						id="updateFacebookPosts"
+						class="bg-edgewater-600 p-2 rounded-md hover:bg-edgewater-500 transition-all duration-200 ease-in-out px-3"
+					>
+						{fbPosts != null ? 'Actualizar posts' : 'Añadir posts'}
+					</button>
 				</div>
+				<PostsTable posts={fbPosts} client:only />
 			</div>
 			<div
 				class="w-full bg-edgewater-800 rounded-md p-6 flex justify-between items-center flex-wrap min-h-[70px]"
@@ -73,4 +133,77 @@ if (!Astro.cookies.has('session')) {
 			</div>
 		</div>
 	</section>
+	<script>
+		import { auth } from '@firebase/client';
+		import { navigate } from 'astro:transitions/client';
+		import { popupStore } from 'frontend/src/hooks/popupStores';
+		import { FetchError } from 'frontend/src/interfaces/Error';
+		document.addEventListener('astro:page-load', () => {
+			/* updateFacebookPosts */
+			const serverUrl = import.meta.env.PUBLIC_SERVER_URL;
+			const updateFacebookPosts = document.getElementById('updateFacebookPosts');
+			const selectUserPages = document.getElementById('select_userpages') as HTMLSelectElement;
+
+			updateFacebookPosts?.addEventListener('click', async () => {
+				if (selectUserPages?.value === 'default') {
+					popupStore.set({
+						title: 'Error',
+						message: 'Selecciona una página',
+						type: 'danger',
+						visible: true,
+					});
+					return;
+				}
+				document.querySelector('#loading')?.classList.add('show');
+				document.querySelector('body')?.style.setProperty('overflow', 'hidden');
+				try {
+					const body = {
+						userId: auth.currentUser?.uid,
+						pageId: selectUserPages?.value,
+					};
+					const result = await fetch(`${serverUrl}/facebook/fetchFacebookPosts/`, {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+						body: JSON.stringify(body),
+					});
+
+					if (!result.ok) {
+						throw new FetchError(result.status, result.statusText, 'Error fetching Facebook posts');
+					}
+
+					await navigate('/ciddt-admin/content-manager');
+					document.querySelector('#loading')?.classList.remove('show');
+					document.querySelector('body')?.style.setProperty('overflow', 'auto');
+					return popupStore.set({
+						title: 'Posts actualizados',
+						message: `Se han actualizado los posts de la página ${
+							selectUserPages?.options[selectUserPages.selectedIndex].text
+						}`,
+						type: 'success',
+						visible: true,
+					});
+				} catch (error: any) {
+					console.error(error);
+					document.querySelector('#loading')?.classList.remove('show');
+					document.querySelector('body')?.style.setProperty('overflow', 'auto');
+
+					const errorMessage =
+						error.status === 404
+							? 'Hubo un error al intentar conectarse con el servidor, '
+							: error.status === 429
+							  ? 'Demasiadas solicitudes, intenta más tarde'
+							  : error.message; // o puedes usar un mensaje genérico basado en el código de estado
+
+					return popupStore.set({
+						title: 'Error',
+						message: `Ha ocurrido un error: ${errorMessage ?? error}`,
+						type: 'danger',
+						visible: true,
+					});
+				}
+			});
+		});
+	</script>
 </AdminPanelLayout>
