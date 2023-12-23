@@ -1,0 +1,118 @@
+---
+import Popup from '@components/buttons/Popup';
+import InputPopup from '@components/ciddt-admin/InputPopup';
+import Loader from '@components/ciddt-admin/Loader';
+import Navbar from '@components/ciddt-admin/Navbar';
+import NavbarHeader from '@components/ciddt-admin/NavbarHeader.astro';
+import { auth } from '@firebase/server';
+import { ViewTransitions } from 'astro:transitions';
+import { type UserRecord } from 'firebase-admin/auth';
+import { loader } from 'src/hooks/pushBody';
+
+let userRecord: UserRecord | null = null;
+
+const sessionCookie = Astro.cookies.get('session')?.value;
+
+if (sessionCookie != null) {
+	const decodedCookie = await auth.verifySessionCookie(sessionCookie);
+	try {
+		userRecord = await auth.getUser(decodedCookie.uid);
+	} catch (error) {
+		console.log('No usuario');
+		return Astro.redirect('/ciddt-admin/login');
+	}
+}
+
+interface Props {
+	title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>CIDDT | {title}</title>
+		<ViewTransitions />
+	</head>
+	<body class="bg-edgewater-950 text-white" style={loader.get().isLoading ? 'overflow: hidden' : 'overflow: auto'}>
+		<Loader client:only transition:persist />
+		{userRecord != null && <NavbarHeader userRecord={userRecord} transition:persist />}
+		{/* incluir nuevos links aqui si es necesario, la ruta del href debe ser absoluta */}
+		<Navbar
+			navLinks={[
+				{ name: 'Dashboard', icon: 'home', href: '/ciddt-admin/dashboard' },
+				{ name: 'Content Manager', icon: 'file-text', href: '/ciddt-admin/content-manager' },
+				{ name: 'Settings', icon: 'settings', href: '/ciddt-admin/settings' },
+				{ name: 'Cerrar Sesión', icon: 'log-out', href: '/api/auth/signout' },
+			]}
+			client:only
+			transition:persist
+		/>
+		<main>
+			<section class="w-full">
+				<div class="m-auto w-3/5">
+					<section class="mt-[150px]">
+						<slot />
+					</section>
+				</div>
+			</section>
+			<Popup client:only transition:persist />
+			<InputPopup client:only transition:persist />
+		</main>
+
+		<footer class="h-[20vh]"></footer>
+
+		<script>
+			import { signInWithCustomToken } from 'firebase/auth';
+			import { inputPopupStore, popupStore } from '../hooks/popupStores';
+			import { loader } from '../hooks/pushBody';
+			import { auth } from '@firebase/client';
+
+			document.addEventListener('astro:before-preparation', () => {
+				loader.set({
+					isLoading: true,
+					message: 'Cargando...',
+					type: 'infinite',
+				});
+			});
+			document.addEventListener('astro:after-preparation', () => {
+				loader.set({
+					isLoading: false,
+					type: 'infinite',
+				});
+			});
+			document.addEventListener('astro:after-swap', () => {
+				popupStore.set({ visible: false, title: '', message: '', type: 'info' });
+				inputPopupStore.set({ visible: false, message: '', type: 'text', content: '' });
+			});
+
+			async function restoreAuthState() {
+				// Verificar el estado de la sesión con el servidor
+				const response = await fetch('/api/auth/verify-session');
+				if (response.ok) {
+					const { idToken } = await response.json();
+
+					// Si el token de ID está presente, usa ese token para autenticar al cliente
+					console.log(idToken);
+					if (idToken) {
+						await signInWithCustomToken(auth, idToken);
+					}
+				} else {
+					// Si la sesión no es válida, considera redirigir al usuario a la página de inicio de sesión
+					window.location.assign(new URL('/ciddt-admin/login', window.location.href).href);
+				}
+			}
+
+			document.addEventListener(
+				'astro:page-load',
+				() => {
+					void restoreAuthState();
+				},
+				{ once: true },
+			);
+		</script>
+	</body>
+</html>

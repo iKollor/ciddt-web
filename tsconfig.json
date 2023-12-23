@@ -15,13 +15,13 @@
 			}
 		],
 		"paths": {
-			"@app/*": ["frontend/src/app/*"],
+			"@app/*": ["src/app/*"],
 			"@shared/*": ["shared/*"],
-			"@public/*": ["frontend/public/*"],
-			"@components/*": ["frontend/src/components/*"],
-			"@styles/*": ["frontend/src/styles/*"],
-			"@firebase/*": ["frontend/src/firebase/*"]
+			"@public/*": ["public/*"],
+			"@components/*": ["src/components/*"],
+			"@styles/*": ["src/styles/*"],
+			"@firebase/*": ["src/firebase/*"]
 		}
 	},
-	"include": ["src/**/*", "frontend/src/**/*", "./astro.config.mjs"]
+	"include": ["src/**/*", "./astro.config.mjs"]
 }

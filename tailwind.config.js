@@ -3,12 +3,11 @@
 const { colors: defaultColors } = require('tailwindcss/defaultTheme');
 
 export default {
-	content: ['./frontend/src/**/*.{html,js,astro,ts,tsx,jsx}'],
+	content: ['./src/**/*.{html,js,astro,ts,tsx,jsx}'],
 	theme: {
 		extend: {
 			backgroundImage: {
-				'instagram-gradient':
-					'linear-gradient(45deg, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%)',
+				'instagram-gradient': 'linear-gradient(45deg, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%)',
 			},
 			dropShadow: {
 				custom: '5px 5px 0px #1d1d1b',

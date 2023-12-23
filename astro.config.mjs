@@ -10,8 +10,8 @@ export default defineConfig({
 	adapter: node({
 		mode: 'standalone',
 	}),
-	srcDir: 'frontend/src',
-	publicDir: 'frontend/public',
+	srcDir: 'src',
+	publicDir: 'public',
 	image: {
 		remotePatterns: [{ protocol: 'https' }],
 	},
