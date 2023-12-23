@@ -6,3 +6,26 @@ export interface popUp {
 	title: string;
 	message: string;
 }
+
+export type InputType =
+	| 'email'
+	| 'password'
+	| 'text'
+	| 'number'
+	| 'tel'
+	| 'url'
+	| 'search'
+	| 'date'
+	| 'time'
+	| 'datetime-local'
+	| 'month'
+	| 'week'
+	| 'color';
+
+export interface InputPopupProps {
+	visible: boolean;
+	content: string;
+	placeholder?: string;
+	type: InputType;
+	message: string;
+}

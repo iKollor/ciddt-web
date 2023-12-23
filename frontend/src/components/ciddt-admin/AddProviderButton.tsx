@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { auth } from '@firebase/client';
+import { fbScopes } from '@firebase/login';
 import { faCheckCircle, faCirclePlus, faCircleXmark, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { FacebookAuthProvider, linkWithPopup, onAuthStateChanged, TwitterAuthProvider, unlink } from 'firebase/auth';
@@ -41,14 +42,7 @@ const AddProviderButton: React.FC<AddProviderButtonProps> = ({ provider }) => {
 		switch (provider) {
 			case 'facebook':
 				providerInstance = new FacebookAuthProvider();
-				scopes = [
-					'public_profile',
-					'email',
-					'instagram_basic',
-					'pages_show_list',
-					'pages_read_engagement',
-					'pages_read_user_content',
-				];
+				scopes = fbScopes;
 				break;
 			case 'twitter':
 				providerInstance = new TwitterAuthProvider();
@@ -71,6 +65,7 @@ const AddProviderButton: React.FC<AddProviderButtonProps> = ({ provider }) => {
 			throw new Error('User is not logged in');
 		}
 		await unlink(auth.currentUser, `${provider}.com`);
+
 		setIsIntegrated(false);
 		setIsLoading(false);
 		setIsHover(false);
@@ -117,7 +112,7 @@ const AddProviderButton: React.FC<AddProviderButtonProps> = ({ provider }) => {
 	};
 
 	if (isLoading) {
-		return <FontAwesomeIcon icon={faSpinner} className="text-2xl h-6 w-6 rotate-spin" />;
+		return <FontAwesomeIcon icon={faSpinner} className="text-2xl h-6 w-6 animate-spin" />;
 	}
 
 	return (

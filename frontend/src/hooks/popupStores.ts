@@ -1,6 +1,6 @@
 import { atom } from 'nanostores';
 
-import type { popUp } from '../interfaces/popUp';
+import type { InputPopupProps, popUp } from '../interfaces/popUp';
 
 export const popupStore = atom<popUp>({
 	visible: false,
@@ -9,7 +9,10 @@ export const popupStore = atom<popUp>({
 	message: '',
 });
 
-export const InputPopup = atom({
+export const inputPopupStore = atom<InputPopupProps>({
 	visible: false,
 	content: '',
+	placeholder: '',
+	type: 'text',
+	message: '',
 });

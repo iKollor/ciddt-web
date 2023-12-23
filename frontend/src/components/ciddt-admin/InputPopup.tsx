@@ -1,11 +1,13 @@
+/* eslint-disable import/no-named-as-default-member */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { useStore } from '@nanostores/react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { InputPopup as inputPopupState } from 'frontend/src/hooks/popupStores';
+import { inputPopupStore } from 'frontend/src/hooks/popupStores';
+import type { InputType } from 'frontend/src/interfaces/popUp';
+import validator from 'validator';
 
-const InputPopup: React.FC = () => {
-	const popUpState = useStore(inputPopupState) as { visible: boolean; content: string };
-
+const InputPopup = () => {
+	const popUpState = useStore(inputPopupStore);
 	const popupVariants = {
 		open: {
 			scale: 1,
@@ -20,19 +22,13 @@ const InputPopup: React.FC = () => {
 	};
 
 	const handleClose = (): void => {
-		inputPopupState.set({ ...popUpState, visible: false }); // Actualizar el estado para ocultar el popup
+		inputPopupStore.set({ ...popUpState, visible: false, content: '' }); // Actualizar el estado para ocultar el popup
 	};
 
-	const handleSubmit = (event: React.FormEvent<HTMLFormElement>): void => {
-		event.preventDefault(); // Prevenir el comportamiento por defecto del formulario
-
-		// Comprobar si el correo electrónico está presente y es válido
-		if (popUpState.content.length > 0 && /\S+@\S+\.\S+/.test(popUpState.content)) {
-			console.log(popUpState.content); // Muestra el correo electrónico en la consola
-			inputPopupState.set({ ...popUpState, visible: false }); // Cierra el popup
-		} else {
-			console.log('Correo electrónico inválido o no proporcionado');
-			// Aquí puedes manejar el caso de un correo electrónico inválido o no proporcionado
+	const handleSubmit = (): void => {
+		console.log(popUpState.content);
+		if (window.confirm(`¿Estás seguro?: ${popUpState.content}`)) {
+			inputPopupStore.set({ ...popUpState, visible: false }); // Actualizar el estado para ocultar el popup
 		}
 	};
 
@@ -44,70 +40,62 @@ const InputPopup: React.FC = () => {
 					animate="open"
 					exit="closed"
 					variants={popupVariants}
-					className="inputPopup absolute text-left top-20 flex flex-col justify-center items-center gap-4 align-middle rounded-lg p-8 mb-4 text-sm max-w-[400px] min-w-[250px] min-h-24 center bg-blue-500"
+					className="inputPopup fixed text-left origin-center flex flex-col justify-center items-center gap-2 align-middle rounded-lg p-4 px-6 text-sm max-w-[400px] min-w-[250px] bg-edgewater-700 z-[100000]"
+					style={{ top: 100, left: '50%', translateX: '-50%' }} // Ajustes de estilo para posicionamiento
 					id="popup"
 					role="alert"
 				>
-					<p className="w-full text-center mt-4">
-						<span className="font-medium text-base text-white text-center">
-							Tuvimos problemas al intentar obtener tu email de Facebook, ingresa nuevamente tu email
-						</span>
+					<p className="w-full text-center mt-6">
+						<span className="font-medium text-2xl text-white text-center">{popUpState.message}</span>
 						<br />
 					</p>
-					<form
-						action="#"
-						id="InputPopupForm"
-						method="POST"
-						className="z-[1] flex flex-col w-full justify-center items-center align-middle gap-4"
-						onSubmit={handleSubmit}
-					>
+					<div className="z-[1] flex flex-col w-full justify-center items-center align-middle gap-4">
 						<input
-							name="email"
-							type="email"
-							autoComplete="email"
+							name={popUpState.type}
+							type={popUpState.type}
+							autoComplete="on"
 							onChange={(e) => {
-								inputPopupState.set({ ...popUpState, content: e.target.value });
+								inputPopupStore.set({ ...popUpState, content: e.target.value });
 							}}
-							placeholder="Enter your email"
+							placeholder={popUpState.placeholder}
 							required
 							className="bg-white block w-full rounded-md border-0 py-1.5 px-1.5 text-gray shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 z-[1]"
 						/>
 						<button
-							type="submit"
-							className="text-white bg-green-400 hover:bg-green-500 transition-all p-2 px-6 m-2 text-center rounded-md z-[1]"
+							type="button"
+							onClick={handleSubmit}
+							className="text-white bg-edgewater-400 hover:bg-edgewater-500 transition-all p-2 px-6 m-2 text-center rounded-md z-[1]"
 						>
 							OK
 						</button>
-					</form>
-					<div className="absolute w-full h-full p-4">
-						<motion.a
-							onClick={handleClose}
-							className="w-3 h-3 absolute ml-2 mr-2 right-4 cursor-pointer"
-							id="button"
-							initial={{
-								stroke: '#fff',
-								fill: '#fff',
-								strokeWidth: 2,
-								opacity: 0.6,
-								scale: 1.5,
-							}}
-							whileHover={{
-								opacity: 1,
-								scale: 2,
-								rotate: 90,
-							}}
-							transition={{
-								duration: 0.2,
-							}}
-						>
-							<svg viewBox="0 -.5 21 21">
-								<motion.path
-									d="M12.018 10L21 18.554 19.481 20 10.5 11.446 1.518 20 0 18.554 8.981 10 0 1.446 1.518 0 10.5 8.554 19.481 0 21 1.446z"
-									fillRule="evenodd"
-								/>
-							</svg>
-						</motion.a>
 					</div>
+					<motion.a
+						onClick={handleClose}
+						className="w-4 h-4 absolute right-4 top-3 cursor-pointer"
+						id="button"
+						initial={{
+							stroke: '#fff',
+							fill: '#fff',
+							strokeWidth: 2,
+							opacity: 0.6,
+							scale: 1,
+						}}
+						whileHover={{
+							opacity: 1,
+							scale: 1.5,
+							rotate: 90,
+						}}
+						transition={{
+							duration: 0.2,
+						}}
+					>
+						<svg viewBox="0 -.5 21 21">
+							<motion.path
+								d="M12.018 10L21 18.554 19.481 20 10.5 11.446 1.518 20 0 18.554 8.981 10 0 1.446 1.518 0 10.5 8.554 19.481 0 21 1.446z"
+								fillRule="evenodd"
+							/>
+						</svg>
+					</motion.a>
 				</motion.div>
 			)}
 		</AnimatePresence>
@@ -115,3 +103,73 @@ const InputPopup: React.FC = () => {
 };
 
 export default InputPopup;
+
+export async function requestUserInput(
+	placeholder: string,
+	type: InputType,
+	message: string,
+	errorMessage: string,
+): Promise<string> {
+	// Mostrar el popup
+	inputPopupStore.set({
+		visible: true,
+		content: '',
+		placeholder,
+		type,
+		message,
+	});
+
+	return await new Promise((resolve, reject) => {
+		const unsubscribe = inputPopupStore.subscribe((state) => {
+			// Comprobar si el popup está cerrado
+			if (!state.visible) {
+				if (validateInput(state.content, type)) {
+					resolve(state.content);
+				} else {
+					reject(new Error(errorMessage));
+				}
+				unsubscribe();
+			}
+		});
+	});
+}
+
+function validateInput(input: string, type: InputType): boolean {
+	switch (type) {
+		case 'email':
+			return validator.isEmail(input);
+		case 'password':
+			// Definir los criterios para una contraseña válida
+			return validator.isLength(input, { min: 6 });
+		case 'text':
+			return validator.isLength(input, { min: 1 });
+		case 'number':
+			return validator.isNumeric(input);
+		case 'tel':
+			return validator.isMobilePhone(input);
+		case 'url':
+			return validator.isURL(input);
+		case 'date':
+			return validator.isDate(input);
+		case 'time':
+			return validarHora(input);
+		case 'datetime-local':
+			return validator.isISO8601(input);
+		case 'month':
+			// Puedes implementar tu propia lógica aquí
+			return true;
+		case 'week':
+			// Puedes implementar tu propia lógica aquí
+			return true;
+		case 'color':
+			return validator.isHexColor(input);
+		default:
+			return false;
+	}
+}
+
+function validarHora(hora: string): boolean {
+	// Expresión regular para validar una hora en formato 24 horas (HH:mm)
+	const regex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
+	return regex.test(hora);
+}

@@ -1,5 +1,5 @@
 {
-	"extends": ["plugin:prettier/recommended", "plugin:import/recommended"],
+	"extends": ["plugin:prettier/recommended", "plugin:import/recommended", "prettier"],
 	"ignorePatterns": ["*.html"],
 	"rules": {
 		"prettier/prettier": ["error", { "tabWidth": 4, "printWidth": 120, "endOfLine": "auto" }],

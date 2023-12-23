@@ -26,9 +26,9 @@ const Navbar: React.FC<NavbarProps> = ({ navLinks }) => {
 		return link?.href ?? navLinks[0].href;
 	});
 	const [nextActiveLink, setNextActiveLink] = useState(activeLink);
-	const [tooltipPosition, setTooltipPosition] = useState('right');
-	const [showTooltip, setShowTooltip] = useState(false);
+	const [tooltipPosition, setTooltipPosition] = useState<'right' | 'left'>('right');
 	const [tooltipContent, setTooltipContent] = useState('');
+	const [showTooltip, setShowTooltip] = useState(false);
 
 	useEffect(() => {
 		const updateTooltipPosition = () => {
@@ -128,17 +128,7 @@ const Navbar: React.FC<NavbarProps> = ({ navLinks }) => {
 						>
 							<FeatherIcon icon={link.icon} />
 							{showTooltip && tooltipContent === link.href && (
-								<motion.span
-									className={`absolute p-2 bg-gray-700 text-white rounded-md shadow-lg ${
-										tooltipPosition === 'right' ? 'left-full ml-2' : 'right-full mr-2'
-									}`}
-									initial={{ opacity: 0, scale: 0.6 }}
-									animate={{ opacity: 1, scale: 1 }}
-									exit={{ opacity: 0, scale: 0.6 }}
-									transition={{ type: 'spring', stiffness: 260, damping: 20 }}
-								>
-									{link.name}
-								</motion.span>
+								<Tooltip content={link.name} tooltipPosition={tooltipPosition} />
 							)}
 						</a>
 					</li>
@@ -155,3 +145,24 @@ const Navbar: React.FC<NavbarProps> = ({ navLinks }) => {
 };
 
 export default Navbar;
+
+interface TooltipProps {
+	content: string;
+	tooltipPosition: 'left' | 'right';
+}
+
+export const Tooltip: React.FC<TooltipProps> = ({ content, tooltipPosition }) => {
+	return (
+		<motion.span
+			className={`absolute p-2 bg-gray-700 text-white rounded-md shadow-lg ${
+				tooltipPosition === 'right' ? 'left-full ml-2' : 'right-full mr-2'
+			}`}
+			initial={{ opacity: 0, scale: 0.6 }}
+			animate={{ opacity: 1, scale: 1 }}
+			exit={{ opacity: 0, scale: 0.6 }}
+			transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+		>
+			{content}
+		</motion.span>
+	);
+};

@@ -1,18 +1,31 @@
 import { useStore } from '@nanostores/react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { popupStore } from 'frontend/src/hooks/popupStores';
+import { useEffect } from 'react';
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const Popup = () => {
 	const popupState = useStore(popupStore);
+	const lifeTime = 3; // Tiempo de vida del popup en segundos
 
 	const handleClose = (): void => {
 		popupStore.set({ ...popupState, visible: false }); // Actualizar el estado para ocultar el popup
 	};
 
+	useEffect(() => {
+		// Definir el tiempo de vida del popup
+		const timeout = setTimeout(() => {
+			handleClose();
+		}, lifeTime * 1000); //  3 segundos
+
+		return () => {
+			clearTimeout(timeout);
+		};
+	}, [popupState]);
+
 	// Definir clases base y específicas por tipo
 	const baseClass =
-		'fixed text-left origin-center flex rounded-lg p-4 mb-4 text-sm max-w-[400px] min-w-[250px] min-h-24';
+		'fixed text-left origin-center flex rounded-lg p-4 mb-4 text-sm max-w-[400px] min-w-[250px] min-h-24 overflow-hidden shadow-xl';
 
 	const typeClasses = {
 		info: 'bg-blue text-white',
@@ -70,10 +83,13 @@ const Popup = () => {
 		},
 	};
 
+	const popupKey = Date.now(); // Clave única para cada renderización
+
 	return (
 		<AnimatePresence>
 			{popupState.visible && (
 				<motion.div
+					key={popupKey} // Clave única para reiniciar la animación
 					initial="closed"
 					animate="open"
 					exit="closed"
@@ -83,6 +99,13 @@ const Popup = () => {
 					role="alert"
 					style={{ top: 100, left: '50%', translateX: '-50%' }} // Ajustes de estilo para posicionamiento
 				>
+					<motion.div
+						className="absolute h-[3px] bg-white top-0 left-0"
+						initial={{ width: 0 }}
+						animate={{ width: '100%' }}
+						exit={{ width: 0 }}
+						transition={{ duration: lifeTime, ease: 'easeOut', delay: 0.2 }}
+					></motion.div>
 					{icons[popupState.type]} {/* Muestra el icono correspondiente al tipo */}
 					<p className="w-full mr-5">
 						<span className="font-medium">{popupState.title}</span> <br />

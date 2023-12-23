@@ -1,20 +1,31 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
+import { requestUserInput } from '@components/ciddt-admin/InputPopup';
 import {
 	createUserWithEmailAndPassword,
 	deleteUser,
 	FacebookAuthProvider,
 	linkWithCredential,
+	linkWithPopup,
 	signInWithPopup,
 	updateProfile,
 	type User,
 } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { InputPopup } from 'frontend/src/hooks/popupStores';
 import { type popUp } from 'frontend/src/interfaces/popUp';
 
 import { auth, db } from './client';
 
 const serverUrl = import.meta.env.PUBLIC_SERVER_URL;
+
+export const fbScopes = [
+	'public_profile',
+	'email',
+	'instagram_basic',
+	'pages_show_list',
+	'pages_read_engagement',
+	'pages_read_user_content',
+	'business_management',
+];
 
 // ------------------------------------------ Funciones principales ---------------------------------------------------------
 const registerNewUser = async (
@@ -88,16 +99,7 @@ const registerNewUser = async (
 const loginWithFacebook = async (): Promise<popUp> => {
 	const provider = new FacebookAuthProvider();
 
-	// Especificar scopes adicionales
-	const scopes = [
-		'public_profile',
-		'email',
-		'instagram_basic',
-		'pages_show_list',
-		'pages_read_engagement',
-		'pages_read_user_content',
-	];
-	scopes.forEach((scope) => provider.addScope(scope));
+	fbScopes.forEach((scope) => provider.addScope(scope));
 
 	let user: User | null = null;
 
@@ -215,7 +217,12 @@ const handleNewUser = async (user: User, accessToken: string): Promise<popUp> =>
 	try {
 		let email: string | null = null;
 		if (user.email == null) {
-			email = await requestUserEmail();
+			email = await requestUserInput(
+				'Correo electrónico',
+				'email',
+				'Ingresa tu correo electrónico',
+				'Correo electrónico no válido o cancelado por el usuario',
+			);
 		}
 		const userUID = user.providerData[0].uid;
 
@@ -311,33 +318,36 @@ const safeDeleteUser = async (user: User) => {
 	}
 };
 
-async function requestUserEmail(): Promise<string> {
-	// Mostrar el popup
-	InputPopup.set({
-		visible: true,
-		content: '',
-	});
+export const getUserAccessToken = async (user: User): Promise<string> => {
+	const provider = new FacebookAuthProvider();
+	fbScopes.forEach((scope) => provider.addScope(scope));
 
-	return await new Promise((resolve, reject) => {
-		const unsubscribe = InputPopup.subscribe((state) => {
-			// Comprobar si el popup está cerrado
-			if (!state.visible) {
-				if (validateEmail(state.content)) {
-					resolve(state.content);
-				} else {
-					reject(new Error('Correo electrónico no válido o cancelado por el usuario'));
-				}
-				unsubscribe();
-			}
-		});
-	});
-}
+	// Revisa si el usuario ya tiene una credencial de Facebook asociada
+	const isLinkedWithFacebook = user.providerData.some((data) => data.providerId === 'facebook.com');
 
-function validateEmail(email: string): boolean {
-	// Expresión regular básica para validar un correo electrónico
-	const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-	return regex.test(email) && email.length > 0;
-}
+	try {
+		let result;
+		if (isLinkedWithFacebook) {
+			// Si el usuario ya está asociado con Facebook, usa signInWithPopup
+			result = await signInWithPopup(auth, provider);
+		} else {
+			// Si el usuario no está asociado, usa linkWithPopup
+			result = await linkWithPopup(user, provider);
+		}
+
+		const credential = FacebookAuthProvider.credentialFromResult(result);
+		const accessToken = credential?.accessToken;
+
+		if (accessToken != null) {
+			return accessToken;
+		} else {
+			throw new Error('Failed to get user access token');
+		}
+	} catch (error: any) {
+		console.error('Error getting user access token:', error);
+		throw error;
+	}
+};
 
 // Exportar las funciones para usarlas en otros archivos
 export { loginWithFacebook, registerNewUser };

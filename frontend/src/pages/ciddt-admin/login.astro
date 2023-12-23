@@ -11,21 +11,14 @@ import { app } from '../../firebase/server';
 
 /* Check if the user is authenticated */
 const auth = getAuth(app);
-
-try {
-	if (Astro.cookies.has('session')) {
-		const sessionCookie = Astro.cookies.get('session')?.value;
-		// Verificar explícitamente que sessionCookie no es nulo ni una cadena vacía
-		if (sessionCookie != null) {
-			const decodedCookie = await auth.verifySessionCookie(sessionCookie);
-			if (decodedCookie != null) {
-				return Astro.redirect('/ciddt-admin/dashboard');
-			}
+if (Astro.cookies.has('session')) {
+	const sessionCookie = Astro.cookies.get('session')?.value;
+	if (sessionCookie != null) {
+		const decodedCookie = await auth.verifySessionCookie(sessionCookie);
+		if (decodedCookie != null) {
+			return Astro.redirect('/ciddt-admin/dashboard');
 		}
 	}
-	// Opcional: Manejo de casos cuando no hay sesión
-} catch (error) {
-	return Astro.redirect('/ciddt-admin/login');
 }
 ---
 
@@ -107,7 +100,7 @@ try {
 						</p>
 					</div>
 					<Popup client:only />
-					<InputPopup client:only />
+					<InputPopup client:only/>
 				</div>
 			</>
 			<div class="flex justify-center text-center mt-5">
@@ -121,12 +114,12 @@ try {
 		</div>
 	</body>
 	<script>
-		import { browserLocalPersistence, signInWithEmailAndPassword } from 'firebase/auth';
+		import { browserSessionPersistence, signInWithEmailAndPassword } from 'firebase/auth';
 		import { auth } from '../../firebase/client';
 		import { popupStore } from 'frontend/src/hooks/popupStores';
 		import { loginWithFacebook } from 'frontend/src/firebase/login';
 
-		auth.setPersistence(browserLocalPersistence);
+		auth.setPersistence(browserSessionPersistence);
 
 		const form = document.querySelector('form') as HTMLFormElement;
 		const buttonLogin = document.querySelector('#login_button') as HTMLButtonElement;

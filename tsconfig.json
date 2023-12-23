@@ -9,6 +9,11 @@
 		"lib": ["DOM", "ES2022"],
 		"resolveJsonModule": true,
 		"esModuleInterop": true,
+		"plugins": [
+			{
+				"name": "@astrojs/ts-plugin"
+			}
+		],
 		"paths": {
 			"@app/*": ["frontend/src/app/*"],
 			"@shared/*": ["shared/*"],
