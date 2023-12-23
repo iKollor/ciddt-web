@@ -21,11 +21,37 @@ interface Props {
 const EquipoTable: React.FC<Props> = ({ userRecord }) => {
 	const [equipos, setEquipos] = useState<User[]>([]);
 	const [hasTeam, setHasTeam] = useState<boolean>(false);
+	const [isOwner, setIsOwner] = useState<boolean>(false);
 
-	const { getTeamByUserId, createTeam, addMemberToTeam, validateTeamName, validateMemberId, isMemberAlreadyInTeam } =
-		useTeamManagement();
+	const {
+		getTeamByUserId,
+		createTeam,
+		addMemberToTeam,
+		validateTeamName,
+		validateMemberId,
+		isMemberAlreadyInTeam,
+		isUserTeamOwner,
+	} = useTeamManagement();
 
 	useEffect(() => {
+		const checkUserTeamOwner = async (): Promise<void> => {
+			if (userRecord != null) {
+				try {
+					const team = await getTeamByUserId(userRecord.uid);
+					if (team != null) {
+						const teamSnap = await getDoc(team);
+						if (teamSnap.exists()) {
+							const teamId = teamSnap.id;
+							setIsOwner(await isUserTeamOwner(userRecord.uid, teamId));
+						}
+					}
+				} catch (error) {
+					console.error(error);
+					setIsOwner(false);
+				}
+			}
+		};
+
 		const checkUserTeam = async (): Promise<void> => {
 			if (userRecord != null) {
 				try {
@@ -75,6 +101,7 @@ const EquipoTable: React.FC<Props> = ({ userRecord }) => {
 
 		void checkUserTeam();
 		void fetchEquipos();
+		void checkUserTeamOwner();
 		return () => {
 			setHasTeam(false);
 		};
@@ -223,7 +250,7 @@ const EquipoTable: React.FC<Props> = ({ userRecord }) => {
 								className="border-b border-solid last:border-b-0 border-white border-opacity-20 hover:bg-edgewater-700 cursor-pointer transition-all duration-150 ease-in-out"
 							>
 								{/* Celda para la foto del perfil */}
-								<td className="p-2 rounded-md max-w-[60px]">
+								<td className="p-3 rounded-tl-md rounded-bl-md max-w-[60px]">
 									<div className="flex flex-row items-center gap-3">
 										<img
 											src={equipo.urlFotoPerfil?.href ?? '/assets/images/profile_placeholder.jpg'}
@@ -238,11 +265,13 @@ const EquipoTable: React.FC<Props> = ({ userRecord }) => {
 								<td className="max-w-[200px] truncate">
 									<Tooltip content={equipo.details} children={<div>{equipo.details}</div>} />
 								</td>
-								<td className="rounded-md">
+								<td className="rounded-tr-md rounded-br-md">
 									<div className="flex gap-4">
-										<button className="bg-edgewater-600 p-2 rounded-md hover:bg-edgewater-500 transition-all duration-200 ease-in-out  flex justify-center">
-											<FontAwesomeIcon icon={faPencil} className="h-4 w-4" />
-										</button>
+										{isOwner && (
+											<button className="bg-edgewater-600 p-2 rounded-md hover:bg-edgewater-500 transition-all duration-200 ease-in-out flex justify-center">
+												<FontAwesomeIcon icon={faPencil} className="h-4 w-4" />
+											</button>
+										)}
 										<button className="bg-edgewater-600 p-2 rounded-md hover:bg-edgewater-500 transition-all duration-200 ease-in-out  flex justify-center">
 											<FontAwesomeIcon icon={faClose} className="h-4 w-4" />
 										</button>

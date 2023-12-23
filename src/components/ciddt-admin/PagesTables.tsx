@@ -214,7 +214,7 @@ const PagesTables: FC<PagesTablesProps> = ({ userRecord }) => {
 								className="border-b border-solid last:border-b-0 border-white border-opacity-20 hover:bg-edgewater-700 cursor-pointer transition-all duration-150 ease-in-out"
 								onClick={() => window.open(page.link, '_blank')}
 							>
-								<td className="truncate rounded-md">
+								<td className="truncate rounded-tl-md rounded-bl-md">
 									<div className="flex flex-row items-center gap-3">
 										<img
 											src={page.picture}
@@ -225,7 +225,7 @@ const PagesTables: FC<PagesTablesProps> = ({ userRecord }) => {
 									</div>
 								</td>
 								<td className="p-3">{page.id}</td>
-								<td className="capitalize rounded-md">{page.account_type}</td>
+								<td className="capitalize rounded-tr-md rounded-br-md">{page.account_type}</td>
 							</tr>
 						))}
 					</tbody>

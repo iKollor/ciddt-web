@@ -58,7 +58,7 @@ const profilePicture =
 					<div class="py-1 h-full flex flex-col items-center justify-center" role="none">
 						<!-- Opciones -->
 						<a
-							href="#"
+							id="editPhotoButton"
 							class="text-gray-700 block px-4 py-2 text-sm hover:bg-gray-200 transition-all w-full"
 							role="menuitem">Editar foto</a
 						>
@@ -85,9 +85,13 @@ const profilePicture =
 		const dropdownButton = document.querySelector('#dropdownButton');
 		const dropdown = document.querySelector('#dropdown');
 		const logoutButton = document.querySelector('#logoutButton');
+		const editPhotoButton = document.querySelector('#editPhotoButton');
 
 		logoutButton?.addEventListener('click', () => {
 			navigate('/api/auth/signout');
+		});
+
+		editPhotoButton?.addEventListener('click', () => {
 		});
 
 		dropdownButton?.addEventListener('click', (e) => {

@@ -8,19 +8,28 @@ export interface popUp {
 }
 
 export type InputType =
-	| 'email'
-	| 'password'
 	| 'text'
+	| 'password'
+	| 'email'
 	| 'number'
-	| 'tel'
-	| 'url'
-	| 'search'
+	| 'range'
 	| 'date'
-	| 'time'
-	| 'datetime-local'
 	| 'month'
 	| 'week'
-	| 'color';
+	| 'time'
+	| 'datetime-local'
+	| 'color'
+	| 'checkbox'
+	| 'radio'
+	| 'file'
+	| 'submit'
+	| 'image'
+	| 'reset'
+	| 'button'
+	| 'search'
+	| 'url'
+	| 'tel'
+	| 'hidden';
 
 export interface InputPopupProps {
 	visible: boolean;

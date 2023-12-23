@@ -104,20 +104,58 @@ const InputPopup = () => {
 
 export default InputPopup;
 /**
- * Prompts the user for input using a popup window.
+ * Provides a function to request user input in a popup for general input types.
  *
- * @param {string} placeholder - The placeholder text to display in the input field.
- * @param {InputType} type - The type of input field to display (e.g., email, password, text).
- * @param {string} message - The message to display above the input field.
- * @param {string} errorMessage - The error message to display if the user input is invalid.
- * @returns {Promise<string>} - A promise that resolves with the user input if it is valid, or rejects with an error if it is invalid.
+ * @param placeholder - The placeholder text for the input field.
+ * @param type - The type of input field ('text', 'password', 'email', etc.), excluding 'file' and 'image'.
+ * @param message - The message to display to the user.
+ * @param errorMessage - The error message to display if the input is invalid.
+ * @returns A promise that resolves with the user's input value.
+ * @throws Error - If the specified type is not implemented.
  */
+// Sobrecarga para tipos que no son 'file' o 'image'
+export async function requestUserInput(
+	placeholder: string,
+	type: Exclude<InputType, 'file' | 'image'>,
+	message: string,
+	errorMessage: string,
+): Promise<string>;
+/**
+ * Provides a function to request user input in a popup specifically for file inputs.
+ *
+ * @param placeholder - The placeholder text for the input field.
+ * @param type - The type of input field ('file' or 'image').
+ * @param message - The message to display to the user.
+ * @param errorMessage - The error message to display if the input is invalid.
+ * @param allowMultiple - Whether multiple files can be selected.
+ * @param acceptedTypes - The accepted file types, e.g., '.pdf, .docx'.
+ * @returns A promise that resolves with the selected file(s).
+ * @throws Error - If the required parameters are missing for 'file' or 'image' types.
+ */
+// Sobrecarga para 'file' y 'image'
+export async function requestUserInput(
+	placeholder: string,
+	type: 'file' | 'image',
+	message: string,
+	errorMessage: string,
+	allowMultiple: boolean,
+	acceptedTypes: string,
+): Promise<File | File[]>;
+
 export async function requestUserInput(
 	placeholder: string,
 	type: InputType,
 	message: string,
 	errorMessage: string,
-): Promise<string> {
+	allowMultiple?: boolean,
+	acceptedTypes?: string,
+): Promise<string | File | File[]> {
+	const notImplementedTypes: InputType[] = ['checkbox', 'radio', 'range', 'submit', 'reset', 'button', 'hidden'];
+
+	if (notImplementedTypes.includes(type)) {
+		throw new Error(`Type '${type}' not implemented in this function`);
+	}
+
 	inputPopupStore.set({
 		visible: true,
 		content: '',
@@ -126,9 +164,16 @@ export async function requestUserInput(
 		message,
 	});
 
+	if (type === 'file' || type === 'image') {
+		if (allowMultiple !== undefined && acceptedTypes !== undefined) {
+			return await requestFileInput(allowMultiple, acceptedTypes);
+		} else {
+			throw new Error("Missing parameters for 'file' or 'image' type");
+		}
+	}
+
 	return await new Promise((resolve, reject) => {
 		const unsubscribe = inputPopupStore.subscribe((state) => {
-			// Check if the popup is closed
 			if (!state.visible) {
 				if (validateInput(state.content, type)) {
 					resolve(state.content);
@@ -146,12 +191,11 @@ function validateInput(input: string, type: InputType): boolean {
 		case 'email':
 			return validator.isEmail(input);
 		case 'password':
-			// Definir los criterios para una contraseña válida
 			return validator.isLength(input, { min: 6 });
 		case 'text':
-			return validator.isLength(input, { min: 1 });
+			return input.trim().length > 0;
 		case 'number':
-			return validator.isNumeric(input);
+			return !isNaN(parseFloat(input)) && isFinite(input as any);
 		case 'tel':
 			return validator.isMobilePhone(input);
 		case 'url':
@@ -162,21 +206,48 @@ function validateInput(input: string, type: InputType): boolean {
 			return validarHora(input);
 		case 'datetime-local':
 			return validator.isISO8601(input);
-		case 'month':
-			// Puedes implementar tu propia lógica aquí
-			return true;
-		case 'week':
-			// Puedes implementar tu propia lógica aquí
-			return true;
 		case 'color':
 			return validator.isHexColor(input);
+		case 'month':
+			return validarMes(input);
+		case 'week':
+			return validarSemana(input);
 		default:
 			return false;
 	}
 }
 
 function validarHora(hora: string): boolean {
-	// Expresión regular para validar una hora en formato 24 horas (HH:mm)
 	const regex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
 	return regex.test(hora);
+}
+
+function validarMes(mes: string): boolean {
+	const regex = /^\d{4}-(0[1-9]|1[0-2])$/;
+	return regex.test(mes);
+}
+
+function validarSemana(semana: string): boolean {
+	const regex = /^\d{4}-W(0[1-9]|[1-4][0-9]|5[0-3])$/;
+	return regex.test(semana);
+}
+
+async function requestFileInput(allowMultiple: boolean, acceptedTypes: string): Promise<File | File[]> {
+	return await new Promise((resolve, reject) => {
+		const input = document.createElement('input');
+		input.type = 'file';
+		input.multiple = allowMultiple;
+		input.accept = acceptedTypes;
+
+		input.onchange = (e) => {
+			const files = (e.target as HTMLInputElement).files;
+			if (files != null && files.length > 0) {
+				resolve(allowMultiple ? Array.from(files) : files[0]);
+			} else {
+				reject(new Error('No file selected'));
+			}
+		};
+
+		input.click();
+	});
 }

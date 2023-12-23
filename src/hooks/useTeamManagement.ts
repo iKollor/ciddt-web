@@ -53,6 +53,13 @@ const useTeamManagement = (): {
 	 * @returns A Promise that resolves to true if the member with the given ID is already in the team with the given ID, false otherwise.
 	 */
 	isMemberAlreadyInTeam: (teamId: string, memberId: string) => Promise<boolean>;
+	/**
+	 * Checks if the user with the given ID is the owner of the team with the given ID.
+	 * @param userId - The unique identifier of a user.
+	 * @param teamId - The unique identifier of a team.
+	 * @returns A Promise that resolves to true if the user with the given ID is the owner of the team with the given ID, false otherwise.
+	 */
+	isUserTeamOwner: (userId: string, teamId: string) => Promise<boolean>;
 } => {
 	const getTeamByUserId = async (userId: string): Promise<DocumentReference | null> => {
 		const userRef = doc(db, 'users', userId);
@@ -113,6 +120,18 @@ const useTeamManagement = (): {
 		return teamData.members.includes(memberId);
 	};
 
+	const isUserTeamOwner = async (userId: string, teamId: string): Promise<boolean> => {
+		const teamRef = doc(db, 'teams', teamId);
+		const teamSnap = await getDoc(teamRef);
+
+		if (!teamSnap.exists()) {
+			throw new Error('Equipo no encontrado.');
+		}
+
+		const teamData = teamSnap.data() as Team;
+		return teamData.owner === userId;
+	};
+
 	return {
 		getTeamByUserId,
 		createTeam,
@@ -120,6 +139,7 @@ const useTeamManagement = (): {
 		validateTeamName,
 		validateMemberId,
 		isMemberAlreadyInTeam,
+		isUserTeamOwner,
 	};
 };
 

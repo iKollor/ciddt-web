@@ -265,7 +265,7 @@ const PostsTable: React.FC<Props> = ({ pagePosts, userRecord, provider }) => {
 									className="border-b border-solid last:border-b-0 border-white border-opacity-20 hover:bg-edgewater-700 cursor-pointer transition-all duration-150 ease-in-out"
 									onClick={() => window.open(post.url, '_blank')}
 								>
-									<td className="p-3 rounded-md max-w-[60px]">
+									<td className="p-3 rounded-tl-md rounded-bl-md max-w-[60px]">
 										<div className="flex items-center">
 											<div className="relative inline-block shrink-0">
 												{post.mediaType === 'album' || post.mediaType === 'photo' ? (
@@ -308,7 +308,7 @@ const PostsTable: React.FC<Props> = ({ pagePosts, userRecord, provider }) => {
 									<td id="details" className="max-w-[120px] truncate">
 										<Tooltip content={post.details} children={<div>{post.details}</div>} />
 									</td>
-									<td id="date" className="rounded-md pl-6">
+									<td id="date" className="rounded-tr-md rounded-br-md pl-6">
 										{new Date(post.timestamp).toLocaleDateString('es', {
 											day: '2-digit',
 											month: '2-digit',
