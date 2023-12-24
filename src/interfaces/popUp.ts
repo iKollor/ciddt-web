@@ -30,11 +30,17 @@ export type InputType =
 	| 'url'
 	| 'tel'
 	| 'hidden';
-
+interface FilePreview {
+	file: File;
+	previewUrl: string | null;
+}
 export interface InputPopupProps {
 	visible: boolean;
-	content: string;
+	content?: string;
 	placeholder?: string;
 	type: InputType;
 	message: string;
+	selectedFiles?: FilePreview[];
+	allowMultiple?: boolean;
+	acceptedTypes?: string;
 }

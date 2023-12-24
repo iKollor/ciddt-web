@@ -1,5 +1,4 @@
 import type { DocumentReference } from 'firebase/firestore';
-import type { Url } from 'url';
 
 /**
  * Represents a user.
@@ -8,7 +7,7 @@ export interface User {
 	/**
 	 * The URL of the user's profile photo.
 	 */
-	urlFotoPerfil: Url;
+	urlFotoPerfil: string;
 	/**
 	 * The display name of the user.
 	 */

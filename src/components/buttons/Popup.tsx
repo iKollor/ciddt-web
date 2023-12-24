@@ -25,7 +25,7 @@ const Popup = () => {
 
 	// Definir clases base y específicas por tipo
 	const baseClass =
-		'fixed text-left origin-center flex rounded-lg p-4 mb-4 text-sm max-w-[400px] min-w-[250px] min-h-24 overflow-hidden shadow-xl';
+		'fixed text-left origin-center flex rounded-lg p-4 mb-4 text-sm max-w-[400px] min-w-[250px] min-h-24 overflow-hidden shadow-xl z-[51]';
 
 	const typeClasses = {
 		info: 'bg-blue text-white',

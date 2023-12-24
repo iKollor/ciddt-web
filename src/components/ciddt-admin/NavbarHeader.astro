@@ -1,16 +1,21 @@
 ---
 import { Image } from 'astro:assets';
 import type { UserRecord } from 'firebase-admin/auth';
+import { getProfilePicture } from 'src/hooks/useEditProfileManagment';
+
 interface Props {
 	userRecord: UserRecord;
 }
 
 const { userRecord } = Astro.props;
 
-const profilePicture =
-	userRecord?.photoURL ??
-	userRecord?.providerData[0].photoURL ??
-	'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
+let profilePicture: string | undefined;
+
+try {
+	profilePicture = await getProfilePicture(userRecord?.uid);
+} catch (error) {
+	console.error(error);
+}
 ---
 
 <nav class="h-[80px] w-full fixed top-0 left-0 z-10 my-4">
@@ -23,15 +28,17 @@ const profilePicture =
 			<div class="relative">
 				<button type="button" id="dropdownButton">
 					<picture class="flex items-center">
-						<Image
-							class="rounded-full cursor-pointer"
-							src={profilePicture ?? 'https://img.icons8.com/?size=256&id=98957&format=png'}
-							alt="user_profilePicture"
-							width={50}
-							height={50}
-							transition:name="profilePicture"
-							transition:persist
-						/>
+						<div class="rounded-full w-14 h-14 cursor-pointer overflow-hidden">
+							<Image
+								class="object-cover w-full h-full"
+								src={profilePicture ?? 'https://img.icons8.com/?size=256&id=98957&format=png'}
+								alt="user_profilePicture"
+								width={56}
+								height={56}
+								transition:name="profilePicture"
+								transition:persist
+							/>
+						</div>
 						<svg
 							class="h-5 w-5 transition-all ease-in-out duration-300"
 							xmlns="http://www.w3.org/2000/svg"
@@ -59,12 +66,12 @@ const profilePicture =
 						<!-- Opciones -->
 						<a
 							id="editPhotoButton"
-							class="text-gray-700 block px-4 py-2 text-sm hover:bg-gray-200 transition-all w-full"
+							class="text-gray-700 block px-4 py-2 text-sm hover:bg-gray-200 transition-all w-full cursor-pointer"
 							role="menuitem">Editar foto</a
 						>
 						<a
 							href="#"
-							class="text-gray-700 block px-4 py-2 text-sm hover:bg-gray-200 transition-all w-full"
+							class="text-gray-700 block px-4 py-2 text-sm hover:bg-gray-200 transition-all w-full cursor-pointer"
 							role="menuitem">Ajustes</a
 						>
 						<a
@@ -80,6 +87,11 @@ const profilePicture =
 </nav>
 <script>
 	import { navigate } from 'astro:transitions/client';
+	import { requestUserInput } from './InputPopup';
+	import { popupStore } from 'src/hooks/popupStores';
+	import { uploadProfilePicture } from 'src/hooks/useEditProfileManagment';
+	import { auth } from '@firebase/client';
+	import { loader } from 'src/hooks/pushBody';
 
 	document.addEventListener('astro:page-load', () => {
 		const dropdownButton = document.querySelector('#dropdownButton');
@@ -91,7 +103,47 @@ const profilePicture =
 			navigate('/api/auth/signout');
 		});
 
-		editPhotoButton?.addEventListener('click', () => {
+		editPhotoButton?.addEventListener('click', async () => {
+			try {
+				const files = await requestUserInput('image', false, '.jpg,.jpeg,.png');
+
+				if (files instanceof File && auth.currentUser != null) {
+					loader.set({
+						isLoading: true,
+						message: 'Subiendo imagen...',
+						type: 'infinite',
+					});
+					// Si se devuelve un único archivo, lo subimos
+					const userId = auth.currentUser?.uid;
+					const success = await uploadProfilePicture(files, userId);
+
+					if (success) {
+						await navigate('#');
+						popupStore.set({
+							visible: true,
+							message: 'La foto de perfil se ha actualizado correctamente',
+							type: 'success',
+							title: 'Foto de perfil actualizada',
+						});
+					}
+				} else {
+					// Manejar el caso de que no se haya devuelto un archivo
+					throw new Error('No se seleccionó ningún archivo');
+				}
+			} catch (error: any) {
+				popupStore.set({
+					visible: true,
+					message: error.message,
+					type: 'danger',
+					title: 'Error al subir la imagen',
+				});
+			} finally {
+				loader.set({
+					isLoading: false,
+					message: '',
+					type: 'infinite',
+				});
+			}
 		});
 
 		dropdownButton?.addEventListener('click', (e) => {

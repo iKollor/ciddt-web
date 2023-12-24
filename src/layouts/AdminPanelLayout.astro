@@ -66,10 +66,10 @@ const { title } = Astro.props;
 		<footer class="h-[20vh]"></footer>
 
 		<script>
-			import { signInWithCustomToken } from 'firebase/auth';
 			import { inputPopupStore, popupStore } from '../hooks/popupStores';
 			import { loader } from '../hooks/pushBody';
 			import { auth } from '@firebase/client';
+			import { navigate } from 'astro:transitions/client';
 
 			document.addEventListener('astro:before-preparation', () => {
 				loader.set({
@@ -89,27 +89,18 @@ const { title } = Astro.props;
 				inputPopupStore.set({ visible: false, message: '', type: 'text', content: '' });
 			});
 
-			async function restoreAuthState() {
-				// Verificar el estado de la sesión con el servidor
-				const response = await fetch('/api/auth/verify-session');
-				if (response.ok) {
-					const { idToken } = await response.json();
-
-					// Si el token de ID está presente, usa ese token para autenticar al cliente
-					console.log(idToken);
-					if (idToken) {
-						await signInWithCustomToken(auth, idToken);
-					}
-				} else {
-					// Si la sesión no es válida, considera redirigir al usuario a la página de inicio de sesión
-					window.location.assign(new URL('/ciddt-admin/login', window.location.href).href);
+			function verifyUser() {
+				if (auth.currentUser == null) {
+					navigate('/api/auth/signout');
 				}
 			}
 
 			document.addEventListener(
 				'astro:page-load',
 				() => {
-					void restoreAuthState();
+					setTimeout(() => {
+						verifyUser();
+					}, 1000);
 				},
 				{ once: true },
 			);

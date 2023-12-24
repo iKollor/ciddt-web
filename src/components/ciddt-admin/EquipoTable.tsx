@@ -121,8 +121,8 @@ const EquipoTable: React.FC<Props> = ({ userRecord }) => {
 				throw new Error('Ya tienes un equipo creado.');
 			}
 			const nombreEquipo = await requestUserInput(
-				'Nombre del equipo',
 				'text',
+				'Nombre del equipo',
 				'Ingrese el nombre del equipo',
 				'Nombre del equipo inválido',
 			);
@@ -168,8 +168,8 @@ const EquipoTable: React.FC<Props> = ({ userRecord }) => {
 				throw new Error('Primero debes crear un equipo.');
 			}
 			const id = await requestUserInput(
-				'Id del usuario',
 				'text',
+				'Id del usuario',
 				'Ingrese el id del usuario',
 				'Id del usuario inválido o no existe',
 			);
@@ -253,7 +253,7 @@ const EquipoTable: React.FC<Props> = ({ userRecord }) => {
 								<td className="p-3 rounded-tl-md rounded-bl-md max-w-[60px]">
 									<div className="flex flex-row items-center gap-3">
 										<img
-											src={equipo.urlFotoPerfil?.href ?? '/assets/images/profile_placeholder.jpg'}
+											src={equipo.urlFotoPerfil ?? '/assets/images/profile_placeholder.jpg'}
 											alt="Profile Picture"
 											className="w-[30px] h-[30px] inline-block shrink-0 rounded-md"
 										/>

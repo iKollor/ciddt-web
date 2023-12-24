@@ -86,8 +86,9 @@ const ProfileCard = forwardRef<HTMLDivElement, ProfileCardProps>(({ profile, ind
 		<motion.div
 			ref={ref}
 			className={`profile__container ${state} ${isOverflow && state === 'estado3' ? 'rotate' : ''}`}
-			key={index}
-			style={{ backgroundImage: profile.urlFotoPerfil.href }}
+			style={{
+				backgroundImage: `url(${profile.urlFotoPerfil})` ?? 'url(/assets/images/profile_placeholder.jpg)',
+			}}
 			onClick={onClick}
 			onLoad={onLoad}
 			// @ts-expect-error
@@ -135,9 +136,9 @@ const ProfileCard = forwardRef<HTMLDivElement, ProfileCardProps>(({ profile, ind
 				</div>
 				<div className="profile__name__age">
 					<h1 ref={nameRef} className={`nombre ${isOverflow ? 'vertical' : ''}`}>
-						{state === 'estado3' ? soloNombre : profile.position}
+						{state === 'estado3' ? soloNombre : profile.displayName}
 					</h1>
-					<h1 className="edad">{profile.position}</h1>
+					<h1 className="edad">{profile.age}</h1>
 				</div>
 				<div className="profile__details">{profile.details}</div>
 			</div>

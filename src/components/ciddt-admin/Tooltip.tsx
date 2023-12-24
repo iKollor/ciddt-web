@@ -30,7 +30,7 @@ const Tooltip: React.FC<TooltipProps> = ({ children, content }) => {
 			{visible &&
 				createPortal(
 					<motion.div
-						className="absolute bg-black text-white p-2 rounded shadow-lg max-w-md overflow-hidden text-ellipsis"
+						className="absolute bg-black text-white p-2 rounded shadow-lg max-w-md overflow-hidden text-ellipsis z-[49]"
 						initial={{ opacity: 0, scale: 0 }}
 						animate={{ opacity: 1, scale: 1 }}
 						exit={{ opacity: 0, scale: 0 }}

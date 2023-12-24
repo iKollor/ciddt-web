@@ -6,6 +6,8 @@ import { inputPopupStore } from 'src/hooks/popupStores';
 import type { InputType } from 'src/interfaces/popUp';
 import validator from 'validator';
 
+import Tooltip from './Tooltip';
+
 const InputPopup = () => {
 	const popUpState = useStore(inputPopupStore);
 	const popupVariants = {
@@ -26,9 +28,33 @@ const InputPopup = () => {
 	};
 
 	const handleSubmit = (): void => {
-		console.log(popUpState.content);
-		if (window.confirm(`¿Estás seguro?: ${popUpState.content}`)) {
-			inputPopupStore.set({ ...popUpState, visible: false }); // Actualizar el estado para ocultar el popup
+		let displayContent;
+
+		if (popUpState.type === 'text') {
+			displayContent = popUpState.content; // Contenido para tipos de texto
+		} else if (popUpState.type === 'file' || popUpState.type === 'image') {
+			// Muestra los nombres de los archivos seleccionados
+			const fileNames = popUpState.selectedFiles?.map((filePreview) => filePreview.file.name).join(', ');
+			displayContent = fileNames ?? 'No files selected';
+		} else {
+			displayContent = 'Unknown content';
+		}
+
+		if (window.confirm(`¿Estás seguro?: ${displayContent}`)) {
+			inputPopupStore.set({ ...popUpState, visible: false });
+		}
+	};
+
+	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const files = e.target.files;
+
+		if (files != null && files.length > 0) {
+			const filePreviews = Array.from(files).map((file) => {
+				const previewUrl = file.type.startsWith('image/') ? URL.createObjectURL(file) : null;
+				return { file, previewUrl };
+			});
+
+			inputPopupStore.set({ ...popUpState, selectedFiles: filePreviews });
 		}
 	};
 
@@ -40,7 +66,7 @@ const InputPopup = () => {
 					animate="open"
 					exit="closed"
 					variants={popupVariants}
-					className="inputPopup fixed text-left origin-center flex flex-col justify-center items-center gap-2 align-middle rounded-lg p-4 px-6 text-sm max-w-[400px] min-w-[250px] bg-edgewater-700 z-[100000]"
+					className="inputPopup fixed text-left origin-center flex flex-col justify-center items-center gap-2 align-middle rounded-lg p-4 px-6 text-sm max-w-[400px] min-w-[250px] bg-edgewater-700 z-[48]"
 					style={{ top: 100, left: '50%', translateX: '-50%' }} // Ajustes de estilo para posicionamiento
 					id="popup"
 					role="alert"
@@ -52,15 +78,51 @@ const InputPopup = () => {
 					<div className="z-[1] flex flex-col w-full justify-center items-center align-middle gap-4">
 						<input
 							name={popUpState.type}
-							type={popUpState.type}
+							type={popUpState.type === 'image' ? 'file' : popUpState.type}
+							multiple={popUpState.allowMultiple}
+							accept={popUpState.acceptedTypes}
 							autoComplete="on"
 							onChange={(e) => {
-								inputPopupStore.set({ ...popUpState, content: e.target.value });
+								if (popUpState.type === 'file' || popUpState.type === 'image') {
+									handleFileChange(e);
+								} else {
+									inputPopupStore.set({ ...popUpState, content: e.target.value });
+								}
 							}}
 							placeholder={popUpState.placeholder}
 							required
 							className="bg-white block w-full rounded-md border-0 py-1.5 px-1.5 text-gray shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 z-[1]"
 						/>
+						{popUpState.type === 'image' || popUpState.type === 'file' ? (
+							<div>
+								{popUpState.selectedFiles?.map((filePreview, index) =>
+									filePreview.previewUrl != null ? (
+										<div key={index} className="flex flex-col justify-center items-center gap-2">
+											<img
+												src={filePreview.previewUrl}
+												alt={`Preview ${index}`}
+												style={{ maxWidth: '100%', maxHeight: '200px' }}
+											/>
+											<Tooltip
+												children={
+													<p className="truncate max-w-[350px]">{filePreview.file.name}</p>
+												}
+												content={filePreview.file.name}
+											/>
+										</div>
+									) : (
+										<div key={index}>
+											<Tooltip
+												children={
+													<p className="truncate max-w-[350px]">{filePreview.file.name}</p>
+												}
+												content={filePreview.file.name}
+											/>
+										</div>
+									),
+								)}
+							</div>
+						) : null}
 						<button
 							type="button"
 							onClick={handleSubmit}
@@ -103,52 +165,44 @@ const InputPopup = () => {
 };
 
 export default InputPopup;
+
+// Sobrecarga para tipos que no son 'file' o 'image'
 /**
- * Provides a function to request user input in a popup for general input types.
- *
+ * Requests user input for general input types.
+ * @param type - The type of input field, excluding 'file' and 'image'.
  * @param placeholder - The placeholder text for the input field.
- * @param type - The type of input field ('text', 'password', 'email', etc.), excluding 'file' and 'image'.
  * @param message - The message to display to the user.
  * @param errorMessage - The error message to display if the input is invalid.
  * @returns A promise that resolves with the user's input value.
- * @throws Error - If the specified type is not implemented.
+ * @throws Error if the specified type is not implemented.
  */
-// Sobrecarga para tipos que no son 'file' o 'image'
 export async function requestUserInput(
-	placeholder: string,
 	type: Exclude<InputType, 'file' | 'image'>,
+	placeholder: string,
 	message: string,
 	errorMessage: string,
 ): Promise<string>;
+
 /**
- * Provides a function to request user input in a popup specifically for file inputs.
- *
- * @param placeholder - The placeholder text for the input field.
+ * Requests user input specifically for file inputs.
  * @param type - The type of input field ('file' or 'image').
- * @param message - The message to display to the user.
- * @param errorMessage - The error message to display if the input is invalid.
  * @param allowMultiple - Whether multiple files can be selected.
  * @param acceptedTypes - The accepted file types, e.g., '.pdf, .docx'.
  * @returns A promise that resolves with the selected file(s).
- * @throws Error - If the required parameters are missing for 'file' or 'image' types.
+ * @throws Error if the required parameters are missing for 'file' or 'image' types.
  */
-// Sobrecarga para 'file' y 'image'
 export async function requestUserInput(
-	placeholder: string,
 	type: 'file' | 'image',
-	message: string,
-	errorMessage: string,
 	allowMultiple: boolean,
 	acceptedTypes: string,
 ): Promise<File | File[]>;
 
+// Implementación genérica
 export async function requestUserInput(
-	placeholder: string,
 	type: InputType,
-	message: string,
-	errorMessage: string,
-	allowMultiple?: boolean,
-	acceptedTypes?: string,
+	arg2: string | boolean, // arg2: allowMultiple | placeholder
+	arg3?: string, // arg3: acceptedTypes | message
+	arg4?: string, // arg4: errorMessage
 ): Promise<string | File | File[]> {
 	const notImplementedTypes: InputType[] = ['checkbox', 'radio', 'range', 'submit', 'reset', 'button', 'hidden'];
 
@@ -156,34 +210,36 @@ export async function requestUserInput(
 		throw new Error(`Type '${type}' not implemented in this function`);
 	}
 
-	inputPopupStore.set({
-		visible: true,
-		content: '',
-		placeholder,
-		type,
-		message,
-	});
-
 	if (type === 'file' || type === 'image') {
-		if (allowMultiple !== undefined && acceptedTypes !== undefined) {
-			return await requestFileInput(allowMultiple, acceptedTypes);
-		} else {
-			throw new Error("Missing parameters for 'file' or 'image' type");
+		if (typeof arg2 !== 'boolean' || typeof arg3 !== 'string') {
+			throw new Error("Missing or incorrect parameters for 'file' or 'image' type");
 		}
-	}
-
-	return await new Promise((resolve, reject) => {
-		const unsubscribe = inputPopupStore.subscribe((state) => {
-			if (!state.visible) {
-				if (validateInput(state.content, type)) {
-					resolve(state.content);
-				} else {
-					reject(new Error(errorMessage));
-				}
-				unsubscribe();
-			}
+		return await requestFileInput(arg2, arg3, type); // arg2: allowMultiple, arg3: acceptedTypes
+	} else {
+		if (typeof arg2 !== 'string' || typeof arg3 !== 'string' || typeof arg4 !== 'string') {
+			throw new Error('Missing or incorrect parameters for input type');
+		}
+		inputPopupStore.set({
+			visible: true,
+			content: '',
+			placeholder: arg2, // arg2: placeholder
+			type,
+			message: arg3, // arg3: message
 		});
-	});
+
+		return await new Promise((resolve, reject) => {
+			const unsubscribe = inputPopupStore.subscribe((state) => {
+				if (!state.visible && state.content != null) {
+					if (validateInput(state.content, type)) {
+						resolve(state.content);
+					} else {
+						reject(new Error(arg4)); // arg4: errorMessage
+					}
+					unsubscribe();
+				}
+			});
+		});
+	}
 }
 
 function validateInput(input: string, type: InputType): boolean {
@@ -232,22 +288,30 @@ function validarSemana(semana: string): boolean {
 	return regex.test(semana);
 }
 
-async function requestFileInput(allowMultiple: boolean, acceptedTypes: string): Promise<File | File[]> {
+async function requestFileInput(
+	allowMultiple: boolean,
+	acceptedTypes: string,
+	type: 'file' | 'image',
+): Promise<File | File[]> {
 	return await new Promise((resolve, reject) => {
-		const input = document.createElement('input');
-		input.type = 'file';
-		input.multiple = allowMultiple;
-		input.accept = acceptedTypes;
+		inputPopupStore.set({
+			visible: true,
+			type,
+			message: 'Selecciona un archivo',
+			allowMultiple,
+			acceptedTypes,
+		});
 
-		input.onchange = (e) => {
-			const files = (e.target as HTMLInputElement).files;
-			if (files != null && files.length > 0) {
-				resolve(allowMultiple ? Array.from(files) : files[0]);
-			} else {
-				reject(new Error('No file selected'));
+		const unsubscribe = inputPopupStore.subscribe((state) => {
+			if (!state.visible) {
+				if (state.selectedFiles != null && state.selectedFiles.length > 0) {
+					const files = state.selectedFiles.map((filePreview) => filePreview.file);
+					resolve(allowMultiple ? files : files[0]);
+				} else {
+					reject(new Error('No file selected'));
+				}
+				unsubscribe();
 			}
-		};
-
-		input.click();
+		});
 	});
 }

@@ -2,7 +2,9 @@
 
 import '../styles/components/Carrousel.scss';
 
+import { db } from '@firebase/client';
 import { useStore } from '@nanostores/react';
+import { collection, getDocs } from 'firebase/firestore';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 
@@ -11,16 +13,44 @@ import { type User } from '../interfaces/User';
 import ArrowIcon from './buttons/ArrowIcon';
 import ProfileCard from './ProfileCard';
 
-interface CarruselProps {
-	profilesData: User[];
-}
-
-const Carrusel: React.FC<CarruselProps> = ({ profilesData }) => {
+const Carrusel: React.FC = () => {
 	const chunkSize = 3;
 	const $chunkIndex = useStore(chunkIndex);
+	const [profilesData, setProfilesData] = useState<User[]>([]);
 	const [currentChunkData, setCurrentChunkData] = useState(() => profilesData.slice(0, chunkSize));
 	const [profileClasses, setProfileClasses] = useState(['estado1', 'estado2', 'estado3']);
 	const $animationFinished = useStore(animationFinished);
+
+	const getProfilesData = async (): Promise<User[]> => {
+		try {
+			const usersRef = collection(db, 'users');
+			const profilesData = await getDocs(usersRef)
+				.then((querySnapshot) => {
+					const data: User[] = [];
+					querySnapshot.forEach((doc) => {
+						data.push(doc.data() as User);
+					});
+					return data;
+				})
+				.catch((error) => {
+					throw new Error(error);
+				});
+			return profilesData;
+		} catch (error: any) {
+			console.error(error);
+		}
+		return [];
+	};
+
+	useEffect(() => {
+		void getProfilesData()
+			.then((data) => {
+				setProfilesData(data);
+			})
+			.catch((error) => {
+				console.error(error);
+			});
+	}, []);
 
 	const nextStep = () => {
 		if ($animationFinished) return; // Prevenir múltiples clics si ya está deshabilitado
@@ -113,9 +143,9 @@ const Carrusel: React.FC<CarruselProps> = ({ profilesData }) => {
 				</motion.div>
 			</AnimatePresence>
 			<i
-				className={`nextButton ${$animationFinished ? 'disabled' : ''}`}
+				className={`nextButton ${$animationFinished || profilesData.length < 3 ? 'disabled' : ''}`}
 				onClick={() => {
-					if (!$animationFinished) {
+					if (!$animationFinished && profilesData.length > 3) {
 						nextStep();
 					}
 				}}

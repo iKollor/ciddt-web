@@ -1,21 +1,56 @@
 /* eslint-disable @typescript-eslint/strict-boolean-expressions */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
+import { db } from '@firebase/client';
 import { useStore } from '@nanostores/react';
+import type { User } from 'firebase/auth';
+import { collection, getDocs } from 'firebase/firestore';
 import { motion, useAnimation } from 'framer-motion';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { animationFinished, chunkIndex } from '../../hooks/carrouselStores';
 
 interface NavigationButtonsProps {
-	Data: any[];
 	className?: string;
 }
 
-const NavigationButtons: React.FC<NavigationButtonsProps> = ({ Data, className }) => {
+const NavigationButtons: React.FC<NavigationButtonsProps> = ({ className }) => {
 	const $chunkIndex = useStore(chunkIndex);
 	const $animationFinished = useStore(animationFinished);
 	const progressBarControls = useAnimation();
 	const containerRef = useRef(null);
+
+	const getProfilesData = async (): Promise<User[]> => {
+		try {
+			const usersRef = collection(db, 'users');
+			const profilesData = await getDocs(usersRef)
+				.then((querySnapshot) => {
+					const data: User[] = [];
+					querySnapshot.forEach((doc) => {
+						data.push(doc.data() as User);
+					});
+					return data;
+				})
+				.catch((error) => {
+					throw new Error(error);
+				});
+			return profilesData;
+		} catch (error: any) {
+			console.error(error);
+		}
+		return [];
+	};
+
+	const [Data, setData] = useState<User[]>([]);
+
+	useEffect(() => {
+		void getProfilesData()
+			.then((data) => {
+				setData(data);
+			})
+			.catch((error) => {
+				console.error(error);
+			});
+	}, []);
 
 	useEffect(() => {
 		const updateCircles = () => {
@@ -94,7 +129,7 @@ const NavigationButtons: React.FC<NavigationButtonsProps> = ({ Data, className }
 		const observer = new IntersectionObserver(
 			(entries) => {
 				const [entry] = entries;
-				if (entry.isIntersecting) {
+				if (entry.isIntersecting && Data.length > 3) {
 					startInterval();
 				} else {
 					// Si no está intersectando, limpia el intervalo
