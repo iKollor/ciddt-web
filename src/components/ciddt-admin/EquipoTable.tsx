@@ -250,29 +250,38 @@ const EquipoTable: React.FC<Props> = ({ userRecord }) => {
 								className="border-b border-solid last:border-b-0 border-white border-opacity-20 hover:bg-edgewater-700 cursor-pointer transition-all duration-150 ease-in-out"
 							>
 								{/* Celda para la foto del perfil */}
-								<td className="p-3 rounded-tl-md rounded-bl-md max-w-[60px]">
+								<td className="py-3 rounded-tl-md rounded-bl-md max-w-[60px]">
 									<div className="flex flex-row items-center gap-3">
 										<img
 											src={equipo.urlFotoPerfil ?? '/assets/images/profile_placeholder.jpg'}
 											alt="Profile Picture"
-											className="w-[30px] h-[30px] inline-block shrink-0 rounded-md"
+											className="w-[30px] h-[30px] object-cover inline-block shrink-0 rounded-md"
 										/>
 										<h1>{equipo.displayName}</h1>
 									</div>
 								</td>
-								<td className="capitalize pl-6">{equipo.position}</td>
+								<td className="capitalize">{equipo.position}</td>
 								<td className="text-center">{equipo.age ?? 'N/A'}</td>
-								<td className="max-w-[200px] truncate">
-									<Tooltip content={equipo.details} children={<div>{equipo.details}</div>} />
+								<td className="pr-3 max-w-[120px] truncate">
+									<Tooltip
+										content={equipo.details}
+										children={<p className="truncate text-ellipsis">{equipo.details}</p>}
+									/>
 								</td>
 								<td className="rounded-tr-md rounded-br-md">
 									<div className="flex gap-4">
 										{isOwner && (
-											<button className="bg-edgewater-600 p-2 rounded-md hover:bg-edgewater-500 transition-all duration-200 ease-in-out flex justify-center">
+											<button
+												type="button"
+												className="bg-edgewater-600 p-2 rounded-md hover:bg-edgewater-500 transition-all duration-200 ease-in-out flex justify-center"
+											>
 												<FontAwesomeIcon icon={faPencil} className="h-4 w-4" />
 											</button>
 										)}
-										<button className="bg-edgewater-600 p-2 rounded-md hover:bg-edgewater-500 transition-all duration-200 ease-in-out  flex justify-center">
+										<button
+											type="button"
+											className="bg-edgewater-600 p-2 rounded-md hover:bg-edgewater-500 transition-all duration-200 ease-in-out  flex justify-center"
+										>
 											<FontAwesomeIcon icon={faClose} className="h-4 w-4" />
 										</button>
 									</div>

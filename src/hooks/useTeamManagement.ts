@@ -60,6 +60,12 @@ const useTeamManagement = (): {
 	 * @returns A Promise that resolves to true if the user with the given ID is the owner of the team with the given ID, false otherwise.
 	 */
 	isUserTeamOwner: (userId: string, teamId: string) => Promise<boolean>;
+	/**
+	 * Retrieves the profiles of the members of the team with the given ID.
+	 * @param teamId - The unique identifier of a team.
+	 * @returns A Promise that resolves to an array containing the profiles of the members of the team with the given ID.
+	 */
+	getProfilesData: (teamId: string) => Promise<User[]>;
 } => {
 	const getTeamByUserId = async (userId: string): Promise<DocumentReference | null> => {
 		const userRef = doc(db, 'users', userId);
@@ -132,6 +138,30 @@ const useTeamManagement = (): {
 		return teamData.owner === userId;
 	};
 
+	const getProfilesData = async (teamId: string): Promise<User[]> => {
+		const teamRef = doc(db, 'teams', teamId);
+		const teamSnap = await getDoc(teamRef);
+
+		if (!teamSnap.exists()) {
+			throw new Error('Equipo no encontrado.');
+		}
+
+		const teamData = teamSnap.data() as Team;
+		const members = teamData.members ?? [];
+		const profiles: User[] = [];
+
+		for (const memberId of members) {
+			const userRef = doc(db, 'users', memberId);
+			const userSnap = await getDoc(userRef);
+			if (userSnap.exists()) {
+				const userData = userSnap.data() as User;
+				profiles.push(userData);
+			}
+		}
+
+		return profiles;
+	};
+
 	return {
 		getTeamByUserId,
 		createTeam,
@@ -140,6 +170,7 @@ const useTeamManagement = (): {
 		validateMemberId,
 		isMemberAlreadyInTeam,
 		isUserTeamOwner,
+		getProfilesData,
 	};
 };
 

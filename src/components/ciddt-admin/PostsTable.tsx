@@ -306,7 +306,10 @@ const PostsTable: React.FC<Props> = ({ pagePosts, userRecord, provider }) => {
 										{post.likesCount}
 									</td>
 									<td id="details" className="max-w-[120px] truncate">
-										<Tooltip content={post.details} children={<div>{post.details}</div>} />
+										<Tooltip
+											content={post.details}
+											children={<p className="truncate text-ellipsis">{post.details}</p>}
+										/>
 									</td>
 									<td id="date" className="rounded-tr-md rounded-br-md pl-6">
 										{new Date(post.timestamp).toLocaleDateString('es', {

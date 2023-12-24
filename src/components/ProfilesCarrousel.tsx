@@ -2,16 +2,17 @@
 
 import '../styles/components/Carrousel.scss';
 
-import { db } from '@firebase/client';
 import { useStore } from '@nanostores/react';
-import { collection, getDocs } from 'firebase/firestore';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
+import useTeamManagement from 'src/hooks/useTeamManagement';
 
 import { animationFinished, chunkIndex } from '../hooks/carrouselStores';
 import { type User } from '../interfaces/User';
 import ArrowIcon from './buttons/ArrowIcon';
 import ProfileCard from './ProfileCard';
+
+const teamId = import.meta.env.PUBLIC_TEAM_ID;
 
 const Carrusel: React.FC = () => {
 	const chunkSize = 3;
@@ -21,29 +22,11 @@ const Carrusel: React.FC = () => {
 	const [profileClasses, setProfileClasses] = useState(['estado1', 'estado2', 'estado3']);
 	const $animationFinished = useStore(animationFinished);
 
-	const getProfilesData = async (): Promise<User[]> => {
-		try {
-			const usersRef = collection(db, 'users');
-			const profilesData = await getDocs(usersRef)
-				.then((querySnapshot) => {
-					const data: User[] = [];
-					querySnapshot.forEach((doc) => {
-						data.push(doc.data() as User);
-					});
-					return data;
-				})
-				.catch((error) => {
-					throw new Error(error);
-				});
-			return profilesData;
-		} catch (error: any) {
-			console.error(error);
-		}
-		return [];
-	};
+	const { getProfilesData } = useTeamManagement();
 
 	useEffect(() => {
-		void getProfilesData()
+		if (teamId == null) return;
+		void getProfilesData(teamId)
 			.then((data) => {
 				setProfilesData(data);
 			})

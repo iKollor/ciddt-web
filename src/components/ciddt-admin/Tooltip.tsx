@@ -25,12 +25,12 @@ const Tooltip: React.FC<TooltipProps> = ({ children, content }) => {
 	};
 
 	return (
-		<div onMouseEnter={showTooltip} onMouseMove={moveTooltip} onMouseLeave={hideTooltip} className="relative">
+		<div onMouseEnter={showTooltip} onMouseMove={moveTooltip} onMouseLeave={hideTooltip} className="relative ">
 			{children}
 			{visible &&
 				createPortal(
 					<motion.div
-						className="absolute bg-black text-white p-2 rounded shadow-lg max-w-md overflow-hidden text-ellipsis z-[49]"
+						className="absolute bg-black text-white p-2 rounded shadow-lg max-w-md overflow-hidden text-ellipsis z-[52]"
 						initial={{ opacity: 0, scale: 0 }}
 						animate={{ opacity: 1, scale: 1 }}
 						exit={{ opacity: 0, scale: 0 }}

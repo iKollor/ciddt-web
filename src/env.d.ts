@@ -23,6 +23,7 @@ interface ImportMetaEnv {
 	readonly FIREBASE_AUTH_CERT_URL: string;
 	readonly FIREBASE_CLIENT_CERT_URL: string;
 	readonly PUBLIC_SERVER_URL: string;
+	readonly TEAM_ID: string;
 }
 
 interface ImportMeta {
