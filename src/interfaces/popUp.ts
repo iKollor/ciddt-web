@@ -30,7 +30,7 @@ export type InputType =
 	| 'url'
 	| 'tel'
 	| 'hidden';
-interface FilePreview {
+export interface FilePreview {
 	file: File;
 	previewUrl: string | null;
 }
@@ -43,4 +43,9 @@ export interface InputPopupProps {
 	selectedFiles?: FilePreview[];
 	allowMultiple?: boolean;
 	acceptedTypes?: string;
+	closedByUser?: boolean;
+	imageCrop?: boolean;
+	imageCropAspectRatio?: number;
+	inputImageTitle?: string;
+	inputImageSubtitle?: string;
 }

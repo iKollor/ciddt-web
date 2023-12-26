@@ -1,5 +1,5 @@
 import { db } from '@firebase/client';
-import { addDoc, collection, doc, type DocumentReference, getDoc, updateDoc } from 'firebase/firestore';
+import { addDoc, collection, doc, type DocumentReference, getDoc, updateDoc } from 'firebase/firestore/lite';
 
 import type { User } from '../interfaces/User';
 

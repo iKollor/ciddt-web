@@ -2,11 +2,16 @@ import { auth, db } from '@firebase/client';
 import { getUserAccessToken } from '@firebase/login';
 import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { doc, getDoc, type Timestamp, updateDoc } from 'firebase/firestore';
+// eslint-disable-next-line import/no-unresolved
+import { navigate } from 'astro:transitions/client';
+import { doc, getDoc, type Timestamp, updateDoc } from 'firebase/firestore/lite';
 import type { UserRecord } from 'firebase-admin/auth';
-import React, { type FC, useEffect, useState } from 'react';
+import React, { type FC, type ReactNode, useEffect, useState } from 'react';
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { popupStore } from 'src/hooks/popupStores';
 import type { UserPage } from 'src/interfaces/UserPages';
+
+import ImageLoader from './ImageLoader';
 
 interface PagesTablesProps {
 	userRecord: UserRecord;
@@ -23,16 +28,28 @@ const PagesTables: FC<PagesTablesProps> = ({ userRecord }) => {
 	useEffect(() => {
 		const fetchUserPages = async (): Promise<void> => {
 			const userRef = doc(db, 'users', userRecord.uid, 'providers', 'facebook');
-			const querySnapshot = await getDoc(userRef);
+			try {
+				setIsLoading(true);
+				const querySnapshot = await getDoc(userRef);
 
-			const userPages: UserPage[] = [];
-			// pages in firebase are store as an array object
-			if (querySnapshot.data()?.pages != null) {
-				querySnapshot.data()?.pages.forEach((page: any) => {
-					userPages.push(page);
+				const userPages: UserPage[] = [];
+				// pages in firebase are store as an array object
+				if (querySnapshot.data()?.pages != null) {
+					querySnapshot.data()?.pages.forEach((page: any) => {
+						userPages.push(page);
+					});
+				}
+				setPages(userPages);
+				setIsLoading(false);
+			} catch (error: any) {
+				popupStore.set({
+					title: 'Error',
+					message: `Error al cargar páginas: ${error.message}`,
+					type: 'danger',
+					visible: true,
 				});
+				setIsLoading(false);
 			}
-			setPages(userPages);
 		};
 
 		void fetchUserPages();
@@ -169,6 +186,7 @@ const PagesTables: FC<PagesTablesProps> = ({ userRecord }) => {
 				visible: true,
 			});
 			setIsLoading(false);
+			await navigate('#');
 		} catch (error: any) {
 			console.error('Error fetching user pages:', error);
 			popupStore.set({
@@ -182,6 +200,27 @@ const PagesTables: FC<PagesTablesProps> = ({ userRecord }) => {
 		}
 	};
 
+	const renderSkeleton = (): ReactNode => (
+		<SkeletonTheme baseColor="#27474f" highlightColor="#559b81" height={20}>
+			<tr className="border-b border-solid last:border-b-0 border-white border-opacity-20 transition-all duration-150 ease-in-out">
+				<td className="w-[450px] py-3">
+					<div className="flex items-center space-x-4">
+						<Skeleton height={30} width={30} />
+						<div className="flex-grow">
+							<Skeleton width="90%" />
+						</div>
+					</div>
+				</td>
+				<td>
+					<Skeleton width="70%" />
+				</td>
+				<td>
+					<Skeleton width="50%" />
+				</td>
+			</tr>
+		</SkeletonTheme>
+	);
+
 	return (
 		<>
 			<div>
@@ -189,7 +228,10 @@ const PagesTables: FC<PagesTablesProps> = ({ userRecord }) => {
 					onClick={() => {
 						void handleUpdatePages();
 					}}
-					className="bg-edgewater-600 p-2 h-10 w-40 rounded-md hover:bg-edgewater-500 transition-all duration-200 ease-in-out px-3 mb-4 flex justify-center"
+					className={`bg-edgewater-600 p-2 h-10 w-40 rounded-md hover:bg-edgewater-500 transition-all duration-200 ease-in-out px-3 mb-4 flex justify-center ${
+						isLoading ? 'pointer-events-none cursor-not-allowed' : ''
+					}`}
+					disabled={isLoading}
 				>
 					{isLoading ? (
 						<FontAwesomeIcon icon={faSpinner} className="h-6 w-6 animate-spin" />
@@ -208,26 +250,33 @@ const PagesTables: FC<PagesTablesProps> = ({ userRecord }) => {
 						</tr>
 					</thead>
 					<tbody>
-						{pages?.map((page: UserPage, idx: number) => (
-							<tr
-								key={idx}
-								className="border-b border-solid last:border-b-0 border-white border-opacity-20 hover:bg-edgewater-700 cursor-pointer transition-all duration-150 ease-in-out"
-								onClick={() => window.open(page.link, '_blank')}
-							>
-								<td className="truncate rounded-tl-md rounded-bl-md">
-									<div className="flex flex-row items-center gap-3">
-										<img
-											src={page.picture}
-											alt="Profile"
-											className="w-[30px] h-[30px] inline-block shrink-0 rounded-md"
-										/>
-										<h1>{page.name}</h1>
-									</div>
-								</td>
-								<td className="p-3">{page.id}</td>
-								<td className="capitalize rounded-tr-md rounded-br-md">{page.account_type}</td>
-							</tr>
-						))}
+						{isLoading
+							? // Muestra el esqueleto si los datos están cargando
+								Array(6)
+									.fill(null)
+									.map((_, idx) => <React.Fragment key={idx}>{renderSkeleton()}</React.Fragment>)
+							: pages?.map((page: UserPage, idx: number) => (
+									<tr
+										key={idx}
+										className="border-b border-solid last:border-b-0 border-white border-opacity-20 hover:bg-edgewater-700 cursor-pointer transition-all duration-150 ease-in-out"
+										onClick={() => window.open(page.link, '_blank')}
+									>
+										<td className="truncate rounded-tl-md rounded-bl-md max-w-[300px]">
+											<div className="flex flex-row items-center gap-3">
+												<ImageLoader
+													src={page.picture}
+													alt="page picture"
+													className="w-[30px] h-[30px] inline-block shrink-0 rounded-md"
+													height={30}
+													width={30}
+												/>
+												<h1>{page.name}</h1>
+											</div>
+										</td>
+										<td className="p-3">{page.id}</td>
+										<td className="capitalize rounded-tr-md rounded-br-md">{page.account_type}</td>
+									</tr>
+								))}
 					</tbody>
 				</table>
 				{pages.length === 0 && (

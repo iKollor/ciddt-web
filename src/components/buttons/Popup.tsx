@@ -16,7 +16,7 @@ const Popup = () => {
 		// Definir el tiempo de vida del popup
 		const timeout = setTimeout(() => {
 			handleClose();
-		}, lifeTime * 1000); //  3 segundos
+		}, lifeTime * 1000);
 
 		return () => {
 			clearTimeout(timeout);

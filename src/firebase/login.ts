@@ -10,7 +10,7 @@ import {
 	updateProfile,
 	type User,
 } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore/lite';
 import { type popUp } from 'src/interfaces/popUp';
 
 import { auth, db } from './client';
@@ -218,8 +218,8 @@ const handleNewUser = async (user: User, accessToken: string): Promise<popUp> =>
 		let email: string | null = null;
 		if (user.email == null) {
 			email = await requestUserInput(
-				'Correo electrónico',
 				'email',
+				'Correo electrónico',
 				'Ingresa tu correo electrónico',
 				'Correo electrónico no válido o cancelado por el usuario',
 			);

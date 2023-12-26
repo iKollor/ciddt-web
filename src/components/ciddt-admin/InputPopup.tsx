@@ -1,15 +1,25 @@
 /* eslint-disable import/no-named-as-default-member */
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
+import 'react-image-crop/src/ReactCrop.scss';
+
 import { useStore } from '@nanostores/react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { type SyntheticEvent, useRef, useState } from 'react';
+import ReactCrop, { centerCrop, convertToPixelCrop, type Crop, makeAspectCrop, type PixelCrop } from 'react-image-crop';
 import { inputPopupStore } from 'src/hooks/popupStores';
-import type { InputType } from 'src/interfaces/popUp';
+import type { FilePreview, InputType } from 'src/interfaces/popUp';
 import validator from 'validator';
 
 import Tooltip from './Tooltip';
 
-const InputPopup = () => {
+const InputPopup: React.FC = () => {
 	const popUpState = useStore(inputPopupStore);
+
+	const [files, setFiles] = useState<FilePreview[] | undefined>(undefined);
+
+	const [crop, setCrop] = useState<Crop>();
+
+	const imageRef = useRef<HTMLImageElement>(null);
+
 	const popupVariants = {
 		open: {
 			scale: 1,
@@ -24,39 +34,121 @@ const InputPopup = () => {
 	};
 
 	const handleClose = (): void => {
-		inputPopupStore.set({ ...popUpState, visible: false, content: '' }); // Actualizar el estado para ocultar el popup
+		inputPopupStore.set({ ...popUpState, visible: false, content: '', closedByUser: true, selectedFiles: [] });
+		setFiles(undefined);
 	};
 
-	const handleSubmit = (): void => {
-		let displayContent;
+	const handleSubmit = async (): Promise<void> => {
+		let croppedFile: FilePreview[] | undefined;
+		if (popUpState.type === 'image') {
+			if (
+				popUpState.imageCrop === true &&
+				crop?.width !== 0 &&
+				crop?.height !== 0 &&
+				popUpState.allowMultiple === false &&
+				crop != null
+			) {
+				try {
+					const selectedFile = popUpState.selectedFiles?.[0].file;
+					if (selectedFile != null) {
+						const imageUrl = URL.createObjectURL(selectedFile);
+						const blob = await getCroppedImg(
+							imageUrl,
+							convertToPixelCrop(
+								crop,
+								imageRef.current?.naturalWidth ?? 0,
+								imageRef.current?.naturalHeight ?? 0,
+							),
+							selectedFile.type,
+						);
+						const croppedImage = new File([blob], selectedFile.name, { type: selectedFile.type });
+						const croppedImageUrl = URL.createObjectURL(croppedImage);
+						croppedFile = [
+							{
+								file: croppedImage,
+								previewUrl: croppedImageUrl,
+							},
+						];
 
-		if (popUpState.type === 'text') {
-			displayContent = popUpState.content; // Contenido para tipos de texto
-		} else if (popUpState.type === 'file' || popUpState.type === 'image') {
-			// Muestra los nombres de los archivos seleccionados
-			const fileNames = popUpState.selectedFiles?.map((filePreview) => filePreview.file.name).join(', ');
-			displayContent = fileNames ?? 'No files selected';
-		} else {
-			displayContent = 'Unknown content';
+						URL.revokeObjectURL(imageUrl);
+					}
+				} catch (error) {
+					console.error('Error al procesar la imagen: ', error);
+				}
+			} else {
+				if (files != null) {
+					inputPopupStore.set({
+						...popUpState,
+						selectedFiles: files,
+					});
+				}
+			}
+		} else if (popUpState.type === 'file') {
+			if (files != null) {
+				inputPopupStore.set({
+					...popUpState,
+					selectedFiles: files,
+				});
+			}
 		}
 
-		if (window.confirm(`¿Estás seguro?: ${displayContent}`)) {
-			inputPopupStore.set({ ...popUpState, visible: false });
+		// Confirmación y cierre
+		if (
+			window.confirm(
+				`¿Estás seguro?: ${
+					popUpState.selectedFiles
+						?.map((file) => {
+							return file.file.name;
+						})
+						.join(', ') ??
+					popUpState.content ??
+					''
+				}`,
+			)
+		) {
+			inputPopupStore.set({
+				...popUpState,
+				visible: false,
+				closedByUser: false,
+				selectedFiles: croppedFile ?? files ?? [],
+			});
+			setFiles(undefined);
 		}
 	};
 
-	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
 		const files = e.target.files;
 
-		if (files != null && files.length > 0) {
-			const filePreviews = Array.from(files).map((file) => {
-				const previewUrl = file.type.startsWith('image/') ? URL.createObjectURL(file) : null;
-				return { file, previewUrl };
+		if (files != null) {
+			const filesPreview = Array.from(files).map((file) => ({
+				file,
+				previewUrl: file.type.startsWith('image/') ? URL.createObjectURL(file) : null,
+			}));
+			inputPopupStore.set({
+				...popUpState,
+				selectedFiles: filesPreview,
 			});
-
-			inputPopupStore.set({ ...popUpState, selectedFiles: filePreviews });
+			setFiles(filesPreview);
 		}
 	};
+
+	function changeCrop(event: SyntheticEvent<HTMLImageElement, Event>): void {
+		const { naturalWidth: width, naturalHeight: height } = event.currentTarget;
+		const crop = centerCrop(
+			makeAspectCrop(
+				{
+					unit: '%',
+					height: 100,
+				},
+				popUpState.imageCropAspectRatio ?? 1,
+				width,
+				height,
+			),
+			width,
+			height,
+		);
+		setCrop(crop);
+	}
 
 	return (
 		<AnimatePresence>
@@ -95,14 +187,40 @@ const InputPopup = () => {
 						/>
 						{popUpState.type === 'image' || popUpState.type === 'file' ? (
 							<div>
-								{popUpState.selectedFiles?.map((filePreview, index) =>
+								{files?.map((filePreview, index) =>
 									filePreview.previewUrl != null ? (
 										<div key={index} className="flex flex-col justify-center items-center gap-2">
-											<img
-												src={filePreview.previewUrl}
-												alt={`Preview ${index}`}
-												style={{ maxWidth: '100%', maxHeight: '200px' }}
-											/>
+											<div className="text-center">
+												<h1 className="text-xl bold">{popUpState.inputImageTitle}</h1>
+												<p>{popUpState.inputImageSubtitle}</p>
+											</div>
+											{popUpState.type === 'image' ? (
+												popUpState.imageCrop === true ? (
+													<ReactCrop
+														crop={crop}
+														onChange={(_crop, percentCrop) => {
+															setCrop(percentCrop);
+														}}
+														aspect={popUpState.imageCropAspectRatio ?? 1}
+														style={{ maxWidth: '100%', maxHeight: '200px' }}
+														minHeight={100}
+														minWidth={100}
+													>
+														<img
+															ref={imageRef}
+															src={filePreview.previewUrl}
+															alt={`Preview ${filePreview.file.name}`}
+															onLoad={changeCrop}
+														/>
+													</ReactCrop>
+												) : (
+													<img
+														src={filePreview.previewUrl}
+														alt={`Preview ${filePreview.file.name}`}
+													/>
+												)
+											) : null}
+
 											<Tooltip
 												children={
 													<p className="truncate max-w-[350px]">{filePreview.file.name}</p>
@@ -125,7 +243,9 @@ const InputPopup = () => {
 						) : null}
 						<button
 							type="button"
-							onClick={handleSubmit}
+							onClick={() => {
+								void handleSubmit();
+							}}
 							className="text-white bg-edgewater-400 hover:bg-edgewater-500 transition-all p-2 px-6 m-2 text-center rounded-md z-[1]"
 						>
 							OK
@@ -187,7 +307,12 @@ export async function requestUserInput(
  * Requests user input specifically for file inputs.
  * @param type - The type of input field ('file' or 'image').
  * @param allowMultiple - Whether multiple files can be selected.
- * @param acceptedTypes - The accepted file types, e.g., '.pdf, .docx'.
+ * @param acceptedTypes - The accepted file types, e.g., '.jpg, .png'.
+ * @param errorMessage - The error message to display if the input is invalid.
+ * @param imageCrop - Whether to crop the image.
+ * @param imageCropAspectRatio - The aspect ratio to use for cropping.
+ * @param inputImageTitle - The title to display for the image input.
+ * @param inputImageSubtitle - The subtitle to display for the image input.
  * @returns A promise that resolves with the selected file(s).
  * @throws Error if the required parameters are missing for 'file' or 'image' types.
  */
@@ -195,6 +320,10 @@ export async function requestUserInput(
 	type: 'file' | 'image',
 	allowMultiple: boolean,
 	acceptedTypes: string,
+	imageCrop?: boolean,
+	imageCropAspectRatio?: number,
+	inputImageTitle?: string,
+	inputImageSubtitle?: string,
 ): Promise<File | File[]>;
 
 // Implementación genérica
@@ -202,7 +331,10 @@ export async function requestUserInput(
 	type: InputType,
 	arg2: string | boolean, // arg2: allowMultiple | placeholder
 	arg3?: string, // arg3: acceptedTypes | message
-	arg4?: string, // arg4: errorMessage
+	arg4?: string | boolean, // arg4: errorMessage | imageCrop
+	imageCropAspectRatio?: number,
+	inputImageTitle?: string,
+	inputImageSubtitle?: string,
 ): Promise<string | File | File[]> {
 	const notImplementedTypes: InputType[] = ['checkbox', 'radio', 'range', 'submit', 'reset', 'button', 'hidden'];
 
@@ -211,10 +343,18 @@ export async function requestUserInput(
 	}
 
 	if (type === 'file' || type === 'image') {
-		if (typeof arg2 !== 'boolean' || typeof arg3 !== 'string') {
+		if (typeof arg2 !== 'boolean' || typeof arg3 !== 'string' || typeof arg4 !== 'boolean') {
 			throw new Error("Missing or incorrect parameters for 'file' or 'image' type");
 		}
-		return await requestFileInput(arg2, arg3, type); // arg2: allowMultiple, arg3: acceptedTypes
+		return await requestFileInput(
+			type,
+			arg2, // arg2: allowMultiple
+			arg3, // arg3: acceptedTypes
+			arg4, // arg4: errorMessage
+			imageCropAspectRatio,
+			inputImageTitle,
+			inputImageSubtitle,
+		);
 	} else {
 		if (typeof arg2 !== 'string' || typeof arg3 !== 'string' || typeof arg4 !== 'string') {
 			throw new Error('Missing or incorrect parameters for input type');
@@ -230,11 +370,12 @@ export async function requestUserInput(
 		return await new Promise((resolve, reject) => {
 			const unsubscribe = inputPopupStore.subscribe((state) => {
 				if (!state.visible && state.content != null) {
-					if (validateInput(state.content, type)) {
-						resolve(state.content);
-					} else {
-						reject(new Error(arg4)); // arg4: errorMessage
-					}
+					if (state.closedByUser === true)
+						reject(new Error('User closed popup', { cause: { userClosed: true } }));
+					if (!validateInput(state.content, type)) reject(new Error(arg4));
+
+					resolve(state.content);
+
 					unsubscribe();
 				}
 			});
@@ -289,9 +430,13 @@ function validarSemana(semana: string): boolean {
 }
 
 async function requestFileInput(
+	type: 'file' | 'image',
 	allowMultiple: boolean,
 	acceptedTypes: string,
-	type: 'file' | 'image',
+	imageCrop?: boolean,
+	imageCropAspectRatio?: number,
+	inputImageTitle?: string,
+	inputImageSubtitle?: string,
 ): Promise<File | File[]> {
 	return await new Promise((resolve, reject) => {
 		inputPopupStore.set({
@@ -300,10 +445,17 @@ async function requestFileInput(
 			message: 'Selecciona un archivo',
 			allowMultiple,
 			acceptedTypes,
+			imageCrop,
+			imageCropAspectRatio,
+			inputImageTitle,
+			inputImageSubtitle,
 		});
 
 		const unsubscribe = inputPopupStore.subscribe((state) => {
 			if (!state.visible) {
+				if (state.closedByUser === true)
+					reject(new Error('User closed popup', { cause: { userClosed: true } }));
+
 				if (state.selectedFiles != null && state.selectedFiles.length > 0) {
 					const files = state.selectedFiles.map((filePreview) => filePreview.file);
 					resolve(allowMultiple ? files : files[0]);
@@ -313,5 +465,51 @@ async function requestFileInput(
 				unsubscribe();
 			}
 		});
+	});
+}
+/**
+ * Crea una imagen recortada a partir de una imagen original y parámetros de recorte.
+ * @param imageSrc La URL de la imagen original.
+ * @param crop Los parámetros de recorte en píxeles.
+ * @param type El tipo de archivo de la imagen.
+ * @returns {Promise<Blob>} Un blob de la imagen recortada.
+ */
+export async function getCroppedImg(imageSrc: string, crop: PixelCrop, type: Blob['type']): Promise<Blob> {
+	const image = new Image();
+	image.src = imageSrc;
+	await new Promise((resolve) => {
+		image.onload = resolve;
+	});
+	const canvas = document.createElement('canvas');
+	const ctx = canvas.getContext('2d');
+	if (ctx == null) {
+		throw new Error('No se pudo crear un contexto de canvas');
+	}
+	const pixelRatio = window.devicePixelRatio;
+	const scaleX = image.naturalWidth / image.width;
+	const scaleY = image.naturalHeight / image.height;
+	canvas.width = Math.floor(crop.width * scaleX * pixelRatio);
+	canvas.height = Math.floor(crop.height * scaleY * pixelRatio);
+
+	ctx.scale(pixelRatio, pixelRatio);
+	ctx.imageSmoothingQuality = 'high';
+	ctx.save();
+
+	const cropX = crop.x * scaleX;
+	const cropY = crop.y * scaleY;
+
+	ctx.translate(-cropX, -cropY);
+	ctx.drawImage(image, 0, 0, image.naturalWidth, image.naturalHeight, 0, 0, image.naturalWidth, image.naturalHeight);
+
+	ctx.restore();
+
+	return await new Promise((resolve, reject) => {
+		canvas.toBlob((blob) => {
+			if (blob == null) {
+				reject(new Error('Canvas is empty'));
+				return;
+			}
+			resolve(blob);
+		}, type);
 	});
 }

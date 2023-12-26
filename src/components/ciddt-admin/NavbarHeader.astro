@@ -1,21 +1,12 @@
 ---
 import { Image } from 'astro:assets';
 import type { UserRecord } from 'firebase-admin/auth';
-import { getProfilePicture } from 'src/hooks/useEditProfileManagment';
 
 interface Props {
 	userRecord: UserRecord;
 }
 
 const { userRecord } = Astro.props;
-
-let profilePicture: string | undefined;
-
-try {
-	profilePicture = await getProfilePicture(userRecord?.uid);
-} catch (error) {
-	console.error(error);
-}
 ---
 
 <nav class="h-[80px] w-full fixed top-0 left-0 z-10 my-4">
@@ -28,13 +19,13 @@ try {
 			<div class="relative">
 				<button type="button" id="dropdownButton">
 					<picture class="flex items-center">
-						<div class="rounded-full w-14 h-14 cursor-pointer overflow-hidden">
+						<div class="rounded-full w-[50px] h-[50px] cursor-pointer overflow-hidden">
 							<Image
 								class="object-cover w-full h-full"
-								src={profilePicture ?? 'https://img.icons8.com/?size=256&id=98957&format=png'}
+								src={userRecord?.photoURL ?? 'https://img.icons8.com/?size=256&id=98957&format=png'}
 								alt="user_profilePicture"
-								width={56}
-								height={56}
+								width={100}
+								height={100}
 								transition:name="profilePicture"
 								transition:persist
 							/>
@@ -105,7 +96,15 @@ try {
 
 		editPhotoButton?.addEventListener('click', async () => {
 			try {
-				const files = await requestUserInput('image', false, '.jpg,.jpeg,.png');
+				const files = await requestUserInput(
+					'image',
+					false,
+					'.jpg,.jpeg,.png',
+					true,
+					12 / 16,
+					'Ajusta tu imagen',
+					'Recuerda que la imagen que coloques aquí estará en la sección equipo de tu página',
+				);
 
 				if (files instanceof File && auth.currentUser != null) {
 					loader.set({
@@ -114,25 +113,32 @@ try {
 						type: 'infinite',
 					});
 					// Si se devuelve un único archivo, lo subimos
-					const userId = auth.currentUser?.uid;
-					const success = await uploadProfilePicture(files, userId);
-
-					if (success) {
-						await navigate('#');
-						popupStore.set({
-							visible: true,
-							message: 'La foto de perfil se ha actualizado correctamente',
-							type: 'success',
-							title: 'Foto de perfil actualizada',
-						});
+					if (auth.currentUser != null) {
+						const success = await uploadProfilePicture(files, auth.currentUser);
+						if (success) {
+							// reload the page to update the profile picture
+							location.reload();
+							popupStore.set({
+								visible: true,
+								message: 'La foto de perfil se ha actualizado correctamente',
+								type: 'success',
+								title: 'Foto de perfil actualizada',
+							});
+						}
+					} else {
+						throw new Error(
+							'No se ha podido obtener el usuario actual, por favor, recargue la página o vuelva a iniciar sesión',
+						);
 					}
 				} else {
 					// Manejar el caso de que no se haya devuelto un archivo
 					throw new Error('No se seleccionó ningún archivo');
 				}
 			} catch (error: any) {
+				const userClosed = error.cause?.userClosed ? false : true;
+
 				popupStore.set({
-					visible: true,
+					visible: userClosed,
 					message: error.message,
 					type: 'danger',
 					title: 'Error al subir la imagen',

@@ -125,16 +125,18 @@ const Carrusel: React.FC = () => {
 					))}
 				</motion.div>
 			</AnimatePresence>
-			<i
-				className={`nextButton ${$animationFinished || profilesData.length < 3 ? 'disabled' : ''}`}
-				onClick={() => {
-					if (!$animationFinished && profilesData.length > 3) {
-						nextStep();
-					}
-				}}
-			>
-				<ArrowIcon />
-			</i>
+			{profilesData.length >= 3 && (
+				<i
+					className={`nextButton ${$animationFinished ? 'disabled' : ''}`}
+					onClick={() => {
+						if (!$animationFinished) {
+							nextStep();
+						}
+					}}
+				>
+					<ArrowIcon />
+				</i>
+			)}
 		</>
 	);
 };

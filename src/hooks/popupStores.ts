@@ -13,4 +13,5 @@ export const inputPopupStore = atom<InputPopupProps>({
 	visible: false,
 	type: 'hidden',
 	message: '',
+	closedByUser: false,
 });

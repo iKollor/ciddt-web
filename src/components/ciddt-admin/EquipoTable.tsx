@@ -1,16 +1,18 @@
-import { db } from '@firebase/client';
+import { auth, db } from '@firebase/client';
 import { faClose, faPencil } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 // eslint-disable-next-line import/no-unresolved
 import { navigate } from 'astro:transitions/client';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore/lite';
 import type { UserRecord } from 'firebase-admin/auth';
-import React, { useEffect, useState } from 'react';
+import React, { type ReactNode, useEffect, useState } from 'react';
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { popupStore } from 'src/hooks/popupStores';
 import { loader } from 'src/hooks/pushBody';
 import useTeamManagement from 'src/hooks/useTeamManagement';
 import { type User } from 'src/interfaces/User';
 
+import ImageLoader from './ImageLoader';
 import { requestUserInput } from './InputPopup';
 import Tooltip from './Tooltip';
 
@@ -22,6 +24,7 @@ const EquipoTable: React.FC<Props> = ({ userRecord }) => {
 	const [equipos, setEquipos] = useState<User[]>([]);
 	const [hasTeam, setHasTeam] = useState<boolean>(false);
 	const [isOwner, setIsOwner] = useState<boolean>(false);
+	const [isLoading, setIsLoading] = useState<boolean>(true);
 
 	const {
 		getTeamByUserId,
@@ -67,6 +70,7 @@ const EquipoTable: React.FC<Props> = ({ userRecord }) => {
 		const fetchEquipos = async (): Promise<void> => {
 			if (userRecord != null) {
 				try {
+					setIsLoading(true);
 					const team = await getTeamByUserId(userRecord.uid);
 					if (team != null) {
 						const teamMembers = await getDoc(team);
@@ -82,12 +86,15 @@ const EquipoTable: React.FC<Props> = ({ userRecord }) => {
 										...user,
 									});
 									setEquipos(members);
+									setIsLoading(false);
 								}
 							}
 						}
 					}
 				} catch (error: any) {
 					console.error(error);
+					setIsLoading(false);
+
 					setEquipos([]);
 					popupStore.set({
 						message: error.message,
@@ -218,6 +225,33 @@ const EquipoTable: React.FC<Props> = ({ userRecord }) => {
 		);
 	}
 
+	const renderSkeleton = (): ReactNode => (
+		<SkeletonTheme baseColor="#27474f" highlightColor="#559b81" height={20}>
+			<tr className="border-b border-solid last:border-b-0 border-white border-opacity-20 transition-all duration-150 ease-in-out">
+				<td className="py-3">
+					<div className="flex items-center space-x-4">
+						<Skeleton height={30} width={30} />
+						<div className="flex-grow">
+							<Skeleton width="90%" />
+						</div>
+					</div>
+				</td>
+				<td>
+					<Skeleton width="70%" />
+				</td>
+				<td>
+					<Skeleton width="50%" />
+				</td>
+				<td>
+					<Skeleton width="70%" />
+				</td>
+				<td>
+					<Skeleton width="50%" />
+				</td>
+			</tr>
+		</SkeletonTheme>
+	);
+
 	return (
 		<>
 			{/* Boton para crear un nuevo equipo */}
@@ -244,50 +278,67 @@ const EquipoTable: React.FC<Props> = ({ userRecord }) => {
 						</tr>
 					</thead>
 					<tbody>
-						{equipos?.map((equipo, idx) => (
-							<tr
-								key={idx}
-								className="border-b border-solid last:border-b-0 border-white border-opacity-20 hover:bg-edgewater-700 cursor-pointer transition-all duration-150 ease-in-out"
-							>
-								{/* Celda para la foto del perfil */}
-								<td className="py-3 rounded-tl-md rounded-bl-md max-w-[60px]">
-									<div className="flex flex-row items-center gap-3">
-										<img
-											src={equipo.urlFotoPerfil ?? '/assets/images/profile_placeholder.jpg'}
-											alt="Profile Picture"
-											className="w-[30px] h-[30px] object-cover inline-block shrink-0 rounded-md"
-										/>
-										<h1>{equipo.displayName}</h1>
-									</div>
-								</td>
-								<td className="capitalize">{equipo.position}</td>
-								<td className="text-center">{equipo.age ?? 'N/A'}</td>
-								<td className="pr-3 max-w-[120px] truncate">
-									<Tooltip
-										content={equipo.details}
-										children={<p className="truncate text-ellipsis">{equipo.details}</p>}
-									/>
-								</td>
-								<td className="rounded-tr-md rounded-br-md">
-									<div className="flex gap-4">
-										{isOwner && (
-											<button
-												type="button"
-												className="bg-edgewater-600 p-2 rounded-md hover:bg-edgewater-500 transition-all duration-200 ease-in-out flex justify-center"
-											>
-												<FontAwesomeIcon icon={faPencil} className="h-4 w-4" />
-											</button>
-										)}
-										<button
-											type="button"
-											className="bg-edgewater-600 p-2 rounded-md hover:bg-edgewater-500 transition-all duration-200 ease-in-out  flex justify-center"
-										>
-											<FontAwesomeIcon icon={faClose} className="h-4 w-4" />
-										</button>
-									</div>
-								</td>
-							</tr>
-						))}
+						{isLoading
+							? // Muestra el esqueleto si los datos están cargando
+								Array(5)
+									.fill(null)
+									.map((_, idx) => <React.Fragment key={idx}>{renderSkeleton()}</React.Fragment>)
+							: equipos?.map((miembro, idx) => (
+									<tr
+										key={idx}
+										className="border-b border-solid last:border-b-0 border-white border-opacity-20 hover:bg-edgewater-700 cursor-pointer transition-all duration-150 ease-in-out"
+									>
+										{/* Celda para la foto del perfil */}
+										<td className="py-3 rounded-tl-md rounded-bl-md max-w-[60px]">
+											<div className="flex flex-row items-center gap-3">
+												<ImageLoader
+													src={
+														miembro.urlFotoPerfil ??
+														'/assets/images/profile_placeholder.jpg'
+													}
+													alt="Profile Picture"
+													className="w-[30px] h-[30px] object-cover inline-block shrink-0 rounded-md"
+													height={30}
+													width={30}
+												/>
+												<h1>
+													{miembro.displayName}{' '}
+													{miembro.userId === auth.currentUser?.uid ? '(Tú)' : null}
+												</h1>
+											</div>
+										</td>
+										<td className="capitalize">{miembro.position}</td>
+										<td className="text-center">{miembro.age ?? 'N/A'}</td>
+										<td className="pr-3 max-w-[120px] truncate">
+											<Tooltip
+												content={miembro.details}
+												children={<p className="truncate text-ellipsis">{miembro.details}</p>}
+											/>
+										</td>
+										<td className="rounded-tr-md rounded-br-md">
+											<div className="flex gap-4">
+												{isOwner && (
+													<>
+														<button
+															type="button"
+															className="bg-edgewater-600 p-2 rounded-md hover:bg-edgewater-500 transition-all duration-200 ease-in-out flex justify-center"
+														>
+															<FontAwesomeIcon icon={faPencil} className="h-4 w-4" />
+														</button>
+														{miembro.userId === auth.currentUser?.uid ? null : (
+															<button
+																type="button"
+																className="bg-edgewater-600 p-2 rounded-md hover:bg-edgewater-500 transition-all duration-200 ease-in-out  flex justify-center"
+															>
+																<FontAwesomeIcon icon={faClose} className="h-4 w-4" />
+															</button>
+														)}
+													</>
+												)}
+											</div>
+										</td>
+									</tr>
+								))}
 					</tbody>
 				</table>
 				{equipos.length === 0 && (

@@ -75,7 +75,7 @@ const Navbar: React.FC<NavbarProps> = ({ navLinks }) => {
 	const handleClick = async (linkHref: string) => {
 		setNextActiveLink(linkHref);
 		// redirect to href
-		await navigate(linkHref);
+		await navigate(linkHref, {});
 	};
 
 	return (

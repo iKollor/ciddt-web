@@ -3,7 +3,7 @@ import { faInfoCircle } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 // eslint-disable-next-line import/no-unresolved
 // import { navigate } from 'astro:transitions/client';
-import { collection, doc, getDoc, getDocs } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs } from 'firebase/firestore/lite';
 import type { UserRecord } from 'firebase-admin/auth';
 import { motion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
