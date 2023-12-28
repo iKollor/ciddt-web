@@ -1,9 +1,9 @@
-import { auth, db } from '@firebase/client';
+import { auth } from '@firebase/client';
 import { faClose, faPencil } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 // eslint-disable-next-line import/no-unresolved
 import { navigate } from 'astro:transitions/client';
-import { doc, getDoc } from 'firebase/firestore/lite';
+import { getDoc } from 'firebase/firestore/lite';
 import type { UserRecord } from 'firebase-admin/auth';
 import React, { type ReactNode, useEffect, useState } from 'react';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
@@ -25,6 +25,7 @@ const EquipoTable: React.FC<Props> = ({ userRecord }) => {
 	const [hasTeam, setHasTeam] = useState<boolean>(false);
 	const [isOwner, setIsOwner] = useState<boolean>(false);
 	const [isLoading, setIsLoading] = useState<boolean>(true);
+	const [teamId, setTeamId] = useState<string | null>(null);
 
 	const {
 		getTeamByUserId,
@@ -34,6 +35,8 @@ const EquipoTable: React.FC<Props> = ({ userRecord }) => {
 		validateMemberId,
 		isMemberAlreadyInTeam,
 		isUserTeamOwner,
+		getProfilesData,
+		removeMemberFromTeam,
 	} = useTeamManagement();
 
 	useEffect(() => {
@@ -42,6 +45,7 @@ const EquipoTable: React.FC<Props> = ({ userRecord }) => {
 				try {
 					const team = await getTeamByUserId(userRecord.uid);
 					if (team != null) {
+						setTeamId(team.id);
 						const teamSnap = await getDoc(team);
 						if (teamSnap.exists()) {
 							const teamId = teamSnap.id;
@@ -67,52 +71,26 @@ const EquipoTable: React.FC<Props> = ({ userRecord }) => {
 			}
 		};
 
-		const fetchEquipos = async (): Promise<void> => {
-			if (userRecord != null) {
-				try {
-					setIsLoading(true);
-					const team = await getTeamByUserId(userRecord.uid);
-					if (team != null) {
-						const teamMembers = await getDoc(team);
-						if (teamMembers.exists()) {
-							const membersID = teamMembers.data()?.members as string[];
-							const members: User[] = [];
-							for (const id of membersID) {
-								const usersRef = doc(db, 'users', id);
-								const userData = await getDoc(usersRef);
-								if (userData.exists()) {
-									const user = userData.data() as User;
-									members.push({
-										...user,
-									});
-									setEquipos(members);
-									setIsLoading(false);
-								}
-							}
-						}
-					}
-				} catch (error: any) {
-					console.error(error);
-					setIsLoading(false);
-
-					setEquipos([]);
-					popupStore.set({
-						message: error.message,
-						type: 'danger',
-						visible: true,
-						title: 'Error al cargar los miembros del equipo',
-					});
-				}
+		const setProfileData = async (): Promise<void> => {
+			if (teamId == null) return;
+			setIsLoading(true);
+			try {
+				const data = await getProfilesData(teamId);
+				setEquipos(data);
+				setIsLoading(false);
+			} catch (error: any) {
+				console.error(error);
+				setIsLoading(false);
 			}
 		};
 
+		void setProfileData();
 		void checkUserTeam();
-		void fetchEquipos();
 		void checkUserTeamOwner();
 		return () => {
 			setHasTeam(false);
 		};
-	}, [userRecord]);
+	}, [userRecord, teamId]);
 
 	const handleCreateTeam = async (): Promise<void> => {
 		if (userRecord == null) return;
@@ -189,13 +167,14 @@ const EquipoTable: React.FC<Props> = ({ userRecord }) => {
 				throw new Error('El usuario ya es miembro del equipo.');
 			}
 
-			await addMemberToTeam(userRecord.uid, id);
+			await addMemberToTeam(team.id, id);
 			popupStore.set({
 				visible: true,
 				message: 'Miembro añadido correctamente',
 				type: 'success',
 				title: 'Miembro añadido',
 			});
+			setIsLoading(false);
 			await navigate('/ciddt-admin/settings');
 		} catch (error: any) {
 			popupStore.set({
@@ -225,10 +204,35 @@ const EquipoTable: React.FC<Props> = ({ userRecord }) => {
 		);
 	}
 
+	const handleRemoveMember = async (userId: string): Promise<void> => {
+		try {
+			if (userRecord == null) return;
+			if (teamId == null) return;
+			setIsLoading(true);
+			await removeMemberFromTeam(teamId, userId);
+			popupStore.set({
+				visible: true,
+				message: 'Miembro eliminado correctamente',
+				type: 'success',
+				title: 'Miembro eliminado',
+			});
+			setIsLoading(false);
+			await navigate('/ciddt-admin/settings');
+		} catch (error: any) {
+			console.error(error);
+			popupStore.set({
+				visible: true,
+				message: error.message,
+				type: 'danger',
+				title: 'Error al eliminar el miembro',
+			});
+		}
+	};
+
 	const renderSkeleton = (): ReactNode => (
 		<SkeletonTheme baseColor="#27474f" highlightColor="#559b81" height={20}>
 			<tr className="border-b border-solid last:border-b-0 border-white border-opacity-20 transition-all duration-150 ease-in-out">
-				<td className="py-3">
+				<td className="pl-3 py-3">
 					<div className="flex items-center space-x-4">
 						<Skeleton height={30} width={30} />
 						<div className="flex-grow">
@@ -270,7 +274,7 @@ const EquipoTable: React.FC<Props> = ({ userRecord }) => {
 					<thead className="align-bottom">
 						<tr className="font-semibold text-sm text-white text-opacity-50">
 							{/* Cabeceras ajustadas a las propiedades de Equipo */}
-							<th className="pb-2 text-start min-w-[120px] uppercase">Nombre</th>
+							<th className="pl-3 pb-2 text-start min-w-[120px] uppercase">Nombre</th>
 							<th className="pb-2 text-start min-w-[80px] uppercase">Cargo</th>
 							<th className="pb-2 text-center min-w-[50px] uppercase">Edad</th>
 							<th className="pb-2 text-start min-w-[200px] uppercase">Detalles</th>
@@ -289,7 +293,7 @@ const EquipoTable: React.FC<Props> = ({ userRecord }) => {
 										className="border-b border-solid last:border-b-0 border-white border-opacity-20 hover:bg-edgewater-700 cursor-pointer transition-all duration-150 ease-in-out"
 									>
 										{/* Celda para la foto del perfil */}
-										<td className="py-3 rounded-tl-md rounded-bl-md max-w-[60px]">
+										<td className="pl-3 py-3 rounded-tl-md rounded-bl-md max-w-[60px]">
 											<div className="flex flex-row items-center gap-3">
 												<ImageLoader
 													src={
@@ -329,6 +333,9 @@ const EquipoTable: React.FC<Props> = ({ userRecord }) => {
 															<button
 																type="button"
 																className="bg-edgewater-600 p-2 rounded-md hover:bg-edgewater-500 transition-all duration-200 ease-in-out  flex justify-center"
+																onClick={() => {
+																	void handleRemoveMember(miembro.userId);
+																}}
 															>
 																<FontAwesomeIcon icon={faClose} className="h-4 w-4" />
 															</button>

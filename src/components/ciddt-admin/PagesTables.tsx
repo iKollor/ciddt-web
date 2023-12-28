@@ -178,7 +178,6 @@ const PagesTables: FC<PagesTablesProps> = ({ userRecord }) => {
 			});
 			setPages(pages);
 
-			console.log('User pages updated');
 			popupStore.set({
 				title: 'Éxito',
 				message: 'Páginas actualizadas',
@@ -225,6 +224,7 @@ const PagesTables: FC<PagesTablesProps> = ({ userRecord }) => {
 		<>
 			<div>
 				<button
+					type="button"
 					onClick={() => {
 						void handleUpdatePages();
 					}}
@@ -269,6 +269,7 @@ const PagesTables: FC<PagesTablesProps> = ({ userRecord }) => {
 													className="w-[30px] h-[30px] inline-block shrink-0 rounded-md"
 													height={30}
 													width={30}
+													type="image"
 												/>
 												<h1>{page.name}</h1>
 											</div>

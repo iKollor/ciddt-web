@@ -13,6 +13,7 @@ import { FetchError } from 'src/interfaces/Error';
 import type { Post, provider } from 'src/interfaces/Post';
 import type { UserPage } from 'src/interfaces/UserPages';
 
+import ImageLoader from './ImageLoader';
 import Tooltip from './Tooltip';
 
 interface Props {
@@ -202,7 +203,7 @@ const PostsTable: React.FC<Props> = ({ pagePosts, userRecord, provider }) => {
 						ref={selectUserPages}
 						onChange={handleSelectChange}
 						aria-label="Selecciona una página"
-						id="select_userpages"
+						id="select_userPages"
 						className="p-2 rounded-md cursor-pointer max-w-[200px]"
 					>
 						<option value="default">Selecciona una página</option>
@@ -216,6 +217,7 @@ const PostsTable: React.FC<Props> = ({ pagePosts, userRecord, provider }) => {
 					</select>
 				</div>
 				<button
+					type="button"
 					onClick={() => {
 						void handleClick();
 					}}
@@ -269,26 +271,28 @@ const PostsTable: React.FC<Props> = ({ pagePosts, userRecord, provider }) => {
 										<div className="flex items-center">
 											<div className="relative inline-block shrink-0">
 												{post.mediaType === 'album' || post.mediaType === 'photo' ? (
-													<img
-														src={
-															post.media ??
-															'https://placehold.co/50x50?text=No+image&font=ptsans'
-														}
-														width={50}
-														height={50}
-														className="w-[50px] h-[50px] inline-block shrink-0 rounded-md"
-														alt="post image preview"
-													/>
+													<>
+														<ImageLoader
+															src={
+																post.media ??
+																'https://placehold.co/50x50?text=No+image&font=ptsans'
+															}
+															height={50}
+															width={50}
+															className="w-[50px] h-[50px] inline-block shrink-0 rounded-md"
+															alt="post image preview"
+															key={idx}
+															type="image"
+														/>
+													</>
 												) : (
-													<video
+													<ImageLoader
 														src={post.media}
 														width={50}
 														height={50}
 														className="w-[50px] h-[50px] inline-block shrink-0 rounded-md"
-														autoPlay
-														muted
-														loop
-													></video>
+														type="video"
+													></ImageLoader>
 												)}
 											</div>
 										</div>

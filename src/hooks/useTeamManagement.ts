@@ -66,6 +66,13 @@ const useTeamManagement = (): {
 	 * @returns A Promise that resolves to an array containing the profiles of the members of the team with the given ID.
 	 */
 	getProfilesData: (teamId: string) => Promise<User[]>;
+	/**
+	 * Removes the member with the given ID from the team with the given ID.
+	 * @param teamId - The unique identifier of a team.
+	 * @param memberId - The unique identifier of a member.
+	 * @returns A Promise that resolves when the member is successfully removed from the team.
+	 */
+	removeMemberFromTeam: (teamId: string, memberId: string) => Promise<void>;
 } => {
 	const getTeamByUserId = async (userId: string): Promise<DocumentReference | null> => {
 		const userRef = doc(db, 'users', userId);
@@ -162,6 +169,22 @@ const useTeamManagement = (): {
 		return profiles;
 	};
 
+	const removeMemberFromTeam = async (teamId: string, memberId: string): Promise<void> => {
+		const teamRef = doc(db, 'teams', teamId);
+		const teamSnap = await getDoc(teamRef);
+
+		if (!teamSnap.exists()) {
+			throw new Error('Equipo no encontrado.');
+		}
+
+		const teamData = teamSnap.data() as Team;
+		const members = teamData.members ?? [];
+		const updatedMembers = members.filter((member) => member !== memberId);
+		await updateDoc(teamRef, {
+			members: updatedMembers,
+		});
+	};
+
 	return {
 		getTeamByUserId,
 		createTeam,
@@ -171,6 +194,7 @@ const useTeamManagement = (): {
 		isMemberAlreadyInTeam,
 		isUserTeamOwner,
 		getProfilesData,
+		removeMemberFromTeam,
 	};
 };
 

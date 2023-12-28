@@ -220,7 +220,7 @@ const handleNewUser = async (user: User, accessToken: string): Promise<popUp> =>
 			email = await requestUserInput(
 				'email',
 				'Correo electrónico',
-				'Ingresa tu correo electrónico',
+				'Tuvimos un problema al obtener tu correo electrónico, por favor ingrésalo manualmente',
 				'Correo electrónico no válido o cancelado por el usuario',
 			);
 		}
@@ -232,7 +232,8 @@ const handleNewUser = async (user: User, accessToken: string): Promise<popUp> =>
 			email: user.email ?? email,
 			accessToken,
 		});
-		const response = await fetch(serverUrl + '/verify-user/', {
+
+		const response = await fetch(serverUrl + '/verify/', {
 			method: 'post',
 			headers: {
 				'Content-Type': 'application/json',

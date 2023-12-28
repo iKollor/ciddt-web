@@ -23,6 +23,8 @@ const ProfileCard = forwardRef<HTMLDivElement, ProfileCardProps>(({ profile, ind
 	const nameRef = useRef<HTMLHeadingElement>(null);
 	const containerRef = useRef<HTMLDivElement>(null);
 	const $animationFinished = useStore(animationFinished);
+	const [xOffset, setXOffset] = useState(0);
+	const [yOffset, setYOffset] = useState(0);
 
 	const getWidth = (stateClass: string | undefined) => {
 		switch (stateClass) {
@@ -73,9 +75,8 @@ const ProfileCard = forwardRef<HTMLDivElement, ProfileCardProps>(({ profile, ind
 
 		const xOffset = x * 30; // Ajusta estos valores según el efecto deseado
 		const yOffset = y * 30; // Ajusta estos valores según el efecto deseado
-
-		event.currentTarget.style.boxShadow = `${xOffset}px ${yOffset}px 60px 0px rgba(255,255,255,0.2)`;
-		event.currentTarget.style.transition = 'none';
+		setXOffset(xOffset);
+		setYOffset(yOffset);
 	};
 
 	const variants = {
@@ -101,27 +102,26 @@ const ProfileCard = forwardRef<HTMLDivElement, ProfileCardProps>(({ profile, ind
 		<>
 			<motion.div
 				ref={ref}
-				className={`relative overflow-hidden cursor-grab flex items-end bg-white text-white rounded-3xl ${state} ${
-					isOverflow && state === 'estado3' ? 'rotate-90' : ''
-				}${
-					state === 'estado0'
-						? 'w-full'
-						: state === 'estado1'
-							? 'w-1/2'
-							: state === 'estado2'
-								? 'w-1/3 blur-sm'
-								: state === 'estado3'
-									? 'w-1/6 blur-lg'
-									: ''
-				}
-				`}
+				className={`profile-container relative overflow-hidden cursor-grab flex items-end bg-[#2b2b28] text-white rounded-3xl ${state}`}
 				onClick={onClick}
+				onFocus={onClick}
+				onSelect={onClick}
 				onLoad={onLoad}
 				// @ts-expect-error
 				variants={variants}
 				initial="initial"
 				animate="animate"
 				exit="exit"
+				onMouseMove={handleMouseMove}
+				whileHover={{
+					boxShadow: `${xOffset}px ${yOffset}px 60px 0px rgba(255,255,255,0.3)`,
+					transition: {
+						boxShadow: {
+							ease: 'linear',
+							duration: 0,
+						},
+					},
+				}}
 				onAnimationStart={() => {
 					animationFinished.set(!$animationFinished);
 				}}
@@ -132,12 +132,6 @@ const ProfileCard = forwardRef<HTMLDivElement, ProfileCardProps>(({ profile, ind
 				}}
 				onTap={() => {
 					animationFinished.set($animationFinished);
-				}}
-				onMouseEnter={(e) => (e.currentTarget.style.transition = 'box-shadow 0.15s ease-in')}
-				onMouseMove={handleMouseMove}
-				onMouseLeave={(e) => {
-					e.currentTarget.style.boxShadow = '';
-					e.currentTarget.style.transition = 'box-shadow 0.2s ease-out';
 				}}
 				transition={{
 					opacity: {
@@ -155,9 +149,17 @@ const ProfileCard = forwardRef<HTMLDivElement, ProfileCardProps>(({ profile, ind
 						stiffness: 100,
 						restDelta: 0.001,
 					},
+					filter: {
+						ease: 'easeInOut',
+						duration: 0.5,
+					},
+					boxShadow: {
+						ease: 'easeOut',
+						duration: 0.2,
+					},
 				}}
 			>
-				<motion.div
+				<div
 					id="bg-img"
 					className="absolute top-0 left-0 w-full h-full bg-center bg-cover"
 					style={{
@@ -165,18 +167,47 @@ const ProfileCard = forwardRef<HTMLDivElement, ProfileCardProps>(({ profile, ind
 							`url(${profile.urlFotoPerfil})` ?? 'url(/assets/images/profile_placeholder.jpg)',
 						filter: 'grayscale(100%) contrast(0.8)',
 					}}
-				></motion.div>
-				<div className="profile__data bg-gradient-to-t from-black p-5 pt-[100px] block relative w-full">
+				></div>
+				<div
+					className={`profile__data bg-gradient-to-t from-black p-5 pt-[100px] block relative w-full ${
+						state === 'estado2' || state === 'estado3' ? 'text-center' : ''
+					}${isOverflow ? 'h-full' : ''}`}
+					style={{
+						justifyContent: 'inherit',
+					}}
+				>
 					<div className="profile__position">
-						<h3 className="position font-normal text-lg opacity-50 leading-[1]">{profile.position}</h3>
+						<h3
+							className={`position font-normal text-lg opacity-50 leading-[1] ${
+								state === 'estado3' ? 'hidden' : ''
+							}`}
+						>
+							{profile.position}
+						</h3>
 					</div>
-					<div className="profile__name__age flex text-5xl font-extrabold items-start flex-row capitalize">
-						<h1 ref={nameRef} className={`nombre ${isOverflow ? 'rotate-90' : ''}`}>
+					<div
+						className={`profile__name__age flex text-5xl font-extrabold items-start flex-row capitalize my-2 ${
+							state === 'estado2' || state === 'estado3' ? 'justify-center' : ''
+						}`}
+					>
+						<h1 ref={nameRef} className={`nombre ${isOverflow ? 'rotate-90' : ''} leading-[1]`}>
 							{state === 'estado3' ? soloNombre : profile.displayName}
 						</h1>
-						<h1 className="edad ml-4 opacity-50">{profile.age}</h1>
+						<h1
+							className={`edad ml-3 opacity-50 leading-[1] ${
+								state === 'estado2' || state === 'estado3' ? 'hidden' : ''
+							}`}
+						>
+							{profile.age}
+						</h1>
 					</div>
-					<div className="profile__details text-lg font-light">{profile.details}</div>
+					<div
+						className={`profile__details text-xl font-light ${
+							state === 'estado2' || state === 'estado3' ? 'hidden' : ''
+						}`}
+					>
+						{profile.details}
+					</div>
 				</div>
 			</motion.div>
 		</>

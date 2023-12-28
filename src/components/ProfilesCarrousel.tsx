@@ -111,7 +111,7 @@ const Carrusel: React.FC = () => {
 	return (
 		<>
 			<AnimatePresence initial={false} mode="wait">
-				<motion.div className="carrusel__container" key={$chunkIndex}>
+				<motion.div className="carrusel__container gap-6 flex w-full h-full" key={$chunkIndex}>
 					{currentChunkData.map((profile, index) => (
 						<ProfileCard
 							key={index}
@@ -125,7 +125,7 @@ const Carrusel: React.FC = () => {
 					))}
 				</motion.div>
 			</AnimatePresence>
-			{profilesData.length >= 3 && (
+			{profilesData.length > 3 && (
 				<i
 					className={`nextButton ${$animationFinished ? 'disabled' : ''}`}
 					onClick={() => {

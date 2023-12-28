@@ -179,7 +179,8 @@ if (registrationToken == null) {
 									</div>
 									<button
 										type="submit"
-										:class="{'bg-red-400 hover:bg-red-700': isValid(), 'bg-gray-400 cursor-not-allowed': !isValid()}"
+										id="submit"
+										class="bg-red-400 disabled:bg-red-800 disabled:cursor-not-allowed p-4 text-white w-full rounded-full tracking-wide font-semibold font-display focus:outline-none focus:shadow-outline hover:bg-red-600 shadow-lg flex items-center justify-center transition ease-in-out duration-300"
 										:disabled="!isValid()"
 										class="flex text-center items-center justify-center mt-3 text-lg font-semibold w-full text-white rounded-lg px-6 py-3 shadow-xl transition"
 									>
@@ -202,6 +203,10 @@ if (registrationToken == null) {
 		const buttonContent = document.querySelector('#button__content') as HTMLSpanElement;
 		const buttonLoader = document.querySelector('#button__loader') as HTMLSpanElement;
 
+		const buttonSubmit = document.querySelector('#submit') as HTMLButtonElement;
+
+		let isSubmitDisabled = false;
+
 		const emailInput = document.querySelector('#email') as HTMLInputElement;
 		emailInput.addEventListener('onchange', (e) => {
 			e.preventDefault();
@@ -210,6 +215,13 @@ if (registrationToken == null) {
 		const form = document.querySelector('form') as HTMLFormElement;
 		form.addEventListener('submit', async (e) => {
 			e.preventDefault();
+			buttonSubmit.style.cursor = 'not-allowed';
+			buttonSubmit.disabled = true;
+
+			if (isSubmitDisabled) return;
+
+			isSubmitDisabled = true;
+
 			const fromData = new FormData(form);
 			const email = fromData.get('email')?.toString();
 			const password = fromData.get('password')?.toString();
@@ -236,8 +248,10 @@ if (registrationToken == null) {
 						type: response.type,
 						title: response.title,
 					});
-					if (response.type == 'success' && !popupStore.get().visible) {
-						window.location.assign('/ciddt-admin/login');
+					if (response.type === 'success') {
+						setTimeout(() => {
+							window.location.href = '/ciddt-admin/login';
+						}, 3000);
 					}
 				} catch (error: any) {
 					buttonContent?.setAttribute('style', 'display: block');
@@ -251,6 +265,9 @@ if (registrationToken == null) {
 				} finally {
 					buttonContent?.setAttribute('style', 'display: block');
 					buttonLoader?.setAttribute('style', 'display: none');
+					buttonSubmit.style.cursor = 'pointer';
+					buttonSubmit.disabled = false;
+					isSubmitDisabled = false;
 				}
 			}
 		});
