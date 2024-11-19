@@ -1,0 +1,400 @@
+---
+import Contact from '@components/Contact.astro';
+import aboutImage from '@public/images/about.webp';
+import misionIMG from '@public/images/asesoria_sindical.webp';
+import visionIMG from '@public/images/capacitaciones.webp';
+import trayectoriaIMG from '@public/images/defensa_juridica.webp';
+import volver_arribaSVG from '@public/svg/volver_arriba.svg';
+import colors from '@styles/colors';
+import { Image } from 'astro:assets';
+import { Icon } from 'astro-icon/components';
+import useTeamManagement from 'src/hooks/useTeamManagement';
+import PageLayout from 'src/layouts/PageLayout.astro';
+
+const teamId = import.meta.env.PUBLIC_TEAM_ID;
+
+const { getProfilesData } = useTeamManagement();
+
+const team = await getProfilesData(teamId);
+---
+
+<PageLayout title="Acerca de">
+	<main class="mx-auto w-[90%] mt-14">
+		<div class="uppercase flex flex-grow-0 flex-shrink basis-auto items-center justify-start gap-4 font-medium">
+			<span class="rounded-full bg-black aspect-square w-3"></span>
+			<span class="leading-[160%]">Tus derechos, nuestro compromiso</span>
+		</div>
+		<section class="w-full flex mt-4 py-4">
+			<div class="w-1/3">
+				<h1 class="text-6xl font-raleway">Conocenos un poco mejor</h1>
+			</div>
+			<div class="w-2/3 pl-32">
+				<p class="text-xl">
+					Somos un colectivo de visionarios apasionados, dedicados a defender los derechos laborales y mejorar
+					la vida de quienes servimos. <br />
+					<br />Nuestros expertos en derecho laboral y sindical tienen años de experiencia en litigio y
+					asesoría. Ofrecemos servicios que abordan problemas reales, haciendo que la defensa de los derechos
+					laborales sea una experiencia fortalecedora e inclusiva. <br /><br />Creemos que un enfoque legal
+					centrado en las personas hará que la justicia laboral sea más humana.
+				</p>
+			</div>
+		</section>
+		<section class="w-full mt-16 py-4 h-screen">
+			<div class="my-auto h-5/6 w-full flex items-center justify-center relative overflow-hidden rounded-3xl">
+				<Image
+					src={aboutImage}
+					alt="about image"
+					class="bg-cover object-cover object-center cursor-none peer overflow-hidden h-full w-full"
+					id="about-image"
+				/>
+				<div
+					id="custom-cursor"
+					class="aspect-square w-full bg-secondary absolute text-center flex items-center justify-center backdrop-blur-sm bg-opacity-75 peer-hover:bg-opacity-60 peer-hover:backdrop-blur-md cursor-none pointer-events-none rounded-full overflow-hidden text-4xl peer-hover:text-xl scale-150"
+				>
+					<p class="text-primary font-semibold">Descubre más</p>
+				</div>
+			</div>
+		</section>
+		<div class="uppercase flex flex-grow-0 flex-shrink basis-auto items-center justify-start gap-4 font-medium">
+			<span class="rounded-full bg-black aspect-square w-3"></span>
+			<span class="leading-[160%]">Empoderando a los trabajadores con dignidad</span>
+		</div>
+		<section class="w-full flex mt-4 py-4">
+			<div class="w-1/3">
+				<h1 class="text-6xl font-raleway">Nuestros valores fundamentales</h1>
+				<div class="mt-6">
+					<Contact
+						colors={{
+							background: colors.primary,
+							color: colors.secondary,
+							borderColor: colors.secondary,
+							backgroundHover: colors.secondary,
+						}}
+						text="NUESTROS SERVICIOS"
+						href="/services"
+						arrow
+					/>
+				</div>
+			</div>
+			<div class="w-2/3 pl-32">
+				<div class="grid grid-cols-2 gap-y-14">
+					<div
+						class="bg-primary rounded-full aspect-square w-full flex flex-col items-center justify-center text-center text-secondary"
+						data-scroll
+						data-scroll-speed="0.4"
+					>
+						<Icon name="material-symbols-light:handshake-outline" class="text-6xl" />
+						<div class="p-6 space-y-4">
+							<h1 class="font-bold text-2xl">Fortaleciendo cada paso</h1>
+							<p class="">
+								Compromiso inquebrantable desde la consulta inicial hasta la resolución de casos,
+								protegiendo y promoviendo derechos laborales.
+							</p>
+						</div>
+					</div>
+					<div
+						class="bg-primary rounded-full aspect-square w-full flex flex-col items-center justify-center text-center text-secondary"
+						data-scroll
+						data-scroll-speed="0.2"
+					>
+						<Icon name="material-symbols-light:bookmark-star-outline" class="text-6xl" />
+						<div class="p-6 space-y-4">
+							<h1 class="font-bold text-2xl">Ética y honestidad</h1>
+							<p class="">
+								Actuando con transparencia y rectitud en cada acción, alineados con altos estándares
+								éticos en beneficio de nuestros clientes.
+							</p>
+						</div>
+					</div>
+					<div
+						class="bg-primary rounded-full aspect-square w-full flex flex-col items-center justify-center text-center text-secondary"
+						data-scroll
+						data-scroll-speed="0.2"
+						data-scroll-offset="-100%,0"
+					>
+						<Icon name="material-symbols-light:shield-outline" class="text-6xl" />
+						<div class="p-6 space-y-4">
+							<h1 class="font-bold text-2xl">Protegiendo tus derechos</h1>
+							<p class="">
+								Pasión y determinación por la justicia en cada caso, asegurando apoyo y representación
+								justa para cada trabajador.
+							</p>
+						</div>
+					</div>
+					<div
+						class="bg-primary rounded-full aspect-square w-full flex flex-col items-center justify-center text-center text-secondary"
+						data-scroll
+						data-scroll-speed="0.4"
+						data-scroll-offset="-100%,0"
+					>
+						<Icon name="material-symbols-light:target" class="text-6xl" />
+						<div class="p-6 space-y-4">
+							<h1 class="font-bold text-2xl">Calidad y dedicación</h1>
+							<p class="">
+								Equipo profesional dedicado y preparado, brindando servicios legales de alta calidad con
+								atención constante y dedicación incansable.
+							</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<section class="w-full mb-20">
+			<div class="text-center flex flex-col items-center justify-center my-20">
+				<div
+					class="uppercase flex flex-grow-0 flex-shrink basis-auto items-center justify-start gap-4 font-medium"
+				>
+					<span class="rounded-full bg-black aspect-square w-3"></span>
+					<span class="leading-[160%]">Tu voz fuerte y protegida</span>
+				</div>
+				<div class="w-1/3 mt-4">
+					<h1 class="text-6xl font-raleway">Quiénes somos</h1>
+				</div>
+			</div>
+			<div
+				class="border-white border-solid border-2 h-screen w-full max-w-full flex items-center justify-end overflow-hidden"
+			>
+				<input type="radio" name="card" id="card-1" class="peer/color1 sr-only" checked />
+				<label
+					class="bg-primary h-full w-32 group peer-checked/color1:w-full peer-checked/color1:cursor-default cursor-pointer transition-all ease-[cubic-bezier(.84,0,.16,1)] duration-700 overflow-hidden flex relative border-r-2 border-white"
+					id="color1"
+					for="card-1"
+				>
+					<div
+						class="w-24 flex-shrink-0 flex items-center flex-col justify-between h-full text-white py-10 font-raleway"
+					>
+						<h1 class="text-3xl">01</h1>
+						<h1 class="[writing-mode:vertical-lr] rotate-180 text-3xl">Misión</h1>
+					</div>
+					<div class="absolute top-0 left-0 w-[1100px] pl-40 p-20 text-white h-full space-y-10">
+						<h1 class="text-5xl font-raleway">Misión</h1>
+						<p class="text-xl">
+							Nuestra misión es brindar una asesoría y defensa jurídica de alto nivel a las personas
+							trabajadoras que han visto vulnerados sus derechos. Así también, ofrecer un acompañamiento
+							permanente a las organizaciones sindicales en Ecuador en los procesos de promoción y defensa
+							de los derechos y el trabajo digno.
+						</p>
+						<Image src={misionIMG} alt="vision" class="rounded-3xl" />
+					</div>
+				</label>
+
+				<input type="radio" name="card" id="card-2" class="peer/color2 sr-only" />
+				<label
+					class="bg-secondary h-full w-32 group peer-checked/color2:w-full peer-checked/color2:cursor-default cursor-pointer transition-all ease-[cubic-bezier(.84,0,.16,1)] duration-700 overflow-hidden border-r-2 border-white relative flex"
+					id="color2"
+					for="card-2"
+				>
+					<div
+						class="w-24 flex-shrink-0 flex items-center flex-col justify-between h-full text-white py-10 font-raleway"
+					>
+						<h1 class="text-3xl">02</h1>
+						<h1 class="[writing-mode:vertical-lr] rotate-180 text-3xl">Visión</h1>
+					</div>
+					<div
+						class="absolute top-0 left-0 w-[1100px] pl-40 p-20 text-white h-full space-y-10 overflow-hidden"
+					>
+						<h1 class="text-5xl font-raleway">Visión</h1>
+						<p class="text-xl">
+							Laboralistas busca consolidarse como el estudio jurídico líder en la defensa de los derechos
+							de las personas trabajadoras en Ecuador, así como un referente de litigio estratégico
+							enfocado en la promoción de los derechos sindicales y el trabajo digno en el país.
+						</p>
+						<Image src={visionIMG} alt="vision" class="rounded-3xl" />
+					</div>
+				</label>
+
+				<input type="radio" name="card" id="card-3" class="peer/color3 sr-only" />
+				<label
+					class="bg-accent h-full w-32 group peer-checked/color3:w-full peer-checked/color3:cursor-default cursor-pointer relative transition-all ease-[cubic-bezier(.84,0,.16,1)] duration-700 overflow-hidden flex"
+					id="color3"
+					for="card-3"
+				>
+					<div
+						class="w-24 flex-shrink-0 flex items-center flex-col justify-between h-full text-white py-10 font-raleway"
+					>
+						<h1 class="text-3xl">03</h1>
+						<h1 class="[writing-mode:vertical-lr] rotate-180 text-3xl">Trayectoria</h1>
+					</div>
+					<div
+						class="absolute top-0 left-0 w-[1100px] pl-40 p-20 text-white h-full space-y-10 overflow-hidden"
+					>
+						<h1 class="text-5xl font-raleway">Trayectoria</h1>
+						<p class="text-xl">
+							El equipo de Laboralistas en Ecuador ha promovido activamente los derechos laborales y
+							sindicales, defendiendo casos importantes, reformando el Código del Trabajo, y mejorando las
+							condiciones de trabajadoras del hogar. Ofrecen asistencia técnica a sindicatos y presentan
+							quejas ante la OIT, colaborando también con organizaciones internacionales para incidir en
+							la regulación laboral global. Sus servicios se destacan por la alta experiencia y
+							conocimiento en normativa laboral de su equipo de expertos.
+						</p>
+						<Image src={trayectoriaIMG} alt="vision" class="rounded-3xl" />
+					</div>
+				</label>
+			</div>
+		</section>
+
+		<section class="w-full mb-40 mt-40">
+			<div class="text-center flex flex-col items-center justify-center my-20">
+				<div class="w-1/3 mt-10">
+					<h1 class="text-6xl font-raleway">Nuestro Equipo</h1>
+				</div>
+			</div>
+			<ul class="w-full" id="team-list">
+				{
+					team.slice(1).map((member, idx) => (
+						<>
+							<li id={`team-member-${idx}`} class="relative w-full cursor-pointer group">
+								<div class="relative flex items-center p-11 before:absolute before:bottom-0 before:left-0 before:w-full before:h-[1px] before:bg-black after:ease-[cubic-bezier(.84,0,.16,1)] after:transition-all after:duration-300 after:origin-left after:bg-transparent after:w-full after:h-0 group-hover:after:h-full group-hover:after:bg-secondary after:absolute after:top-0 after:left-0 after:-z-10 group-hover:text-white text-black">
+									<div class="font-raleway opacity-20 text-5xl lining-nums w-24 transition-all duration-300 ease-in">
+										0{idx + 1}
+									</div>
+									<div class="font-raleway text-5xl transition-all duration-300 ease-in">
+										{member.displayName}
+									</div>
+									<div class="flex-1 justify-end items-center flex text-2xl transition-all duration-300 ease-in">
+										{member.position}
+									</div>
+								</div>
+								<div
+									class="absolute opacity-0 group-hover:opacity-100 aspect-square w-80 scale-50 group-hover:scale-100 bg-black -top-1/2 left-1/2 z-10 rounded-full transition-[transform,opacity] ease-in-out duration-200 overflow-hidden pointer-events-none"
+									id={`member-image-${idx}`}
+								>
+									<Image
+										src={
+											member?.urlFotoPerfil ??
+											`https://ui-avatars.com/api/?name=${member.displayName.split(' ').join('+')}`
+										}
+										alt={`${member.displayName} image`}
+										inferSize={true}
+									/>
+								</div>
+							</li>
+						</>
+					))
+				}
+			</ul>
+		</section>
+	</main>
+	<section class="bg-secondary text-primary w-full min-h-96 mb-20 flex justify-between px-20 py-12">
+		<div class="space-y-6">
+			<div class="space-y-6">
+				<h1 class="text-6xl font-raleway font-semibold">¿Comenzamos?</h1>
+				<p class="max-w-md">
+					Si necesita asistencia legal en temas laborales o más información sobre los servicios que prestamos,
+					el equipo de Laboralistas está aquí para ayudarle a defender sus derechos y asegurar que reciba la
+					justicia que merece. <br />
+					<br /> Contáctenos para programar una consulta y descubrir cómo podemos apoyar sus necesidades legales
+					laborales.
+				</p>
+			</div>
+			<Contact
+				text="CONECTA CON NOSOTROS"
+				colors={{
+					background: colors.primary,
+					color: colors.secondary,
+					borderColor: colors.secondary,
+					backgroundHover: colors.accent,
+					borderColorHover: colors.secondary,
+					colorHover: colors.secondary,
+				}}
+				arrow
+			/>
+		</div>
+		<div class="space-y-10 text-center my-auto">
+			<p class="text-4xl">¿Te perdiste de algo?</p>
+			<div class="cursor-pointer flex justify-center items-center w-40 h-40 relative mx-auto" id="go-up">
+				<div class="w-full h-full animate-[spin_10s_linear_infinite]">
+					<Image
+						src={volver_arribaSVG}
+						alt="volver arriba"
+						class="object-contain w-full max-w-full h-full block align-middle"
+					/>
+				</div>
+				<div
+					class="aspect-square border border-primary rounded-full w-32 absolute flex items-center justify-center group hover:bg-accent hover:text-secondary hover:border-secondary transition-all ease-in-out duration-200"
+				>
+					<Icon
+						name="material-symbols-light:arrow-upward"
+						class="text-6xl group-hover:-translate-y-5 transition-all ease-in-out duration-100"
+					/>
+				</div>
+			</div>
+		</div>
+	</section>
+	<script>
+		import { gsap } from 'gsap';
+
+		// custom cursor for the image
+		const aboutImage = document.getElementById('about-image');
+		const customCursor = document.getElementById('custom-cursor');
+
+		let prevPos = { x: 0, y: 0 };
+
+		if (customCursor) {
+			prevPos = { x: customCursor.offsetLeft, y: customCursor.offsetTop };
+		}
+
+		aboutImage?.addEventListener('mousemove', (e) => {
+			if (customCursor) {
+				// Obtener las coordenadas del mouse relativas al elemento aboutImage
+				const rect = aboutImage.getBoundingClientRect();
+				const x = e.clientX - rect.left - customCursor.offsetWidth / 2;
+				const y = e.clientY - rect.top - customCursor.offsetHeight / 2;
+
+				gsap.to(customCursor, {
+					top: y,
+					left: x,
+					scale: '1',
+					width: '180px',
+					duration: 0.3,
+					ease: 'power2.out',
+				});
+			}
+		});
+
+		aboutImage?.addEventListener('mouseleave', () => {
+			if (customCursor) {
+				gsap.to(customCursor, {
+					duration: 0.3,
+					top: prevPos.y,
+					left: prevPos.x,
+					width: '100%',
+					scale: '1.5',
+					ease: 'power2.out',
+				});
+			}
+		});
+
+		// team list
+		const teamList = document.getElementById('team-list');
+		const teamMembers = teamList?.querySelectorAll('li');
+
+		// team members images follow the cursor
+		teamMembers?.forEach((member, idx) => {
+			const memberImage = document.getElementById(`member-image-${idx}`);
+			if (memberImage) {
+				//store prev position of image
+				const prevPos = { x: memberImage.offsetLeft, y: memberImage.offsetTop };
+				member.addEventListener('mousemove', (e) => {
+					gsap.to(memberImage, {
+						duration: 0.6,
+						top: memberImage.offsetTop + e.movementY,
+						left: memberImage.offsetLeft + e.movementX,
+						ease: 'power4.out',
+					});
+				});
+				// reset image position
+				member.addEventListener('mouseleave', () => {
+					gsap.to(memberImage, { duration: 0.2, top: prevPos.y, left: prevPos.x, ease: 'power2.out' });
+				});
+			}
+		});
+
+		// go up button
+		const goUp = document.getElementById('go-up');
+		goUp?.addEventListener('click', () => {
+			window.scrollTo({ top: 0, behavior: 'smooth' });
+		});
+	</script>
+</PageLayout>

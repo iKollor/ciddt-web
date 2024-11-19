@@ -3,7 +3,15 @@ import { faInfoCircle } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 // eslint-disable-next-line import/no-unresolved
 // import { navigate } from 'astro:transitions/client';
-import { collection, doc, getDoc, getDocs } from 'firebase/firestore/lite';
+import {
+	collection,
+	type CollectionReference,
+	deleteDoc,
+	doc,
+	type DocumentData,
+	getDoc,
+	getDocs,
+} from 'firebase/firestore';
 import type { UserRecord } from 'firebase-admin/auth';
 import { motion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
@@ -18,11 +26,12 @@ import Tooltip from './Tooltip';
 
 interface Props {
 	pagePosts?: Post[] | null;
-	userRecord: UserRecord | null;
+	userRecord: UserRecord | undefined;
 	provider: provider;
 }
 
 const serverUrl = import.meta.env.PUBLIC_SERVER_URL;
+const teamId = import.meta.env.PUBLIC_TEAM_ID;
 
 const PostsTable: React.FC<Props> = ({ pagePosts, userRecord, provider }) => {
 	const [verMas, setVerMas] = useState(true);
@@ -59,7 +68,7 @@ const PostsTable: React.FC<Props> = ({ pagePosts, userRecord, provider }) => {
 				type: 'infinite',
 			});
 			try {
-				const fbPostsRef = collection(db, 'posts', userRecord.uid, provider);
+				const fbPostsRef = collection(db, 'posts', teamId, provider);
 				const fbPostsSnapshot = await getDocs(fbPostsRef);
 				if (!fbPostsSnapshot.empty) {
 					const posts = fbPostsSnapshot.docs
@@ -125,7 +134,7 @@ const PostsTable: React.FC<Props> = ({ pagePosts, userRecord, provider }) => {
 				progress: 0,
 			});
 			const body = {
-				userId: userRecord?.uid,
+				teamId,
 				pageToken: pages?.find((page) => page.id === pageId)?.accessToken ?? '',
 				pageId,
 			};
@@ -146,9 +155,9 @@ const PostsTable: React.FC<Props> = ({ pagePosts, userRecord, provider }) => {
 				loader.set({ ...loader.get(), progress: 100, message: 'Finalizado' });
 				popupStore.set({
 					title: 'Posts actualizados',
-					message: `Se han actualizado los posts de la página ${selectUserPages?.current?.options[
-						selectUserPages?.current?.selectedIndex
-					].text}`,
+					message: `Se han actualizado los posts de la página ${
+						selectUserPages?.current?.options[selectUserPages?.current?.selectedIndex].text
+					}`,
 					type: 'success',
 					visible: true,
 				});
@@ -186,6 +195,44 @@ const PostsTable: React.FC<Props> = ({ pagePosts, userRecord, provider }) => {
 		}
 	};
 
+	// remover posts de firebase
+	async function removePosts(): Promise<void> {
+		if (userRecord != null && pageId != null) {
+			loader.set({
+				isLoading: true,
+				message: 'Eliminando posts...',
+				type: 'infinite',
+			});
+			try {
+				const fbPostsRef = collection(db, 'posts', teamId, provider);
+				await deleteCollection(fbPostsRef);
+				setPosts(null);
+				setPostFetched(false);
+				popupStore.set({
+					title: 'Posts eliminados',
+					message: `Se han eliminado los posts de la página ${
+						selectUserPages?.current?.options[selectUserPages?.current?.selectedIndex].text
+					}`,
+					type: 'success',
+					visible: true,
+				});
+			} catch (error: any) {
+				console.error(error);
+				popupStore.set({
+					title: 'Error',
+					message: `Ha ocurrido un error: ${error}`,
+					type: 'danger',
+					visible: true,
+				});
+			} finally {
+				loader.set({
+					isLoading: false,
+					type: 'infinite',
+				});
+			}
+		}
+	}
+
 	return (
 		<>
 			<div className="flex flex-col gap-y-2 justify-center items-end">
@@ -216,15 +263,29 @@ const PostsTable: React.FC<Props> = ({ pagePosts, userRecord, provider }) => {
 							))}
 					</select>
 				</div>
-				<button
-					type="button"
-					onClick={() => {
-						void handleClick();
-					}}
-					className="bg-edgewater-600 p-2 rounded-md hover:bg-edgewater-500 transition-all duration-200 ease-in-out px-3"
-				>
-					{posts == null ? 'Añadir posts' : 'Actualizar posts'}
-				</button>
+				<div className="flex gap-2">
+					<button
+						type="button"
+						onClick={() => {
+							void handleClick();
+						}}
+						className="bg-edgewater-600 p-2 rounded-md hover:bg-edgewater-500 transition-all duration-200 ease-in-out px-3"
+					>
+						{posts == null ? 'Añadir posts' : 'Actualizar posts'}
+					</button>
+					{posts != null && (
+						<button
+							type="button"
+							onClick={() => {
+								void removePosts();
+							}}
+							className="bg-edgewater-600 p-2 rounded-md hover:bg-edgewater-500 transition-all duration-200 ease-in-out px-3"
+							disabled={posts == null}
+						>
+							Eliminar posts
+						</button>
+					)}
+				</div>
 			</div>
 			<motion.div
 				ref={tableRef}
@@ -232,9 +293,9 @@ const PostsTable: React.FC<Props> = ({ pagePosts, userRecord, provider }) => {
 					maxHeight: 460,
 				}}
 				animate={{
-					maxHeight: verMas ? 460 : 850,
+					maxHeight: verMas ? 460 : 880,
 				}}
-				className="flex flex-auto flex-col items-center mt-8 justify-start"
+				className="flex flex-auto flex-col items-center mt-8 justify-start w-full"
 			>
 				<div className="overflow-x-auto w-full overflow-y-hidden">
 					<table className="w-full my-0 align-middle border-neutral-200">
@@ -273,10 +334,7 @@ const PostsTable: React.FC<Props> = ({ pagePosts, userRecord, provider }) => {
 												{post.mediaType === 'album' || post.mediaType === 'photo' ? (
 													<>
 														<ImageLoader
-															src={
-																post.media ??
-																'https://placehold.co/50x50?text=No+image&font=ptsans'
-															}
+															src={post.media}
 															height={50}
 															width={50}
 															className="w-[50px] h-[50px] inline-block shrink-0 rounded-md"
@@ -347,3 +405,11 @@ const PostsTable: React.FC<Props> = ({ pagePosts, userRecord, provider }) => {
 };
 
 export default PostsTable;
+async function deleteCollection(fbPostsRef: CollectionReference<DocumentData, DocumentData>): Promise<void> {
+	const q = await getDocs(fbPostsRef);
+	const promises: Array<Promise<void>> = [];
+	q.forEach((doc) => {
+		promises.push(deleteDoc(doc.ref));
+	});
+	await Promise.all(promises);
+}

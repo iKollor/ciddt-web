@@ -1,18 +1,24 @@
 ---
-import Navbar from '../components/Navbar';
+import VerMas from '@components/buttons/VerMas';
+
 import Equipo from './Hero/Equipo.astro';
+import Footer from './Hero/Footer.astro';
 import Header from './Hero/Header.astro';
 import Momentos from './Hero/Momentos.astro';
 import Nosotros from './Hero/Nosotros.astro';
+import Servicios from './Hero/Servicios.astro';
 ---
 
 <>
-	<Navbar client:only />
+	<img
+		src="/2x/noise.gif"
+		class="fixed top-0 left-0 w-screen h-screen object-cover z-[1000] mix-blend-overlay pointer-events-none object-center opacity-20"
+	/>
 	<main>
-		<div id="main-container">
-			<section id="header" class="section-container blanco">
-				<Header />
-			</section>
+		<section id="header" class="section-container blanco">
+			<Header />
+		</section>
+		<div id="main-container" class="rounded-3xl overflow-hidden">
 			<section id="nosotros" class="section-container blanco">
 				<Nosotros />
 			</section>
@@ -22,6 +28,21 @@ import Nosotros from './Hero/Nosotros.astro';
 			<section id="momentos" class="section-container blanco">
 				<Momentos />
 			</section>
+			<section id="servicios" class="section-container negro">
+				<Servicios />
+			</section>
 		</div>
+		<div class="border-opacity-50 py-16">
+			<div class="p-8 space-y-14">
+				<h1 class="text-6xl font-bold">¿Cómo podremos ayudarte?</h1>
+				<div class="mt-5">
+					<VerMas client:visible />
+				</div>
+			</div>
+		</div>
+		<div class="mx-8 h-[1px] bg-black bg-opacity-20"></div>
+		<section id="footer" class="section-container blanco">
+			<Footer />
+		</section>
 	</main>
 </>

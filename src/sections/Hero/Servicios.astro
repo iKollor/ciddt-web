@@ -1,0 +1,158 @@
+---
+import { Image } from 'astro:assets';
+import { Icon } from 'astro-icon/components';
+// imagenes
+import asesoria_sindical from 'public/images/asesoria_sindical.webp';
+import capacitaciones from 'public/images/capacitaciones.webp';
+import defensa_juridica_laboral from 'public/images/defensa_juridica.webp';
+
+interface Service {
+	title: string;
+	services: string[];
+	img: ImageMetadata;
+	href: string;
+}
+
+const services: Service[] = [
+	{
+		title: 'Asesoría Sindical',
+		services: [
+			'Constitución de organizaciones sindicales',
+			'Registro de directivas de organizaciones sociales',
+			'Negociación y contratación colectiva',
+			'Conflictos Colectivos',
+			'Otros',
+		],
+		img: asesoria_sindical,
+		href: '/asesoria-sindical',
+	},
+	{
+		title: 'Defensa Jurídica',
+		services: [
+			'Procesos administración ante el Ministerio del Trabajo',
+			'Juicios Ordinarios',
+			'Juicios Administrativos',
+			'Juicios Constitucionales',
+		],
+		img: defensa_juridica_laboral,
+		href: '/defensa-juridica-laboral',
+	},
+	{
+		title: 'Capacitaciones',
+		services: [
+			'Derechos Laborales',
+			'Contra el Acoso Laboral',
+			'Denuncias Laborales',
+			'Asuntos Internos',
+			'Capacitaciones Especiales',
+			'Otros',
+		],
+		img: capacitaciones,
+		href: '/capacitaciones',
+	},
+];
+---
+
+<section>
+	<div class="w-full bg-primary px-[40px] pt-[90px] text-white pb-10 min-h-screen max-w-full">
+		<div class="flex flex-wrap">
+			<p class="font-bold text-sm leading-4 uppercase w-1/4">Servicios <br /> & soluciones</p>
+			<div class="w-3/4 flex items-start justify-between">
+				<h1 class="text-5xl font-bold">Confía en nosotros -<br /> somos expertos</h1>
+				<p class="max-w-[40%] text-lg leading-5 mr-20">
+					Lorem ipsum dolor sit amet consectetur adipisicing elit. Delectus earum voluptate beatae fugit
+					doloremque recusandae, architecto iure sint, iste molestiae tempora vero possimus quis alias ullam
+					deleniti tenetur cupiditate atque!
+				</p>
+			</div>
+		</div>
+		<div class="flex flex-wrap mt-20">
+			<ul class="w-full">
+				<div>
+					<span class="border-b-2 border-solid border-white block"></span>
+				</div>
+				{
+					services.map((service, idx) => {
+						return (
+							<>
+								<li id="services">
+									<a
+										href={`/services${service.href}`}
+										class="transition-all duration-700 ease-[cubic-bezier(0.65, 0, 0.35, 1)] h-52 flex items-center cursor-pointer !outline-none text-white hover:h-64 group"
+									>
+										<div class="basis-56 mr-16 flex-grow-0 flex-shrink-0">
+											<div class="scale-[0.5] group-hover:scale-[0.8] transition-all duration-500 ease-[cubic-bezier(0.65, 0, 0.35, 1)] will-change-[transform] origin-[center_left]">
+												<div class="rounded-3xl relative overflow-hidden">
+													<Image
+														src={service.img}
+														alt={service.title}
+														class="w-full h-full object-cover"
+														width={614}
+														height={614}
+													/>
+												</div>
+											</div>
+										</div>
+										<div class="flex-1">
+											<div class="relative -top-3 translate-y-8 will-change-[transform] transition-transform duration-700 ease-[cubic-bezier(0.65, 0, 0.35, 1)] group-hover:translate-y-0">
+												<h2 class="text-9xl font-bold leading-[109%]">{service.title}</h2>
+											</div>
+											<div class="-top-3 relative">
+												<div class="items-end flex flex-wrap">
+													<div class="flex-shrink-0 flex-grow-0 basis-1/2 ml-3 relative items-end w-auto max-w-full">
+														<span class="absolute bottom-0 -left-12 translate-y-[calc(-100%-0.8rem)] group-hover:translate-y-0 transition-all duration-700 text-sm will-change-[transform]">
+															0{idx + 1}
+														</span>
+														<span class="line-clamp-2 text-sm opacity-0 pointer-events-none transition-opacity duration-700 ease-[cubic-bezier(0.65, 0, 0.35, 1)] group-hover:opacity-100 group-hover:pointer-events-auto">
+															{service.services.join(', ')}
+														</span>
+													</div>
+													<div class="w-auto max-w-full flex-shrink-0 flex-grow-0 basis-auto relative ml-auto">
+														<button
+															type="button"
+															class="flex items-center opacity-0 pointer-events-none transition-opacity duration-700 ease-[cubic-bezier(0.65, 0, 0.35, 1)] group-hover:opacity-100 group-hover:pointer-events-auto cursor-pointer text-xl"
+														>
+															<Icon name="clarity:child-arrow-line" />
+															<span class="ml-3 border-b-2">Ver servicio</span>
+														</button>
+													</div>
+												</div>
+											</div>
+										</div>
+									</a>
+								</li>
+								<div>
+									<span class="border-b-2 border-solid border-white block" />
+								</div>
+							</>
+						);
+					})
+				}
+			</ul>
+		</div>
+	</div>
+	<style lang="scss">
+		.is-out {
+			height: 185px !important;
+		}
+	</style>
+	<script>
+		const services = document.querySelectorAll('#services a');
+		services.forEach((service) => {
+			service.addEventListener('mouseenter', () => {
+				services.forEach((s) => {
+					if (s !== service) {
+						s.classList.add('is-out');
+					}
+				});
+			});
+			service.addEventListener('mouseleave', () => {
+				services.forEach((s) => {
+					if (s !== service) {
+						s.classList.remove('is-out');
+					}
+				});
+			});
+		});
+	</script>
+</section>

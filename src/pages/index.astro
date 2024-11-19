@@ -1,21 +1,129 @@
 ---
 import '../styles/GlobalStyles.astro';
+import 'overlayscrollbars/overlayscrollbars.css';
 
-import Hero from '../sections/Hero.astro';
+import faviconSrc from '@public/favicon.png';
+import faviconSvgSrc from '@public/favicon.svg';
+import { getImage } from 'astro:assets';
+import Hero from 'src/sections/Hero.astro';
+
+import Menu from '../components/Menu.astro';
+import Navbar from '../components/Navbar.astro';
+
+interface button {
+	name: string;
+	href: string;
+	submenu?: Array<{ name: string; href: string }>;
+}
+
+interface Props {
+	title: string;
+	buttons?: button[];
+}
+const appleTouchIcon = await getImage({
+	src: faviconSrc,
+	width: 180,
+	height: 180,
+	format: 'png',
+});
+const faviconSvg = await getImage({ src: faviconSvgSrc, format: 'svg' });
+
+const title = 'Laboralistas Estudio Juridico';
+const buttons = [
+	{ name: 'Acerca de', href: '/about' },
+	{
+		name: 'Servicios',
+		href: '/services',
+		submenu: [
+			{
+				name: 'Asesoría Sindical',
+				href: '/asesoria-sindical',
+			},
+			{
+				name: 'Defensa Jurídica Laboral',
+				href: '/defensa-juridica-laboral',
+			},
+			{
+				name: 'Capacitaciones',
+				href: '/capacitaciones',
+			},
+		],
+	},
+	{ name: 'Blog', href: '/blog' },
+];
 ---
 
+<!doctype html>
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>CIDDT</title>
+		<link rel="icon" href="/favicon.ico" sizes="16x16" />
+		<link rel="icon" href={faviconSvg.src} type="image/svg+xml" />
+		<link rel="apple-touch-icon" href={appleTouchIcon.src} />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
 	</head>
 	<body>
+		<div id="scrollbar"></div>
+		<Navbar {buttons} />
+		<Menu
+			buttons={buttons.concat({
+				name: 'Contacto',
+				href: '/contact',
+			})}
+		/>
 		<Hero />
-		<style lang="scss">
-			body {
-				background-color: #f8f8f8;
-			}
-		</style>
 	</body>
+	<script src="../layouts/locomotiveScroll.ts"></script>
+
+	<script>
+		import {
+			OverlayScrollbars,
+			ScrollbarsHidingPlugin,
+			SizeObserverPlugin,
+			ClickScrollPlugin,
+		} from 'overlayscrollbars';
+
+		document.addEventListener('DOMContentLoaded', () => {
+			const scrollbar = document.getElementById('scrollbar');
+			if (scrollbar) {
+				const osInstance = OverlayScrollbars(document.body, {
+					scrollbars: {
+						theme: 'os-theme-custom',
+					},
+				});
+				OverlayScrollbars.plugin([SizeObserverPlugin, ClickScrollPlugin, ScrollbarsHidingPlugin]);
+
+				console.log('OverlayScrollbars instance:', osInstance);
+			}
+		});
+	</script>
+
+	<style lang="scss" is:global>
+		// horizontal and vertical scrollbar are 10px
+		.os-theme-custom {
+			--os-size: 10px;
+			filter: grayscale(1);
+		}
+
+		// horizontal scrollbar is 10px
+		.os-theme-custom.os-scrollbar-horizontal {
+			--os-size: 10px;
+		}
+
+		// vertical scrollbar is 20px
+		.os-theme-custom.os-scrollbar-vertical {
+			--os-size: 10px;
+			--os-handle-bg: #e7e3dd;
+			mix-blend-mode: difference;
+			--os-handle-bg-hover: #e7e3dd;
+			--os-handle-bg-active: #e7e3dd;
+
+			transition: all 0.1s ease;
+			&:hover {
+				--os-size: 12px;
+			}
+		}
+	</style>
 </html>

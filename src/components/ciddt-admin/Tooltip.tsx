@@ -5,9 +5,11 @@ import { createPortal } from 'react-dom';
 interface TooltipProps {
 	content: string;
 	children: React.ReactNode;
+	className?: string;
+	show?: boolean;
 }
 
-const Tooltip: React.FC<TooltipProps> = ({ children, content }) => {
+const Tooltip: React.FC<TooltipProps> = ({ children, content, className, show }) => {
 	const [visible, setVisible] = useState(false);
 	const [position, setPosition] = useState({ x: 0, y: 0 });
 
@@ -30,7 +32,9 @@ const Tooltip: React.FC<TooltipProps> = ({ children, content }) => {
 			{visible &&
 				createPortal(
 					<motion.div
-						className="absolute bg-black text-white p-2 rounded shadow-lg max-w-md overflow-hidden text-ellipsis z-[52]"
+						className={`absolute bg-black p-2 rounded shadow-lg max-w-md overflow-hidden text-ellipsis z-[52] ${className} ${
+							show ?? true ? 'block' : 'hidden'
+						}`}
 						initial={{ opacity: 0, scale: 0 }}
 						animate={{ opacity: 1, scale: 1 }}
 						exit={{ opacity: 0, scale: 0 }}

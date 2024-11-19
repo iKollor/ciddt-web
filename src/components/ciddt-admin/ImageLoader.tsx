@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { memo, useState } from 'react';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 
-interface props {
-	src: string;
+interface Props {
+	src: string | undefined;
 	type: 'image' | 'video';
 	alt?: string;
 	style?: React.CSSProperties;
@@ -13,7 +13,7 @@ interface props {
 	width: number;
 }
 
-const ImageLoader: React.FC<props> = ({
+const ImageLoader: React.FC<Props> = ({
 	src,
 	alt,
 	circle = false,
@@ -25,6 +25,16 @@ const ImageLoader: React.FC<props> = ({
 	...props
 }) => {
 	const [isLoaded, setIsLoaded] = useState(false);
+	const [isError, setIsError] = useState(false);
+
+	const defaultImageSrc = '/assets/images/default_placeholder.png'; // Asegúrate de tener una imagen predeterminada válida
+
+	const imageSrc = isError ? defaultImageSrc : src;
+
+	const handleImageError = (): void => {
+		setIsError(true);
+		setIsLoaded(true); // Para quitar el esqueleto una vez que se detecte el error
+	};
 
 	return (
 		<>
@@ -32,7 +42,7 @@ const ImageLoader: React.FC<props> = ({
 				<SkeletonTheme baseColor="#27474f" highlightColor="#559b81">
 					<Skeleton
 						height={height}
-						width={type === 'image' ? width : width * 0.8}
+						width={type === 'image' ? width : width * 0.7}
 						circle={circle}
 						className={skeletonClassName}
 					/>
@@ -40,16 +50,17 @@ const ImageLoader: React.FC<props> = ({
 			)}
 			{type === 'image' ? (
 				<img
-					src={src}
+					src={imageSrc ?? defaultImageSrc}
 					alt={alt}
 					onLoad={() => {
 						setIsLoaded(true);
 					}}
+					onError={handleImageError}
 					style={{ display: isLoaded ? 'block' : 'none', ...props.style }}
-					{...props}
 					className={`${className} ${isLoaded ? '' : 'hidden'}`}
 					height={height}
 					width={width}
+					{...props}
 				/>
 			) : (
 				<video
@@ -57,18 +68,19 @@ const ImageLoader: React.FC<props> = ({
 					onLoadedData={() => {
 						setIsLoaded(true);
 					}}
+					onError={handleImageError}
 					style={{ display: isLoaded ? 'block' : 'none', ...props.style }}
-					{...props}
 					className={`${className} ${isLoaded ? '' : 'hidden'}`}
 					height={height}
 					width={width}
 					autoPlay
 					loop
 					muted
+					{...props}
 				/>
 			)}
 		</>
 	);
 };
 
-export default ImageLoader;
+export default memo(ImageLoader);

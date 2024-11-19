@@ -1,4 +1,7 @@
 {
 	"recommendations": ["astro-build.astro-vscode"],
-	"unwantedRecommendations": []
+	"unwantedRecommendations": [
+		// Remove biome from the unwanted recommendations
+		"biome.biome"
+	]
 }

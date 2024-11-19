@@ -1,0 +1,159 @@
+@font-face {
+	font-family: 'Bruta Pro Extended';
+	src:
+		url('/fonts/BrutaProExtended/BrutaProExtended-Black.woff2') format('woff2'),
+		url('/fonts/BrutaProExtended/BrutaProExtended-Black.woff') format('woff');
+	font-weight: 900;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Bruta Pro Extended';
+	src:
+		url('/fonts/BrutaProExtended/BrutaProExtended-BlackItalic.woff2') format('woff2'),
+		url('/fonts/BrutaProExtended/BrutaProExtended-BlackItalic.woff') format('woff');
+	font-weight: 900;
+	font-style: italic;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Bruta Pro Extended';
+	src:
+		url('/fonts/BrutaProExtended/BrutaProExtended-Bold.woff2') format('woff2'),
+		url('/fonts/BrutaProExtended/BrutaProExtended-Bold.woff') format('woff');
+	font-weight: 700;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Bruta Pro Extended';
+	src:
+		url('/fonts/BrutaProExtended/BrutaProExtended-BoldItalic.woff2') format('woff2'),
+		url('/fonts/BrutaProExtended/BrutaProExtended-BoldItalic.woff') format('woff');
+	font-weight: 700;
+	font-style: italic;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Bruta Pro Extended';
+	src:
+		url('/fonts/BrutaProExtended/BrutaProExtended-ExtraBoldItalic.woff2') format('woff2'),
+		url('/fonts/BrutaProExtended/BrutaProExtended-ExtraBoldItalic.woff') format('woff');
+	font-weight: 800;
+	font-style: italic;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Bruta Pro Extended';
+	src:
+		url('/fonts/BrutaProExtended/BrutaProExtended-ExtraBold.woff2') format('woff2'),
+		url('/fonts/BrutaProExtended/BrutaProExtended-ExtraBold.woff') format('woff');
+	font-weight: 800;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Bruta Pro Extended';
+	src:
+		url('/fonts/BrutaProExtended/BrutaProExtended-ExtraLight.woff2') format('woff2'),
+		url('/fonts/BrutaProExtended/BrutaProExtended-ExtraLight.woff') format('woff');
+	font-weight: 200;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Bruta Pro Extended';
+	src:
+		url('/fonts/BrutaProExtended/BrutaProExtended-ExtraLightItalic.woff2') format('woff2'),
+		url('/fonts/BrutaProExtended/BrutaProExtended-ExtraLightItalic.woff') format('woff');
+	font-weight: 200;
+	font-style: italic;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Bruta Pro Extended';
+	src:
+		url('/fonts/BrutaProExtended/BrutaProExtended-Light.woff2') format('woff2'),
+		url('/fonts/BrutaProExtended/BrutaProExtended-Light.woff') format('woff');
+	font-weight: 300;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Bruta Pro Extended';
+	src:
+		url('/fonts/BrutaProExtended/BrutaProExtended-LightItalic.woff2') format('woff2'),
+		url('/fonts/BrutaProExtended/BrutaProExtended-LightItalic.woff') format('woff');
+	font-weight: 300;
+	font-style: italic;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Bruta Pro Extended';
+	src:
+		url('/fonts/BrutaProExtended/BrutaProExtended-Regular.woff2') format('woff2'),
+		url('/fonts/BrutaProExtended/BrutaProExtended-Regular.woff') format('woff');
+	font-weight: normal;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Bruta Pro Extended';
+	src:
+		url('/fonts/BrutaProExtended/BrutaProExtended-RegularItalic.woff2') format('woff2'),
+		url('/fonts/BrutaProExtended/BrutaProExtended-RegularItalic.woff') format('woff');
+	font-weight: normal;
+	font-style: italic;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Bruta Pro Extended';
+	src:
+		url('/fonts/BrutaProExtended/BrutaProExtended-SemiBold.woff2') format('woff2'),
+		url('/fonts/BrutaProExtended/BrutaProExtended-SemiBold.woff') format('woff');
+	font-weight: 600;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Bruta Pro Extended';
+	src:
+		url('/fonts/BrutaProExtended/BrutaProExtended-SemiBoldItalic.woff2') format('woff2'),
+		url('/fonts/BrutaProExtended/BrutaProExtended-SemiBoldItalic.woff') format('woff');
+	font-weight: 600;
+	font-style: italic;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Bruta Pro Extended';
+	src:
+		url('/fonts/BrutaProExtended/BrutaProExtended-Thin.woff2') format('woff2'),
+		url('/fonts/BrutaProExtended/BrutaProExtended-Thin.woff') format('woff');
+	font-weight: 100;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Bruta Pro Extended';
+	src:
+		url('/fonts/BrutaProExtended/BrutaProExtended-ThinItalic.woff2') format('woff2'),
+		url('/fonts/BrutaProExtended/BrutaProExtended-ThinItalic.woff') format('woff');
+	font-weight: 100;
+	font-style: italic;
+	font-display: swap;
+}

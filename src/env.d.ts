@@ -1,3 +1,4 @@
+/// <reference path="../.astro/types.d.ts" />
 /* eslint-disable @typescript-eslint/triple-slash-reference */
 /// <reference types="astro/client" />
 /// <reference types="astro:transitions/client" />
@@ -7,6 +8,7 @@ declare module 'springer';
 declare module 'feather-icons-react';
 declare module 'alpinejs';
 declare module '';
+declare module 'locomotive-scroll';
 declare module '*.json' {
 	const value: any;
 	export default value;

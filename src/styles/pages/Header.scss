@@ -5,13 +5,13 @@
 	position: relative; // Esto permite que el logo se posicione en relación con este contenedor
 
 	.bg__container {
-		background-image: url('/2x/bg.jpg');
+		/* background-image: url('/2x/bg.jpg');
 		background-size: cover;
 		background-repeat: no-repeat;
-		background-position: center;
+		background-position: center; */
+		background-color: $primary;
 		width: 100%;
 		height: 100vh;
-		filter: contrast(0.8) brightness(0.7);
 		position: absolute;
 		z-index: 2;
 	}
@@ -25,9 +25,8 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		padding-top: 20vh;
 		.logo {
-			width: 25vw;
+			width: 40vw;
 		}
 		z-index: 3;
 	}
@@ -37,9 +36,10 @@
 	}
 
 	.bottom__section__container {
-		width: 100%;
+		width: 90%;
 		height: 30vh;
 		display: flex;
+		margin: auto;
 		.left,
 		.right {
 			width: 50%;
@@ -47,10 +47,13 @@
 			margin: auto;
 		}
 		.leyenda {
-			color: $bg;
+			color: $text;
 			opacity: 0.8;
-			font-size: 1rem;
-			max-width: 35%;
+			font-size: 20px;
+			max-width: 50%;
+		}
+		.right{
+			padding-top: 20px;
 		}
 	}
 }
@@ -68,20 +71,20 @@
 		}
 
 		.bottom__section__container {
-			height: 50vh;
+			height: 30vh;
 			flex-direction: column-reverse;
 			.left,
 			.right {
-				width: 80%;
-				height: 50%;
+				width: 90%;
 				margin: auto;
 			}
+			.left {
+				display: none;
+			}
 			.leyenda {
+				text-align: center;
 				font-size: 1rem;
-				max-width: 80%;
-				p {
-					margin-top: 50px;
-				}
+				max-width: 90%;
 			}
 		}
 	}
@@ -94,20 +97,6 @@
 			padding-top: 5vh;
 			.logo {
 				width: 70vw;
-			}
-		}
-
-		.bottom__section__container {
-			height: 50vh;
-			.left,
-			.right {
-				height: 30%;
-			}
-			.leyenda {
-				font-size: 0.7rem;
-				p {
-					margin-top: 0;
-				}
 			}
 		}
 	}

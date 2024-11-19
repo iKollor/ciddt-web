@@ -5,10 +5,10 @@ import '../styles/components/Carrousel.scss';
 import { useStore } from '@nanostores/react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
+import type { pseudoUser } from 'src/hooks/useEditProfileManagement';
 import useTeamManagement from 'src/hooks/useTeamManagement';
 
-import { animationFinished, chunkIndex } from '../hooks/carrouselStores';
-import { type User } from '../interfaces/User';
+import { animationFinished, chunkIndex, selectedCard } from '../hooks/carrouselStores';
 import ArrowIcon from './buttons/ArrowIcon';
 import ProfileCard from './ProfileCard';
 
@@ -17,10 +17,11 @@ const teamId = import.meta.env.PUBLIC_TEAM_ID;
 const Carrusel: React.FC = () => {
 	const chunkSize = 3;
 	const $chunkIndex = useStore(chunkIndex);
-	const [profilesData, setProfilesData] = useState<User[]>([]);
+	const [profilesData, setProfilesData] = useState<pseudoUser[]>([]);
 	const [currentChunkData, setCurrentChunkData] = useState(() => profilesData.slice(0, chunkSize));
 	const [profileClasses, setProfileClasses] = useState(['estado1', 'estado2', 'estado3']);
 	const $animationFinished = useStore(animationFinished);
+	const [isButtonDisabled, setIsButtonDisabled] = useState(false);
 
 	const { getProfilesData } = useTeamManagement();
 
@@ -28,7 +29,8 @@ const Carrusel: React.FC = () => {
 		if (teamId == null) return;
 		void getProfilesData(teamId)
 			.then((data) => {
-				setProfilesData(data);
+				const profiles = data.slice(1);
+				setProfilesData(profiles);
 			})
 			.catch((error) => {
 				console.error(error);
@@ -36,7 +38,12 @@ const Carrusel: React.FC = () => {
 	}, []);
 
 	const nextStep = () => {
-		if ($animationFinished) return; // Prevenir múltiples clics si ya está deshabilitado
+		if ($animationFinished || isButtonDisabled) return; // Prevenir múltiples clics si ya está deshabilitado
+
+		setIsButtonDisabled(true); // Deshabilitar el botón
+		setTimeout(() => {
+			setIsButtonDisabled(false);
+		}, 1400); // Habilitar el botón después de un tiempo
 
 		const maxIndex = Math.ceil(profilesData.length / chunkSize) - 1;
 		const newIndex = ($chunkIndex + 1) % (maxIndex + 1);
@@ -111,7 +118,7 @@ const Carrusel: React.FC = () => {
 	return (
 		<>
 			<AnimatePresence initial={false} mode="wait">
-				<motion.div className="carrusel__container gap-6 flex w-full h-full" key={$chunkIndex}>
+				<motion.div className="carrusel__container gap-6 flex w-full h-full pr-2" key={$chunkIndex}>
 					{currentChunkData.map((profile, index) => (
 						<ProfileCard
 							key={index}
@@ -120,6 +127,7 @@ const Carrusel: React.FC = () => {
 							state={profileClasses[index]}
 							onClick={() => {
 								handleCardClick(index);
+								selectedCard.set(profile);
 							}}
 						/>
 					))}
@@ -127,12 +135,8 @@ const Carrusel: React.FC = () => {
 			</AnimatePresence>
 			{profilesData.length > 3 && (
 				<i
-					className={`nextButton ${$animationFinished ? 'disabled' : ''}`}
-					onClick={() => {
-						if (!$animationFinished) {
-							nextStep();
-						}
-					}}
+					className={`nextButton ${$animationFinished || isButtonDisabled ? 'disabled' : ''}`}
+					onClick={nextStep}
 				>
 					<ArrowIcon />
 				</i>

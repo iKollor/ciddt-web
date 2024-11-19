@@ -1,9 +1,17 @@
 {
-	"eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact", "astro"],
+	"eslint.validate": [
+		"javascript",
+		"javascriptreact",
+		"typescript",
+		"typescriptreact",
+		"astro"
+	],
 	"prettier.documentSelectors": ["**/*.astro"],
 	"[astro]": {
-		"editor.defaultFormatter": "astro-build.astro-vscode"
+		"editor.defaultFormatter": "dbaeumer.vscode-eslint"
 	},
 	"typescript.tsdk": "node_modules\\typescript\\lib",
-	"cSpell.words": ["edgewater", "renderizado", "tsconfigs"]
+	"cSpell.words": ["edgewater", "renderización", "renderizado", "tsconfigs"],
+	// disable biome extension
+	
 }

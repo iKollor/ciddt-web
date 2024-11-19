@@ -1,15 +1,14 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 
-import { useStore } from '@nanostores/react';
 import { motion } from 'framer-motion';
 import { forwardRef, useEffect, useRef, useState } from 'react';
+import type { pseudoUser } from 'src/hooks/useEditProfileManagement';
 
 import { animationFinished } from '../hooks/carrouselStores';
-import { type User } from '../interfaces/User';
 
 interface ProfileCardProps {
-	profile: User;
+	profile: pseudoUser;
 	index: number;
 	state?: string;
 	onClick?: () => void;
@@ -22,7 +21,6 @@ const ProfileCard = forwardRef<HTMLDivElement, ProfileCardProps>(({ profile, ind
 	const [isOverflow, setIsOverflow] = useState(false);
 	const nameRef = useRef<HTMLHeadingElement>(null);
 	const containerRef = useRef<HTMLDivElement>(null);
-	const $animationFinished = useStore(animationFinished);
 	const [xOffset, setXOffset] = useState(0);
 	const [yOffset, setYOffset] = useState(0);
 
@@ -64,11 +62,10 @@ const ProfileCard = forwardRef<HTMLDivElement, ProfileCardProps>(({ profile, ind
 		}
 	}, []); // Se ejecuta solo cuando el componente se monta
 
-	// TODO: hacer una animación hover en la tarjeta que haga que el boxshadow se mueva en base a la posición del mouse
+	// TODO: hacer una animación hover en la tarjeta que haga que el boxShadow se mueva en base a la posición del mouse
 	const handleMouseMove = (event: React.MouseEvent<HTMLElement>) => {
 		const { clientX, clientY } = event;
 
-		// No es necesario hacer un casting aquí, ya que el tipo de evento es específico de React
 		const { left, top, width, height } = event.currentTarget.getBoundingClientRect();
 		const x = (clientX - left) / width - 0.5; // Normalizar posición x entre -0.5 y 0.5
 		const y = (clientY - top) / height - 0.5; // Normalizar posición y entre -0.5 y 0.5
@@ -123,15 +120,10 @@ const ProfileCard = forwardRef<HTMLDivElement, ProfileCardProps>(({ profile, ind
 					},
 				}}
 				onAnimationStart={() => {
-					animationFinished.set(!$animationFinished);
+					animationFinished.set(true);
 				}}
-				onAnimationEnd={() => {
-					if ($animationFinished) {
-						animationFinished.set(!$animationFinished);
-					}
-				}}
-				onTap={() => {
-					animationFinished.set($animationFinished);
+				onAnimationComplete={() => {
+					animationFinished.set(false);
 				}}
 				transition={{
 					opacity: {
@@ -165,18 +157,17 @@ const ProfileCard = forwardRef<HTMLDivElement, ProfileCardProps>(({ profile, ind
 					style={{
 						backgroundImage:
 							`url(${profile.urlFotoPerfil})` ?? 'url(/assets/images/profile_placeholder.jpg)',
-						filter: 'grayscale(100%) contrast(0.8)',
 					}}
 				></div>
 				<div
-					className={`profile__data bg-gradient-to-t from-black p-5 pt-[100px] block relative w-full ${
+					className={`profile__data max-lg:text-left bg-gradient-to-t from-black p-5 pt-[100px] block relative w-full ${
 						state === 'estado2' || state === 'estado3' ? 'text-center' : ''
 					}${isOverflow ? 'h-full' : ''}`}
 					style={{
 						justifyContent: 'inherit',
 					}}
 				>
-					<div className="profile__position">
+					<div className="profile__position max-lg:hidden">
 						<h3
 							className={`position font-normal text-lg opacity-50 leading-[1] ${
 								state === 'estado3' ? 'hidden' : ''
@@ -186,27 +177,22 @@ const ProfileCard = forwardRef<HTMLDivElement, ProfileCardProps>(({ profile, ind
 						</h3>
 					</div>
 					<div
-						className={`profile__name__age flex text-5xl font-extrabold items-start flex-row capitalize my-2 ${
+						className={`profile__name__age max-lg:text-3xl max-lg:-rotate-90 max-lg:justify-normal flex text-5xl font-extrabold items-start flex-row capitalize my-2 ${
 							state === 'estado2' || state === 'estado3' ? 'justify-center' : ''
 						}`}
 					>
 						<h1 ref={nameRef} className={`nombre ${isOverflow ? 'rotate-90' : ''} leading-[1]`}>
 							{state === 'estado3' ? soloNombre : profile.displayName}
 						</h1>
-						<h1
-							className={`edad ml-3 opacity-50 leading-[1] ${
-								state === 'estado2' || state === 'estado3' ? 'hidden' : ''
-							}`}
-						>
-							{profile.age}
-						</h1>
-					</div>
-					<div
-						className={`profile__details text-xl font-light ${
-							state === 'estado2' || state === 'estado3' ? 'hidden' : ''
-						}`}
-					>
-						{profile.details}
+						{profile.age !== 0 && (
+							<h1
+								className={`edad ml-3 opacity-50 leading-[1] ${
+									state === 'estado2' || state === 'estado3' ? 'hidden' : ''
+								}`}
+							>
+								{profile.age}
+							</h1>
+						)}
 					</div>
 				</div>
 			</motion.div>

@@ -1,0 +1,47 @@
+---
+import BlogPostEditor from '@components/ciddt-admin/BlogPostEditor';
+import { auth } from '@firebase/server';
+import type { UserRecord } from 'firebase-admin/auth';
+import AdminPanelLayout from 'src/layouts/AdminPanelLayout.astro';
+
+import { getPostById } from '../../../../hooks/blogPostService';
+
+const { id } = Astro.params;
+
+if (id == null) {
+	return Astro.redirect('/ciddt-admin/content-manager');
+}
+const post = await getPostById(id);
+
+if (post == null) {
+	return Astro.redirect('/ciddt-admin/content-manager');
+}
+
+/* Check current session */
+if (!Astro.cookies.has('session')) {
+	return Astro.redirect('/ciddt-admin/login');
+}
+
+let userRecord: UserRecord | undefined;
+
+const sessionCookie = Astro.cookies.get('session')?.value;
+
+if (sessionCookie != null) {
+	try {
+		const decodedCookie = await auth.verifySessionCookie(sessionCookie);
+		userRecord = await auth.getUser(decodedCookie.uid);
+	} catch (error: any) {
+		if (error.code === 'UND_ERR_CONNECT_TIMEOUT') {
+			return;
+		}
+		console.log(error);
+		return Astro.redirect('/ciddt-admin/dashboard');
+	}
+}
+---
+
+<AdminPanelLayout title="Content Manager">
+	<section>
+		<BlogPostEditor blogPost={post} userRecord={userRecord} client:only />
+	</section>
+</AdminPanelLayout>

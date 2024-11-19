@@ -3,7 +3,7 @@
 import { navigate } from 'astro:transitions/client';
 import FeatherIcon from 'feather-icons-react';
 import { motion } from 'framer-motion';
-import { useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 
 interface NavLink {
 	name: string;
@@ -87,7 +87,7 @@ const Navbar: React.FC<NavbarProps> = ({ navLinks }) => {
 			dragTransition={{ timeConstant: 200, power: 0.2 }}
 			initial={navInitialPosition}
 			style={{
-				zIndex: 1000,
+				zIndex: 48,
 				position: 'fixed',
 				top: '10px',
 				left: '10px',
@@ -144,14 +144,14 @@ const Navbar: React.FC<NavbarProps> = ({ navLinks }) => {
 	);
 };
 
-export default Navbar;
+export default memo(Navbar);
 
 interface TooltipProps {
 	content: string;
 	tooltipPosition: 'left' | 'right';
 }
 
-export const Tooltip: React.FC<TooltipProps> = ({ content, tooltipPosition }) => {
+const Tooltip: React.FC<TooltipProps> = ({ content, tooltipPosition }) => {
 	return (
 		<motion.span
 			className={`absolute p-2 bg-gray-700 text-white rounded-md shadow-lg ${

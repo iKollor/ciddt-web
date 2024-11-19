@@ -1,10 +1,19 @@
 <style lang="scss" is:global>
-	@import '../../fonts/Gelion/stylesheet.css';
+	@import '/fonts/Gelion/stylesheet.css';
 	@import 'GlobalVariables.scss';
-
+	@import '/node_modules/locomotive-scroll/dist/locomotive-scroll';
+	@import url('https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap');
+	html[data-scroll-orientation='horizontal'] {
+		body {
+			width: fit-content;
+		}
+		[data-scroll-container] {
+			display: flex;
+		}
+	}
 	html {
 		font-family: 'Gelion', sans-serif;
-		scroll-behavior: smooth;
+		overflow-x: hidden;
 	}
 	a {
 		text-decoration: none;
@@ -20,8 +29,7 @@
 	}
 	body {
 		margin: 0 auto;
-		overflow-x: hidden;
-		scroll-behavior: smooth;
+		background-color: $bg_white;
 	}
 
 	#main-container {
@@ -32,5 +40,9 @@
 	.pushed {
 		transition: width 0.6s ease-in-out;
 		width: calc(100% - #{$navbar_menu_width} + #{$scrollbar_width_px}) !important;
+	}
+
+	.font-raleway {
+		font-family: 'Raleway', sans-serif;
 	}
 </style>

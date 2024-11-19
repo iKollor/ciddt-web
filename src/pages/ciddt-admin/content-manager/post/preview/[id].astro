@@ -1,0 +1,164 @@
+---
+import { Image } from 'astro:assets';
+import { Timestamp } from 'firebase/firestore';
+import { parse } from 'node-html-parser';
+import { getPostById } from 'src/hooks/blogPostService';
+import PageLayout from 'src/layouts/PageLayout.astro';
+import Footer from 'src/sections/Hero/Footer.astro';
+
+const { id } = Astro.params;
+
+if (id == null) {
+	return Astro.redirect('/blog/');
+}
+const post = await getPostById(id);
+
+if (post == null) {
+	return Astro.redirect('/blog/');
+}
+
+const postDate = new Timestamp(post.date.seconds, post.date.nanoseconds).toDate();
+// formatear la fecha a español con el siguiente formato "Lunes, 1 de enero de 2021"
+const postDateFormatted = postDate.toLocaleDateString('es-ES', {
+	weekday: 'long',
+	year: 'numeric',
+	month: 'long',
+	day: 'numeric',
+});
+
+const styles = `
+	<style>
+		.fade-in-up {
+			opacity: 0;
+			transform: translateY(20px);
+			transition: all 0.7s ease-in-out;
+			}
+		.fade-in-up-active {
+			transform: translateY(0);
+			opacity: 1;
+		}
+		.hr-hidden{
+			width: 0;
+			transition: width 2s ease-in-out;
+		}
+		.hr-show{
+			width: 100%;
+		}
+		.content-image{
+			width: 100% !important;
+			height: auto;
+			margin: 0 auto;
+			display: block;
+			object-fit: cover;
+			cursor: default !important;
+		}
+		.content-image-wrapper{
+			width: 100%;
+			height: auto;
+			margin: 0 auto;
+			display: block;
+			overflow: hidden;
+			border-radius: 10px;
+			box-shadow: 0 0 10px rgba(0,0,0,0.1);
+			margin-top: 50px;
+			margin-bottom: 50px;
+			overflow: hidden;
+		}
+	</style>
+`;
+
+const script = `
+	<script>
+		document.addEventListener('DOMContentLoaded', () => {
+			const content = document.querySelector('.content');
+
+			const hrs = document.querySelectorAll('hr');
+			let sectionCounter = 1;
+			hrs.forEach(hr => {
+				const section = document.createElement('section');
+				section.id = 'blog_section_' + sectionCounter;
+				let nextSibling = hr.nextSibling;
+				while (nextSibling) {
+					const current = nextSibling;
+					nextSibling = current.nextSibling;
+					section.appendChild(current);
+				}
+				hr.parentNode.insertBefore(section, hr.nextSibling);
+				sectionCounter++;
+			});
+
+			// get images inside content
+			const images = content.querySelectorAll('img');
+			images.forEach(image => {
+				const wrapper = document.createElement('div');
+				wrapper.classList.add('content-image-wrapper');
+				wrapper.classList.add('fade-in-up');
+				// add custom attr to wrapper
+				wrapper.setAttribute('data-scroll', '');
+				wrapper.setAttribute('data-scroll-class', 'fade-in-up-active')
+				wrapper.setAttribute('data-scroll-repeat', '');
+				wrapper.setAttribute('data-scroll-offset', '25% 0');
+				image.parentNode.insertBefore(wrapper, image);
+				wrapper.appendChild(image);
+			});
+		});
+	</script>
+`;
+
+// añadir styles al post.content
+const html = script + post.content + styles;
+const parseHTML = parse(html);
+---
+
+<PageLayout title=`${post.title}` onBackHref={`/ciddt-admin/content-manager/post/${post.id}`}>
+	<section class="w-[80%] mx-auto my-32">
+		<div class="flex justify-end text-right mb-20">
+			<h1 class="text-9xl text-right max-w-screen-lg" data-scroll data-scroll-speed="0.2">{post.title}</h1>
+		</div>
+		<div
+			class="flex justify-end text-xl sm:text-2xl leading-none text-right sm:text-left"
+			data-scroll
+			data-scroll-speed="0.3"
+		>
+			<div class="flex items-center gap-x-4 sm:gap-x-12 mb-32">
+				<time datetime={postDate.toDateString()} class="capitalize-first">{postDateFormatted}</time>
+				<div class="flex items-center justify-end">
+					<p>
+						por
+						<span>{post.author}</span>
+					</p>
+					<div class="w-10 h-10 rounded-full overflow-hidden ml-4">
+						<Image
+							src={post.authorUrlImage}
+							alt={post.author}
+							width={200}
+							height={200}
+							class="w-full h-full object-cover object-center"
+						/>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="mb-32 sm:mb-40 fade-in-up" data-scroll data-scroll-class="fade-in-up-active" data-scroll-repeat>
+			<div class="h-[calc(100vh-100px)] w-full relative overflow-hidden bg-gray-200 rounded-lg shadow-lg">
+				<div
+					class="h-full w-full absolute top-0 left-0 transition-opacity duration-400 ease-in-out opacity-0"
+					style="transform: translateZ(0px); z-index: 1;"
+				>
+					<img class="scale-110 blur-xl" alt={post.title} src={post.imageUrl} />
+				</div>
+				<Image
+					class="object-cover object-center w-full h-full"
+					alt={post.title}
+					src={post.imageUrl}
+					width={2000}
+					height={2000}
+				/>
+			</div>
+		</div>
+		<div class="w-[90%] mx-auto min-h-screen content" data-scroll-section>
+			{parseHTML}
+		</div>
+	</section>
+	<Footer />
+</PageLayout>

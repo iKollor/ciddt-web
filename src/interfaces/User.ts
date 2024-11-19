@@ -1,4 +1,4 @@
-import type { DocumentReference } from 'firebase/firestore/lite';
+import type { DocumentReference } from 'firebase/firestore';
 
 /**
  * Represents a user.
@@ -35,7 +35,7 @@ export interface User {
 	/**
 	 * The unique identifier of the user.
 	 */
-	userId: string;
+	uid: string;
 	/**
 	 * The position of the user (optional).
 	 */

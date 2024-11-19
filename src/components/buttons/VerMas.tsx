@@ -1,21 +1,76 @@
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
-
 import { motion } from 'framer-motion';
 
-function VerMas() {
+const colors = {
+	text: '#0A0801',
+	background: '#F0E7E0',
+	primary: '#163330',
+	secondary: '#CB9E50',
+	accent: '#5D2A2C',
+	inverse: '#f2cccf',
+};
+
+interface VerMasProps {
+	opcion?: '1' | '2';
+	textoBoton?: string;
+	tamanoTexto?: string; // Ejemplo: '1.5rem'
+	paddingBoton?: string; // Ejemplo: '15px 17px'
+	href?: string;
+	width?: string;
+	className?: string;
+}
+
+function VerMas({
+	opcion = '1',
+	textoBoton = 'Ver Más',
+	tamanoTexto = '1.5rem',
+	paddingBoton = '15px 17px',
+	href = '#',
+	width = 'auto',
+	className,
+}: VerMasProps): JSX.Element {
+	const estilosBase = {
+		padding: paddingBoton,
+		fontSize: tamanoTexto,
+		borderRadius: '15px',
+		fontWeight: 'bold',
+		width,
+	};
+
+	const estilosOpcion = {
+		1: {
+			backgroundColor: colors.primary,
+			color: colors.background + ' !important',
+			boxShadow: 'none',
+			'&:hover': {
+				x: -5,
+				y: -5,
+				boxShadow: `5px 5px 0px ${colors.secondary}`,
+			},
+		},
+		2: {
+			backgroundColor: colors.background,
+			boxShadow: 'none',
+			color: colors.primary + ' !important',
+			'&:hover': {
+				x: -5,
+				y: -5,
+				backgroundColor: colors.background,
+				boxShadow: `5px 5px 0px ${colors.secondary}`,
+			},
+		},
+	};
+
 	return (
 		<>
 			<motion.a
-				href="#"
+				href={href}
 				style={{
-					padding: '15px 17px',
-					backgroundColor: '#db001c',
-					fontSize: '1.5rem',
-					marginRight: '100px',
-					borderRadius: '15px',
-					fontWeight: 'bold',
+					...estilosBase,
+					backgroundColor: estilosOpcion[opcion].backgroundColor,
+					color: estilosOpcion[opcion].color,
 				}}
-				whileHover={{ x: -5, y: -5, boxShadow: '5px 5px 0px #1d1d1b' }}
+				className={className}
+				whileHover={estilosOpcion[opcion]['&:hover']}
 				transition={{
 					type: 'spring',
 					damping: 10,
@@ -23,7 +78,7 @@ function VerMas() {
 					stiffness: 300,
 				}}
 			>
-				VER MÁS
+				{textoBoton}
 			</motion.a>
 		</>
 	);

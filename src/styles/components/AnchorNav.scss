@@ -1,12 +1,10 @@
-@import '../../../fonts/BrutaProExtended/stylesheet.css';
 @import '../GlobalVariables.scss';
 
 .anchorNav__container {
 	position: fixed;
 	font-family: 'Bruta Pro Extended', sans-serif;
-	left: 0;
+	left: 40px;
 	bottom: 0;
-
 	z-index: 1;
 
 	ul {
@@ -30,8 +28,8 @@
 
 				&:hover,
 				&.destacado {
-					color: $rojo !important;
-					-webkit-text-stroke: 0 $bg;
+					color: $secondary !important;
+					-webkit-text-stroke: 0 $bg_black;
 				}
 				&.destacado {
 					font-size: 5vw;

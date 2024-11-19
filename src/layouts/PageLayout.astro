@@ -1,0 +1,115 @@
+---
+import 'overlayscrollbars/overlayscrollbars.css';
+import 'src/styles/GlobalStyles.astro';
+
+import noiseGIF from '@public/2x/noise.gif';
+import faviconSrc from '@public/favicon.png';
+import faviconSvgSrc from '@public/favicon.svg';
+import { getImage, Image } from 'astro:assets';
+import { Icon } from 'astro-icon/components';
+import Footer from 'src/sections/Hero/Footer.astro';
+
+interface Props {
+	title: string;
+	onBackHref?: string;
+}
+
+const appleTouchIcon = await getImage({
+	src: faviconSrc,
+	width: 180,
+	height: 180,
+	format: 'png',
+});
+const faviconSvg = await getImage({ src: faviconSvgSrc, format: 'svg' });
+
+const { title, onBackHref } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="icon" href="/favicon.ico" sizes="32x32" />
+		<link rel="icon" href={faviconSvg.src} type="image/svg+xml" />
+		<link rel="apple-touch-icon" href={appleTouchIcon.src} />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title} • Laboralistas Estudio Juridico</title>
+	</head>
+	<body class="bg-background text-black">
+		<Image
+			src={noiseGIF}
+			alt="noisegif"
+			class="fixed top-0 left-0 w-screen h-screen object-cover z-[1000] mix-blend-overlay pointer-events-none object-center opacity-20"
+		/>
+		<div id="scrollbar"></div>
+		<header
+			class="mx-auto w-[90%] h-[90px] flex justify-between border-b-[1px] border-solid border-b-black items-center pt-8"
+		>
+			<a href={onBackHref ?? '/'} class="flex relative items-center" id="logo">
+				<div class="absolute w-full h-full top-0 left-0 peer"></div>
+				<Icon
+					id="mdi-chevron-left"
+					name="mdi:chevron-left"
+					width={40}
+					height={40}
+					class="text-primary mdi-chevron-left ease-in-out duration-300 transition-all peer-hover:-translate-x-3"
+				/>
+				<img src="/svg/logotipo_verde.svg" alt="logo" class="h-5" />
+			</a>
+
+			<h1 class="text-xl uppercase">{title}</h1>
+		</header>
+		<slot />
+		<Footer />
+	</body>
+	<script src="./locomotiveScroll.ts"></script>
+	<script>
+		import {
+			OverlayScrollbars,
+			ScrollbarsHidingPlugin,
+			SizeObserverPlugin,
+			ClickScrollPlugin,
+		} from 'overlayscrollbars';
+
+		document.addEventListener('DOMContentLoaded', () => {
+			const scrollbar = document.getElementById('scrollbar');
+			if (scrollbar) {
+				const osInstance = OverlayScrollbars(document.body, {
+					scrollbars: {
+						theme: 'os-theme-custom',
+					},
+				});
+				OverlayScrollbars.plugin([SizeObserverPlugin, ClickScrollPlugin, ScrollbarsHidingPlugin]);
+
+				console.log('OverlayScrollbars instance:', osInstance);
+			}
+		});
+	</script>
+
+	<style lang="scss" is:global>
+		// horizontal and vertical scrollbar are 10px
+		.os-theme-custom {
+			--os-size: 10px;
+		}
+
+		// horizontal scrollbar is 10px
+		.os-theme-custom.os-scrollbar-horizontal {
+			--os-size: 10px;
+		}
+
+		// vertical scrollbar is 20px
+		.os-theme-custom.os-scrollbar-vertical {
+			--os-size: 10px;
+			--os-handle-bg: #e7e3dd;
+			mix-blend-mode: difference;
+			--os-handle-bg-hover: #e7e3dd;
+			--os-handle-bg-active: #e7e3dd;
+
+			transition: all 0.1s ease;
+			&:hover {
+				--os-size: 12px;
+			}
+		}
+	</style>
+</html>

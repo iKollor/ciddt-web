@@ -4,7 +4,7 @@ import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 // eslint-disable-next-line import/no-unresolved
 import { navigate } from 'astro:transitions/client';
-import { doc, getDoc, type Timestamp, updateDoc } from 'firebase/firestore/lite';
+import { doc, getDoc, type Timestamp, updateDoc } from 'firebase/firestore';
 import type { UserRecord } from 'firebase-admin/auth';
 import React, { type FC, type ReactNode, useEffect, useState } from 'react';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
@@ -57,7 +57,6 @@ const PagesTables: FC<PagesTablesProps> = ({ userRecord }) => {
 
 	async function userAccessToken(): Promise<void> {
 		try {
-			console.log('User has no access token');
 			popupStore.set({
 				title: 'Token no encontrado',
 				message:
@@ -81,12 +80,9 @@ const PagesTables: FC<PagesTablesProps> = ({ userRecord }) => {
 			});
 
 			if (!response.ok) {
-				console.error('Error fetching user access token');
 				throw new Error('Error fetching user access token');
 			}
 
-			const data = await response.json();
-			console.log(data);
 			popupStore.set({
 				title: 'Éxito',
 				message: 'Token de acceso actualizado, intenta actualizar nuevamente',
@@ -94,7 +90,6 @@ const PagesTables: FC<PagesTablesProps> = ({ userRecord }) => {
 				visible: true,
 			});
 		} catch {
-			console.error('Error fetching user access token');
 			popupStore.set({
 				title: 'Error',
 				message: 'Error al actualizar token de acceso',
@@ -120,7 +115,6 @@ const PagesTables: FC<PagesTablesProps> = ({ userRecord }) => {
 				return;
 			}
 
-			console.log('Fetching user pages');
 			const url = `https://graph.facebook.com/v18.0/me/accounts?fields=access_token,id,picture{url},name,link,instagram_business_account&access_token=${accessToken}`;
 			const response = await fetch(url);
 			const data = await response.json();
@@ -132,12 +126,10 @@ const PagesTables: FC<PagesTablesProps> = ({ userRecord }) => {
 			}
 
 			if (!response.ok) {
-				console.error('Error fetching user pages');
 				throw new Error('Error fetching user pages');
 			}
 
 			if (data.data.length === 0) {
-				console.error('User has no pages');
 				throw new Error('User has no pages');
 			}
 
@@ -158,7 +150,6 @@ const PagesTables: FC<PagesTablesProps> = ({ userRecord }) => {
 					const instagramData = await instagramResponse.json();
 
 					if (!instagramResponse.ok) {
-						console.error('Error fetching instagram account');
 						throw new Error('Error fetching instagram account');
 					}
 
@@ -187,7 +178,6 @@ const PagesTables: FC<PagesTablesProps> = ({ userRecord }) => {
 			setIsLoading(false);
 			await navigate('#');
 		} catch (error: any) {
-			console.error('Error fetching user pages:', error);
 			popupStore.set({
 				title: 'Error',
 				message: `Error al actualizar páginas: ${error.message}`,
@@ -244,7 +234,7 @@ const PagesTables: FC<PagesTablesProps> = ({ userRecord }) => {
 				<table className="w-full my-0 align-middle border-neutral-200">
 					<thead className="align-bottom">
 						<tr className="font-semibold text-sm text-white text-opacity-50">
-							<th className="pb-2 text-start min-w-[50px] uppercase">Página</th>
+							<th className="pb-2 pl-3 text-start min-w-[50px] uppercase">Página</th>
 							<th className="pb-2 pl-3 text-start min-w-[50px] uppercase">Identificador de Página</th>
 							<th className="pb-2 text-start min-w-[50px] uppercase">Tipo de Cuenta</th>
 						</tr>
@@ -261,7 +251,7 @@ const PagesTables: FC<PagesTablesProps> = ({ userRecord }) => {
 										className="border-b border-solid last:border-b-0 border-white border-opacity-20 hover:bg-edgewater-700 cursor-pointer transition-all duration-150 ease-in-out"
 										onClick={() => window.open(page.link, '_blank')}
 									>
-										<td className="truncate rounded-tl-md rounded-bl-md max-w-[300px]">
+										<td className="truncate rounded-tl-md rounded-bl-md max-w-[300px] pl-3">
 											<div className="flex flex-row items-center gap-3">
 												<ImageLoader
 													src={page.picture}

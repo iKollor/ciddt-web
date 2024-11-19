@@ -1,9 +1,10 @@
 import { db } from '@firebase/client';
-import { addDoc, collection, doc, type DocumentReference, getDoc, updateDoc } from 'firebase/firestore/lite';
+import { addDoc, collection, deleteDoc, doc, type DocumentReference, getDoc, updateDoc } from 'firebase/firestore';
 
 import type { User } from '../interfaces/User';
+import { deleteProfilePicture, type pseudoUser } from './useEditProfileManagement';
 
-interface Team {
+export interface Team {
 	name: string;
 	owner: string;
 	members: string[];
@@ -15,73 +16,110 @@ interface Team {
  */
 const useTeamManagement = (): {
 	/**
-	 * Retrieves the team reference associated with the given user ID.
+	 * Retrieves the team reference associated with a given user ID.
 	 * @param userId - The unique identifier of a user.
-	 * @returns A Promise that resolves to the team reference associated with the given user ID, or null if the user is not in a team.
+	 * @returns A promise that resolves to the team reference associated with the given user ID, or null if not found.
 	 */
 	getTeamByUserId: (userId: string) => Promise<DocumentReference | null>;
+
 	/**
-	 * Creates a new team with the given name and the user as the owner.
+	 * Creates a new team with the specified name.
 	 * @param userId - The unique identifier of a user.
-	 * @param teamName - The name of the team.
-	 * @returns A Promise that resolves to the team reference of the newly created team.
+	 * @param teamName - The name of the team to be created.
+	 * @returns A promise that resolves to the reference of the newly created team.
 	 */
 	createTeam: (userId: string, teamName: string) => Promise<DocumentReference>;
+
 	/**
-	 * Adds a member with the given ID to the team with the given ID.
+	 * Adds a member to a team by updating the team's member list.
 	 * @param teamId - The unique identifier of a team.
-	 * @param memberId - The unique identifier of a member.
-	 * @returns A Promise that resolves when the member is successfully added to the team.
+	 * @param memberId - The unique identifier of a team member.
+	 * @returns A promise that resolves when the member is successfully added to the team.
 	 */
 	addMemberToTeam: (teamId: string, memberId: string) => Promise<void>;
+
 	/**
-	 * Checks if the given team name is valid.
-	 * @param name - The team name to validate.
-	 * @returns True if the given team name is valid, false otherwise.
+	 * Checks if a team name is valid by performing a simple validation.
+	 * @param name - The name to be validated.
+	 * @returns A boolean indicating whether the team name is valid or not.
 	 */
 	validateTeamName: (name: string) => boolean;
+
 	/**
-	 * Checks if the given member ID exists in the database.
-	 * @param memberId - The unique identifier of a member.
-	 * @returns A Promise that resolves to true if the given member ID exists in the database, false otherwise.
+	 * Checks if a member ID is valid by querying the database.
+	 * @param memberId - The unique identifier of a team member.
+	 * @returns A promise that resolves to a boolean indicating whether the member ID is valid or not.
 	 */
 	validateMemberId: (memberId: string) => Promise<boolean>;
+
 	/**
-	 * Checks if the member with the given ID is already in the team with the given ID.
+	 * Checks if a member is already part of a team by querying the database.
 	 * @param teamId - The unique identifier of a team.
-	 * @param memberId - The unique identifier of a member.
-	 * @returns A Promise that resolves to true if the member with the given ID is already in the team with the given ID, false otherwise.
+	 * @param memberId - The unique identifier of a team member.
+	 * @returns A promise that resolves to a boolean indicating whether the member is already in the team or not.
 	 */
 	isMemberAlreadyInTeam: (teamId: string, memberId: string) => Promise<boolean>;
+
 	/**
-	 * Checks if the user with the given ID is the owner of the team with the given ID.
+	 * Checks if a user is the owner of a team by comparing their user ID with the team's owner ID.
 	 * @param userId - The unique identifier of a user.
 	 * @param teamId - The unique identifier of a team.
-	 * @returns A Promise that resolves to true if the user with the given ID is the owner of the team with the given ID, false otherwise.
+	 * @returns A promise that resolves to a boolean indicating whether the user is the owner of the team or not.
 	 */
 	isUserTeamOwner: (userId: string, teamId: string) => Promise<boolean>;
+
 	/**
-	 * Retrieves the profiles of the members of the team with the given ID.
+	 * Retrieves the profile data of all members in a team.
 	 * @param teamId - The unique identifier of a team.
-	 * @returns A Promise that resolves to an array containing the profiles of the members of the team with the given ID.
+	 * @returns A promise that resolves to an array of User objects containing the profile data of all members in the team.
 	 */
-	getProfilesData: (teamId: string) => Promise<User[]>;
+	getProfilesData: (teamId: string) => Promise<pseudoUser[]>;
+
 	/**
-	 * Removes the member with the given ID from the team with the given ID.
+	 * Removes a member from a team by updating the team's member list.
 	 * @param teamId - The unique identifier of a team.
-	 * @param memberId - The unique identifier of a member.
-	 * @returns A Promise that resolves when the member is successfully removed from the team.
+	 * @param memberId - The unique identifier of a team member.
+	 * @returns A promise that resolves when the member is successfully removed from the team.
 	 */
 	removeMemberFromTeam: (teamId: string, memberId: string) => Promise<void>;
+
+	/**
+	 * Retrieves the information of a team by its ID.
+	 * @param teamId - The unique identifier of a team.
+	 * @returns A promise that resolves to the Team object containing the information of the team.
+	 */
+	getTeamInfoById: (teamId: string) => Promise<Team>;
+
+	/**
+	 * Updates the name of a team.
+	 * @param teamId - The unique identifier of a team.
+	 * @param newName - The new name for the team.
+	 * @returns A promise that resolves when the team name is successfully updated.
+	 */
+	editTeamName: (teamId: string, newName: string) => Promise<void>;
 } => {
 	const getTeamByUserId = async (userId: string): Promise<DocumentReference | null> => {
-		const userRef = doc(db, 'users', userId);
-		const userSnap = await getDoc(userRef);
-		const userData = userSnap.data() as User;
-		if (userSnap.exists() && userData.team != null) {
-			return userData.team;
+		try {
+			const userRef = doc(db, 'users', userId);
+			const userSnap = await getDoc(userRef);
+			const userData = userSnap.data() as User;
+			if (userSnap.exists() && userData.team != null) {
+				return userData.team;
+			}
+			return null;
+		} catch (error) {
+			console.error('Error al obtener el equipo por ID de usuario:', error);
+			return null;
 		}
-		return null;
+	};
+
+	const getTeamInfoById = async (teamId: string): Promise<Team> => {
+		const teamRef = doc(db, 'teams', teamId);
+		const teamSnap = await getDoc(teamRef);
+		if (!teamSnap.exists()) {
+			throw new Error('Equipo no encontrado.');
+		}
+		return teamSnap.data() as Team;
 	};
 
 	const createTeam = async (userId: string, teamName: string): Promise<DocumentReference> => {
@@ -99,6 +137,7 @@ const useTeamManagement = (): {
 	const addMemberToTeam = async (teamId: string, memberId: string): Promise<void> => {
 		const teamRef = doc(db, 'teams', teamId);
 		const teamSnap = await getDoc(teamRef);
+
 		if (teamSnap.exists()) {
 			const teamData = teamSnap.data() as Team;
 			const members = teamData.members ?? [];
@@ -145,7 +184,7 @@ const useTeamManagement = (): {
 		return teamData.owner === userId;
 	};
 
-	const getProfilesData = async (teamId: string): Promise<User[]> => {
+	const getProfilesData = async (teamId: string): Promise<pseudoUser[]> => {
 		const teamRef = doc(db, 'teams', teamId);
 		const teamSnap = await getDoc(teamRef);
 
@@ -155,17 +194,16 @@ const useTeamManagement = (): {
 
 		const teamData = teamSnap.data() as Team;
 		const members = teamData.members ?? [];
-		const profiles: User[] = [];
+		const profiles: pseudoUser[] = [];
 
 		for (const memberId of members) {
 			const userRef = doc(db, 'users', memberId);
 			const userSnap = await getDoc(userRef);
 			if (userSnap.exists()) {
-				const userData = userSnap.data() as User;
+				const userData = userSnap.data() as pseudoUser;
 				profiles.push(userData);
 			}
 		}
-
 		return profiles;
 	};
 
@@ -183,6 +221,18 @@ const useTeamManagement = (): {
 		await updateDoc(teamRef, {
 			members: updatedMembers,
 		});
+		if (memberId.startsWith('pseudo')) {
+			const userRef = doc(db, 'users', memberId);
+			await deleteDoc(userRef);
+		}
+		await deleteProfilePicture(memberId);
+	};
+
+	const editTeamName = async (teamId: string, newName: string): Promise<void> => {
+		const teamRef = doc(db, 'teams', teamId);
+		await updateDoc(teamRef, {
+			name: newName,
+		});
 	};
 
 	return {
@@ -195,6 +245,8 @@ const useTeamManagement = (): {
 		isUserTeamOwner,
 		getProfilesData,
 		removeMemberFromTeam,
+		getTeamInfoById,
+		editTeamName,
 	};
 };
 

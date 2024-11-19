@@ -14,9 +14,14 @@ const auth = getAuth(app);
 if (Astro.cookies.has('session')) {
 	const sessionCookie = Astro.cookies.get('session')?.value;
 	if (sessionCookie != null) {
-		const decodedCookie = await auth.verifySessionCookie(sessionCookie);
-		if (decodedCookie != null) {
-			return Astro.redirect('/ciddt-admin/dashboard');
+		try {
+			const decodedCookie = await auth.verifySessionCookie(sessionCookie);
+			if (decodedCookie != null) {
+				return Astro.redirect('/ciddt-admin/dashboard');
+			}
+		} catch (error) {
+			// En caso de error (como una sesión expirada), borra la cookie
+			Astro.cookies.delete('session');
 		}
 	}
 }
@@ -31,7 +36,7 @@ if (Astro.cookies.has('session')) {
 		<title>CIDDT | Admin</title>
 	</head>
 
-	<body class="bg-black">
+	<body class="bg-edgewater-950">
 		<div class="flex min-h-full flex-col justify-center px-6 py-16 lg:px-8 text-center">
 			<div class="sm:mx-auto sm:w-full sm:max-w-sm">
 				<Image class="mx-auto h-10 w-auto" src={logo} alt="ciddt-web" />
@@ -58,7 +63,9 @@ if (Astro.cookies.has('session')) {
 
 						<div>
 							<div class="flex items-center justify-between">
-								<label for="password" class="block text-sm font-medium leading-6 text-gray"> Contraseña</label>
+								<label for="password" class="block text-sm font-medium leading-6 text-gray">
+									Contraseña</label
+								>
 							</div>
 							<div class="mt-2">
 								<input
@@ -112,15 +119,16 @@ if (Astro.cookies.has('session')) {
 		</div>
 	</body>
 	<script>
-		import { browserSessionPersistence, signInWithEmailAndPassword } from 'firebase/auth';
+		import { browserLocalPersistence, signInWithEmailAndPassword } from 'firebase/auth';
 		import { auth } from '../../firebase/client';
 		import { popupStore } from 'src/hooks/popupStores';
 		import { loginWithFacebook } from 'src/firebase/login';
 
-		auth.setPersistence(browserSessionPersistence);
+		auth.setPersistence(browserLocalPersistence);
 
 		const form = document.querySelector('form') as HTMLFormElement;
 		const buttonLogin = document.querySelector('#login_button') as HTMLButtonElement;
+
 		const buttonContent = document.querySelector('#button__content') as HTMLSpanElement;
 		const buttonLoader = document.querySelector('#button__loader') as HTMLSpanElement;
 
@@ -145,7 +153,6 @@ if (Astro.cookies.has('session')) {
 							Authorization: `Bearer ${idToken}`,
 						},
 					});
-
 					if (response.redirected) {
 						popupStore.set({
 							visible: true,
@@ -167,7 +174,10 @@ if (Astro.cookies.has('session')) {
 				} catch (error: any) {
 					buttonContent?.setAttribute('style', 'display: block');
 					buttonLoader?.setAttribute('style', 'display: none');
-					if (error === 'FirebaseError: [code=unavailable]: Failed to get document because the client is offline.') {
+					if (
+						error ===
+						'FirebaseError: [code=unavailable]: Failed to get document because the client is offline.'
+					) {
 						return {
 							visible: true,
 							type: 'danger',
@@ -175,12 +185,22 @@ if (Astro.cookies.has('session')) {
 							message: `No se pudo conectar con el servidor, por favor intente nuevamente en unos segundos o recargue la página`,
 						};
 					}
+					if (error.code === 'auth/invalid-credential') {
+						return popupStore.set({
+							visible: true,
+							message: 'Email o Contraseña incorrectos',
+							type: 'danger',
+							title: 'Error en el Inicio de Sesión',
+						});
+					}
 					popupStore.set({
 						visible: true,
 						message: error.message || 'Ocurrió un error desconocido',
 						type: 'danger',
 						title: 'Error en el Inicio de Sesión',
 					});
+				} finally {
+					buttonLogin.disabled = false;
 				}
 			}
 		});
@@ -226,6 +246,9 @@ if (Astro.cookies.has('session')) {
 							type: 'danger',
 							title: 'Error en el Inicio de Sesión',
 						});
+					})
+					.finally(() => {
+						FBbutton.disabled = false;
 					});
 			}
 		};

@@ -1,0 +1,108 @@
+---
+import BlogTable from '@components/ciddt-admin/BlogTable';
+import FileUploader from '@components/ciddt-admin/FileUploader';
+import PostsTable from '@components/ciddt-admin/PostsTable';
+import { auth } from '@firebase/server';
+import type { UserRecord } from 'firebase-admin/auth';
+import AdminPanelLayout from 'src/layouts/AdminPanelLayout.astro';
+
+/* Check current session */
+if (!Astro.cookies.has('session')) {
+	return Astro.redirect('/ciddt-admin/login');
+}
+
+let userRecord: UserRecord | undefined;
+
+const sessionCookie = Astro.cookies.get('session')?.value;
+
+if (sessionCookie != null) {
+	try {
+		const decodedCookie = await auth.verifySessionCookie(sessionCookie);
+		userRecord = await auth.getUser(decodedCookie.uid);
+	} catch (error: any) {
+		if (error.code === 'UND_ERR_CONNECT_TIMEOUT') {
+			return;
+		}
+		console.log(error);
+		return Astro.redirect('/ciddt-admin/dashboard');
+	}
+}
+---
+
+<AdminPanelLayout title="Content Manager">
+	<section>
+		<div>
+			<h1 class="font-black text-4xl w-full">Posts</h1>
+			<p class="mt-2 w-full min-h-[50px]">
+				Maneja el contenido de tus posts de las redes sociales aquí, podrás traer hasta máximo 10 de tus ultimos
+				posts.
+			</p>
+		</div>
+		<div class="flex flex-col gap-4">
+			<div
+				class="w-full bg-edgewater-800 rounded-md p-6 flex justify-between items-center flex-wrap min-h-[70px]"
+			>
+				<h3 class="flex flex-col items-start justify-center m-2 ml-0">
+					<span class="mr-3 font-semibold text-3xl text-white">Facebook</span>
+					<span class="mt-1 text-white text-opacity-70"
+						>Maneja el contenido de tus páginas de Facebook aquí. <br />
+						Solo puedes traer los posts de una página a la vez.</span
+					>
+				</h3>
+				<PostsTable userRecord={userRecord} provider="facebook" client:only />
+			</div>
+			<div
+				class="w-full bg-edgewater-800 rounded-md p-6 flex justify-between items-center flex-wrap min-h-[70px]"
+			>
+				<h3 class="flex flex-col items-start justify-center m-2 ml-0">
+					<span class="mr-3 font-semibold text-3xl text-white">Instagram</span>
+					<span class="mt-1 text-white text-opacity-70"
+						>Maneja el contenido de tus páginas de Instagram aquí. <br />
+						Solo puedes traer los posts de una página a la vez.</span
+					>
+				</h3>
+				<PostsTable userRecord={userRecord} provider="instagram" client:only />
+			</div>
+			<div
+				class="w-full bg-edgewater-800 rounded-md p-6 flex justify-between items-center flex-wrap min-h-[70px]"
+			>
+				<h2 class="text-2xl font-semibold">X</h2>
+				<p>Maneja el contenido de X aquí</p>
+			</div>
+			<div
+				class="w-full bg-edgewater-800 rounded-md p-6 flex justify-between items-center flex-wrap min-h-[70px]"
+			>
+				<h2 class="text-2xl font-semibold">TikTok</h2>
+				<p>Maneja el contenido de TikTok aquí</p>
+			</div>
+		</div>
+	</section>
+	<section class="mt-16">
+		<div>
+			<h1 class="font-black text-4xl w-full">Otros</h1>
+			<p class="mt-2 w-full min-h-[50px]">
+				Maneja el contenido customizado de ciertas secciones de la página aquí.
+			</p>
+		</div>
+		<div class="flex flex-col gap-4">
+			<div
+				class="w-full bg-edgewater-800 rounded-md p-6 flex justify-between items-center flex-wrap min-h-[70px]"
+			>
+				<h3 class="flex flex-col items-start justify-center m-2 ml-0">
+					<span class="mr-3 font-semibold text-3xl text-white">Blog</span>
+					<span class="mt-1 text-white text-opacity-70">Maneja el contenido de la página de blogs</span>
+				</h3>
+				<BlogTable client:only />
+			</div>
+			<div
+				class="w-full bg-edgewater-800 rounded-md p-6 flex justify-between items-center flex-wrap min-h-[70px]"
+			>
+				<h3 class="flex flex-col items-start justify-center m-2 ml-0">
+					<span class="mr-3 font-semibold text-3xl text-white">Subir Archivos</span>
+					<span class="mt-1 text-white text-opacity-70">Maneja el contenido de la base de datos</span>
+				</h3>
+				<FileUploader {userRecord} type="uploader" client:only />
+			</div>
+		</div>
+	</section>
+</AdminPanelLayout>

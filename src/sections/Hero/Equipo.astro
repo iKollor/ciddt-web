@@ -9,12 +9,45 @@ import Carrousel from '@components/ProfilesCarrousel';
 	<div class="equipo__container">
 		<div class="divisor1">
 			<div class="text__container">
-				<p>Con experiencia y empatía, defendemos cada empleo.</p>
+				<p>Descubre las trayectorias que definen nuestro éxito.</p>
+				<p class="info text-xl font-normal opacity-80"></p>
 			</div>
-			<NavigationButtons client:only />
+			<NavigationButtons client:visible />
 		</div>
 		<div class="divisor2">
-			<Carrousel client:only />
+			<Carrousel client:visible />
 		</div>
 	</div>
+	<script>
+		import { selectedCard } from '../../hooks/carrouselStores';
+
+		selectedCard.subscribe((profile) => {
+			const infoElement = document.querySelector('.info');
+			if (infoElement) {
+				// Remover la clase de animación para resetear la animación
+				infoElement.classList.remove('fadeIn');
+
+				setTimeout(() => {
+					infoElement.classList.add('fadeIn');
+					infoElement.innerHTML =
+						profile.details?.replace(/\n/g, '<br><br>') ||
+						'Haz click sobre uno de nosotros para conocer más.';
+				}, 10);
+			}
+		});
+	</script>
+	<style>
+		@keyframes fadeIn {
+			from {
+				opacity: 0;
+			}
+			to {
+				opacity: 0.8;
+			}
+		}
+
+		.fadeIn {
+			animation: fadeIn 1s;
+		}
+	</style>
 </>

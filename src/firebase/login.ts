@@ -10,7 +10,7 @@ import {
 	updateProfile,
 	type User,
 } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore/lite';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { type popUp } from 'src/interfaces/popUp';
 
 import { auth, db } from './client';
@@ -73,7 +73,7 @@ const registerNewUser = async (
 		await setDoc(doc(db, 'users', firebaseUser.uid), {
 			username,
 			email,
-			userId: firebaseUser.uid, // Usando el userId de Firebase
+			uid: firebaseUser.uid, // Usando el userId de Firebase
 			displayName,
 		});
 
@@ -198,6 +198,7 @@ const loginWithFacebook = async (): Promise<popUp> => {
 				message: `No se pudo conectar con el servidor, por favor intente nuevamente en unos segundos o recargue la página`,
 			};
 		}
+
 		return {
 			visible: true,
 			type: 'danger',

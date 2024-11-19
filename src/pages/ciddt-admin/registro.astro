@@ -2,6 +2,7 @@
 import '../../styles/GlobalVariables.scss';
 
 import Popup from '@components/buttons/Popup';
+
 const registrationToken = Astro.url.searchParams.get('token');
 
 if (registrationToken == null) {
@@ -108,7 +109,12 @@ if (registrationToken == null) {
 													:class="{'bg-green-700 text-white': password == password_confirm && password.length > 0, 'bg-red-400 text-white':password != password_confirm || password.length == 0}"
 													class="rounded-full p-1 fill-current transition"
 												>
-													<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+													<svg
+														class="w-4 h-4"
+														fill="none"
+														viewBox="0 0 24 24"
+														stroke="currentColor"
+													>
 														<path
 															x-show="password == password_confirm && password.length > 0"
 															stroke-linecap="round"
@@ -134,7 +140,12 @@ if (registrationToken == null) {
 													:class="{'bg-green-700 text-white': password.length > 7, 'bg-red-400 text-white':password.length <= 7 }"
 													class="rounded-full p-1 fill-current transition"
 												>
-													<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+													<svg
+														class="w-4 h-4"
+														fill="none"
+														viewBox="0 0 24 24"
+														stroke="currentColor"
+													>
 														<path
 															x-show="password.length > 7"
 															stroke-linecap="round"
@@ -159,7 +170,12 @@ if (registrationToken == null) {
 									</div>
 									<div class="flex justify-start">
 										<label class="block text-gray font-bold my-4 flex items-center">
-											<input class="leading-loose text-pink-600 top-0" type="checkbox" x-model="terms" required />
+											<input
+												class="leading-loose text-pink-600 top-0"
+												type="checkbox"
+												x-model="terms"
+												required
+											/>
 											<span class="ml-2 text-sm py-2 text-gray text-left font-normal"
 												>Acepta los
 												<a
@@ -290,7 +306,10 @@ if (registrationToken == null) {
 						emailInput.value = data.email;
 
 						// Almacenar en localStorage junto con el token como un objeto JSON
-						localStorage.setItem('cachedEmail', JSON.stringify({ email: data.email, token: registrationToken }));
+						localStorage.setItem(
+							'cachedEmail',
+							JSON.stringify({ email: data.email, token: registrationToken }),
+						);
 					} else {
 						throw new Error('Error fetching email');
 					}

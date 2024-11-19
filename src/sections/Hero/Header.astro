@@ -3,27 +3,28 @@
 import '@styles/pages/Header.scss';
 
 import AnchorNav from '@components/AnchorNav';
-import Logo from '@public/svg/logo_text_blanco.svg';
+import Logo from '@public/svg/logo_blanco.svg';
 import { Image } from 'astro:assets';
 ---
 
 <header>
 	<div class="header__container">
-		<div class="bg__container"></div>
+		<div class="bg__container select-none"></div>
 		<!-- Solo la imagen de fondo aquí -->
-		<div class="bg__container__logo">
-			<Image class="logo" src={Logo} alt="Logo" />
+		<div class="bg__container__logo select-none">
+			<Image class="logo pointer-events-none" src={Logo} alt="Logo" />
 		</div>
 		<div class="invisible-filler"></div>
 		<div class="bottom__section__container">
 			<div class="anchors left">
-				<AnchorNav client:only />
+				<AnchorNav client:only="react" />
 			</div>
 			<div class="leyenda right">
 				<p>
-					El Centro de Investigación y Defensa del Derecho al Trabajo (CIDDT) es una organización que busca
-					promover y defender el derecho al trabajo, a través de la formación, investigación, litigio
-					estratégico y acompañamiento a organizaciones sindicales y personas trabajadoras.
+					Laboralistas ofrece defensa jurídica laboral y sindical, capacitación en derechos laborales, y
+					asesoría para organizaciones sindicales. Nuestro equipo profesional y experimentado está
+					comprometido con la justicia social y la promoción del trabajo digno en Ecuador. Contáctanos hoy
+					para proteger y defender tus derechos laborales.
 				</p>
 			</div>
 		</div>
@@ -31,18 +32,18 @@ import { Image } from 'astro:assets';
 	<script>
 		import { gsap } from 'gsap';
 
-		function customSpring(progress: number, strength = 1.5, endAt = 1): number {
-			return Math.pow(2, -10 * progress) * Math.sin(((progress - endAt / 4) * (2 * Math.PI)) / endAt) + 1;
+		function customSpring(progress: number, strength = 1): number {
+			return Math.pow(2, -10 * progress) * Math.sin(((progress - strength / 4) * (2 * Math.PI)) / strength) + 1;
 		}
 
 		gsap.to('.bg__container, .bg__container__logo', {
 			delay: 1,
-			height: '70%',
+			height: '70vh',
 			duration: 2,
-			ease: (progress) => customSpring(progress, 0.1, 0.4),
+			ease: (progress) => customSpring(progress, 0.7),
 		});
 		gsap.to('.bg__container', {
-			duration: 2,
+			duration: 1,
 			borderBottomLeftRadius: '30px',
 			borderBottomRightRadius: '30px',
 			delay: 2,

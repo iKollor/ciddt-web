@@ -14,4 +14,7 @@ export const inputPopupStore = atom<InputPopupProps>({
 	type: 'hidden',
 	message: '',
 	closedByUser: false,
+	value: '',
 });
+
+export const modalStore = atom<boolean>(false);

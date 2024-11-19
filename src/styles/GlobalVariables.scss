@@ -1,7 +1,11 @@
-$rojo: #db001c;
-$bg: #1d1d1b;
-$white: #f8f8f8;
-$gray: #b0b0b0;
+@import '/fonts/BrutaProExtended/stylesheet.css';
+
+$text: #0a0801;
+$bg_black: #0a0801;
+$bg_white: #f0e7e0;
+$primary: #163330;
+$secondary: #cb9e50;
+$accent: #5d2a2c;
 $easeInOutCubic: cubic-bezier(0.41, 0.99, 0.43, 1.44);
 $duration: 640ms;
 $navbar_menu_width: 25vw;

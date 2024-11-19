@@ -4,6 +4,7 @@ import '../styles/components/AnchorNav.scss';
 
 import { motion, useScroll, useSpring, useTransform } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
+import { locomotiveScroll } from 'src/layouts/locomotiveScroll';
 
 // style const
 const COLORS = {
@@ -65,7 +66,6 @@ function AnchorNav() {
 					navRect.bottom < sectionRect.top ||
 					navRect.top > sectionRect.bottom
 				);
-
 				if (isOverlapping) {
 					newStrokeColor = isWhite ? COLORS.negro : isBlack ? COLORS.blanco : newStrokeColor;
 					if (currentHighlightedId === '') {
@@ -117,10 +117,11 @@ function AnchorNav() {
 				ref={navRef}
 				initial={{ scale: 1 }}
 				style={{
-					marginLeft: 30,
 					marginBottom: 20,
 					scale: scaleSpring,
 					transformOrigin: 'left bottom',
+					opacity: highlightedId === '' || highlightedId === 'footer' ? 0 : 1,
+					pointerEvents: highlightedId === '' || highlightedId === 'footer' ? 'none' : 'auto',
 				}}
 				transition={{
 					margin: {
@@ -152,13 +153,14 @@ function AnchorNav() {
 							}}
 						>
 							<motion.a
-								href={`#${id}`}
+								id={`anchor-${id}`}
 								style={{
 									WebkitTextStrokeColor: textStrokeColor,
 									fontSize: highlightedId === id ? '7vw' : '3vw', // Aquí se asume que quieres una escala de 1 cuando está destacado
 									lineHeight: lineHeightValueSpring,
+									cursor: 'pointer',
 								}}
-								className={highlightedId === id ? 'destacado' : ''}
+								className={`${highlightedId === id ? 'destacado' : ''}`}
 								transition={{
 									fontSize: {
 										type: 'spring',
@@ -167,6 +169,13 @@ function AnchorNav() {
 										restDelta: 0.001,
 										duration: 1,
 									},
+								}}
+								data-scroll-to
+								onClick={() => {
+									scrollTo({
+										target: `#${id}`,
+										options: {},
+									});
 								}}
 							>
 								{id.charAt(0).toUpperCase() + id.slice(1)}
@@ -180,3 +189,8 @@ function AnchorNav() {
 }
 
 export default AnchorNav;
+
+function scrollTo(params: { target: number | HTMLElement | string; options: any }) {
+	const { target, options } = params;
+	locomotiveScroll.scrollTo(target, options);
+}

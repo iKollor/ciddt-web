@@ -1,0 +1,261 @@
+---
+import { Image } from 'astro:assets';
+import { Icon } from 'astro-icon/components';
+import { Timestamp } from 'firebase/firestore';
+import { getPosts } from 'src/hooks/blogPostService';
+import type { BlogPost } from 'src/interfaces/Blog';
+import PageLayout from 'src/layouts/PageLayout.astro';
+
+let posts: BlogPost[] = [];
+try {
+	posts = (await getPosts()).filter((post) => post.published);
+} catch (e) {
+	console.error(e);
+}
+
+// tags from posts
+const tags = posts.reduce<string[]>((acc, post) => {
+	post.tags?.forEach((tag) => {
+		if (!acc.includes(tag)) {
+			acc.push(tag);
+		}
+	});
+	return acc;
+}, []);
+---
+
+<style lang="scss">
+	.post {
+		@apply border-[1px] border-solid border-gray-400 p-4 rounded-xl space-y-4 cursor-pointer flex mb-10 transition-all ease-in-out duration-300;
+		opacity: 1;
+		transform: scale(1);
+		max-height: 1000px;
+		transition:
+			transform 0.5s,
+			opacity 0.5s,
+			max-height 0,
+			margin 0,
+			padding 0;
+
+		&:hover {
+			@apply shadow-lg border-black;
+		}
+
+		&.post-visible {
+			opacity: 1;
+			transform: scale(1);
+			max-height: 1000px;
+		}
+
+		&.post-hidden {
+			opacity: 0;
+			transform: scale(0.95);
+			max-height: 0;
+			transition:
+				transform 0.5s,
+				opacity 0.5s,
+				max-height 0 0.5s ease-out,
+				margin 0 0.5s,
+				padding 0 0.5s;
+
+			overflow: hidden;
+			margin: 0;
+			padding: 0;
+		}
+	}
+
+	#tags {
+		button {
+			&:hover {
+				border-color: #ccc;
+			}
+		}
+		.active {
+			border-color: #ccc;
+		}
+	}
+</style>
+<PageLayout title="Blog">
+	<main class="flex mx-auto w-11/12 mb-20">
+		<section class="sticky top-0 h-screen overflow-y-auto p-4 w-1/4 space-y-4 pt-10 mt-10">
+			<p class="text-2xl font-bold">Lorem, ipsum dolor sit amet consectetur adipisicing elit.</p>
+			<div class="flex">
+				<input
+					type="text"
+					class="w-full p-2 border-[1px] border-solid border-gray-400 rounded-lg bg-background"
+					id="search"
+					placeholder="Buscar"
+				/>
+				<button
+					class="bg-accent bg-opacity-75 text-white p-2 rounded-lg ml-2 hover:bg-opacity-100 transition-all duration-150 ease-in-out"
+				>
+					<Icon id="mdi-magnify" name="mdi:magnify" width={24} height={24} />
+				</button>
+			</div>
+			<div class="flex gap-4 w-full flex-wrap" id="tags">
+				<button
+					class="border-transparent border-[1px] border-solid hover:border-gray-400 p-1 px-2 rounded-lg transition-all ease-in-out duration-150 active"
+					id="all"
+				>
+					Todo
+				</button>
+				{
+					tags.map((tag) => (
+						<button
+							class="border-transparent border-[1px] border-solid hover:border-gray-400 p-1 px-2 rounded-lg transition-all ease-in-out duration-150 max-w-[100px]"
+							id={tag.replace(/ /g, '-')}
+							title={tag}
+						>
+							<p class="line-clamp-1 break-words text-left">{`#${tag}`}</p>
+						</button>
+					))
+				}
+			</div>
+		</section>
+		<section class="flex-1 p-4 ml-4 mt-10">
+			<ul class="grid grid-cols-1" id="posts">
+				{
+					posts.length > 0 ? (
+						posts.map((post) => (
+							<li
+								class="post relative bg-[#fff3e2] bg-opacity-100"
+								data-id={post.id}
+								post-tags={post.tags?.join(',')}
+							>
+								<div class="w-1/3 overflow-hidden rounded-xl">
+									{post.imageUrl != null && (
+										<Image
+											src={post.imageUrl}
+											alt={post.title}
+											height={500}
+											width={500}
+											class="object-cover object-center w-full h-full rounded-xl group-hover:scale-105 transition-all ease-in-out duration-300 overflow-hidden bg-[#fff]"
+											loading="eager"
+										/>
+									)}
+								</div>
+								<div class="w-2/3 p-3 space-y-4 relative ml-5">
+									<h2 class="text-3xl font-bold line-clamp-3 post-title">{post.title}</h2>
+									<p class="line-clamp-4 post-description">{post.shortDescription}</p>
+									<div class="absolute -bottom-4 left-0 p-3 justify-between w-full flex items-end">
+										<div class="flex text-xl">
+											<p class="text-black">
+												{new Timestamp(post.date.seconds, post.date.nanoseconds)
+													.toDate()
+													.toLocaleDateString()
+													.replace(/\//g, '.')}
+											</p>
+											<div class="h-[30px] w-[1px] bg-black mx-4 opacity-25" />
+											<p class="text-black capitalize">{post.author}</p>
+										</div>
+										{post.tags != null && (
+											<div class="text-right">
+												<h1 class="pr-2 font-bold text-opacity-70">Tags</h1>
+												<div class="flex gap-1 text-right items-end justify-end max-w-[380px] overflow-hidden">
+													{post.tags.slice(0, 4).map((tag) => (
+														<button
+															class="border-transparent border-[1px] border-solid hover:border-gray-400 p-1 px-2 rounded-lg transition-all ease-in-out duration-150 max-w-[100px] min-w-[60px] overflow-hidden post-tags"
+															title={tag}
+														>
+															<p class="line-clamp-1 break-words text-left">{`#${tag}`}</p>
+														</button>
+													))}
+												</div>
+											</div>
+										)}
+									</div>
+								</div>
+							</li>
+						))
+					) : (
+						<div class="w-full h-screen flex items-center justify-center">
+							<p class="text-4xl font-bold opacity-30">No hay posts publicados</p>
+						</div>
+					)
+				}
+			</ul>
+		</section>
+		<script>
+			document.addEventListener('DOMContentLoaded', () => {
+				const postParent = document.getElementById('posts');
+				const search = document.getElementById('search') as HTMLInputElement;
+				const tags = document.getElementById('tags');
+				let currentTag = '';
+
+				// Función para navegar a la página del post
+				function navigateToPost(post: HTMLElement) {
+					const id = post.getAttribute('data-id');
+					if (id) {
+						window.location.href = `/blog/${id}`;
+					} else {
+						console.log('No se encontró URL para este elemento');
+					}
+				}
+
+				// Agregar listener a cada post
+				if (postParent) {
+					postParent.querySelectorAll('li').forEach((post) => {
+						post.addEventListener('click', () => navigateToPost(post));
+					});
+				}
+
+				// Funciones para mostrar y ocultar posts
+				function togglePostDisplay(post: Element, show?: boolean) {
+					if (show) {
+						post.classList.remove('post-hidden');
+						post.classList.add('post-visible');
+					} else {
+						post.classList.remove('post-visible');
+						post.classList.add('post-hidden');
+					}
+				}
+
+				function applyFilters() {
+					const searchValue = search.value.toLowerCase();
+					postParent?.querySelectorAll('.post').forEach((post) => {
+						const title = post.querySelector('.post-title')?.textContent?.toLowerCase();
+						const description = post.querySelector('.post-description')?.textContent?.toLowerCase();
+						const postTags = post.getAttribute('post-tags');
+
+						const matchesSearch = title?.includes(searchValue) || description?.includes(searchValue);
+						const matchesTag = currentTag === 'all' || postTags?.includes(currentTag);
+						togglePostDisplay(post, matchesSearch && matchesTag);
+					});
+				}
+
+				// Debounce para la búsqueda por input
+				let debounceTimeout: ReturnType<typeof setTimeout>;
+				search.addEventListener('keyup', () => {
+					clearTimeout(debounceTimeout);
+					debounceTimeout = setTimeout(applyFilters, 500);
+				});
+
+				// Filtros por tags
+				if (tags) {
+					tags.querySelectorAll('button').forEach((button) => {
+						button.addEventListener('click', () => {
+							if (!button.classList.contains('active')) {
+								tags.querySelector('.active')?.classList.remove('active');
+								button.classList.add('active');
+								currentTag = button.id;
+								applyFilters();
+							}
+						});
+					});
+				}
+
+				const post_tags = document.querySelectorAll('.post-tags');
+				post_tags.forEach((tag) => {
+					tag.addEventListener('click', (e) => {
+						e.stopPropagation();
+						const tagText = tag.textContent;
+						currentTag = tagText?.substring(1) ?? '';
+						tags?.querySelector('.active')?.classList.remove('active');
+						tags?.querySelector(`#${currentTag.replace(/ /g, '-')}`)?.classList.add('active');
+						applyFilters();
+					});
+				});
+			});
+		</script>
+	</main>
+</PageLayout>

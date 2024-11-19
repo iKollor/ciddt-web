@@ -1,3 +1,4 @@
+/* eslint-disable import/no-named-as-default */
 /* eslint-disable import/no-named-as-default-member */
 import 'react-image-crop/src/ReactCrop.scss';
 
@@ -49,7 +50,7 @@ const InputPopup: React.FC = () => {
 				crop != null
 			) {
 				try {
-					const selectedFile = popUpState.selectedFiles?.[0].file;
+					const selectedFile = (popUpState.selectedFiles as FilePreview[])[0].file;
 					if (selectedFile != null) {
 						const imageUrl = URL.createObjectURL(selectedFile);
 						const blob = await getCroppedImg(
@@ -96,9 +97,9 @@ const InputPopup: React.FC = () => {
 		if (
 			window.confirm(
 				`¿Estás seguro?: ${
-					popUpState.selectedFiles
+					(popUpState.selectedFiles as FilePreview[])
 						?.map((file) => {
-							return file.file.name;
+							return file.file?.name;
 						})
 						.join(', ') ??
 					popUpState.content ??
@@ -122,7 +123,7 @@ const InputPopup: React.FC = () => {
 		if (files != null) {
 			const filesPreview = Array.from(files).map((file) => ({
 				file,
-				previewUrl: file.type.startsWith('image/') ? URL.createObjectURL(file) : null,
+				previewUrl: file.type.startsWith('image/') ? URL.createObjectURL(file) : undefined,
 			}));
 			inputPopupStore.set({
 				...popUpState,
@@ -184,6 +185,7 @@ const InputPopup: React.FC = () => {
 							placeholder={popUpState.placeholder}
 							required
 							className="bg-white block w-full rounded-md border-0 py-1.5 px-1.5 text-gray shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 z-[1]"
+							defaultValue={popUpState.value ?? ''}
 						/>
 						{popUpState.type === 'image' || popUpState.type === 'file' ? (
 							<div>
@@ -209,32 +211,32 @@ const InputPopup: React.FC = () => {
 														<img
 															ref={imageRef}
 															src={filePreview.previewUrl}
-															alt={`Preview ${filePreview.file.name}`}
+															alt={`Preview ${filePreview.file?.name}`}
 															onLoad={changeCrop}
 														/>
 													</ReactCrop>
 												) : (
 													<img
 														src={filePreview.previewUrl}
-														alt={`Preview ${filePreview.file.name}`}
+														alt={`Preview ${filePreview.file?.name}`}
 													/>
 												)
 											) : null}
 
 											<Tooltip
 												children={
-													<p className="truncate max-w-[350px]">{filePreview.file.name}</p>
+													<p className="truncate max-w-[350px]">{filePreview.file?.name}</p>
 												}
-												content={filePreview.file.name}
+												content={filePreview.file?.name ?? ''}
 											/>
 										</div>
 									) : (
 										<div key={index}>
 											<Tooltip
 												children={
-													<p className="truncate max-w-[350px]">{filePreview.file.name}</p>
+													<p className="truncate max-w-[350px]">{filePreview.file?.name}</p>
 												}
-												content={filePreview.file.name}
+												content={filePreview.file?.name ?? ''}
 											/>
 										</div>
 									),
@@ -293,6 +295,7 @@ export default InputPopup;
  * @param placeholder - The placeholder text for the input field.
  * @param message - The message to display to the user.
  * @param errorMessage - The error message to display if the input is invalid.
+ * @param value - The initial value for the input field.
  * @returns A promise that resolves with the user's input value.
  * @throws Error if the specified type is not implemented.
  */
@@ -301,6 +304,7 @@ export async function requestUserInput(
 	placeholder: string,
 	message: string,
 	errorMessage: string,
+	value?: string,
 ): Promise<string>;
 
 /**
@@ -332,7 +336,7 @@ export async function requestUserInput(
 	arg2: string | boolean, // arg2: allowMultiple | placeholder
 	arg3?: string, // arg3: acceptedTypes | message
 	arg4?: string | boolean, // arg4: errorMessage | imageCrop
-	imageCropAspectRatio?: number,
+	arg5?: number | string, // arg5: imageCropAspectRatio | value
 	inputImageTitle?: string,
 	inputImageSubtitle?: string,
 ): Promise<string | File | File[]> {
@@ -343,28 +347,43 @@ export async function requestUserInput(
 	}
 
 	if (type === 'file' || type === 'image') {
-		if (typeof arg2 !== 'boolean' || typeof arg3 !== 'string' || typeof arg4 !== 'boolean') {
+		if (
+			typeof arg2 !== 'boolean' ||
+			typeof arg3 !== 'string' ||
+			!(typeof arg4 === 'boolean' || typeof arg4 === 'undefined') ||
+			!(typeof arg5 === 'number' || typeof arg5 === 'undefined')
+		) {
+			console.log(arg2, arg3, arg4, arg5);
 			throw new Error("Missing or incorrect parameters for 'file' or 'image' type");
 		}
+
 		return await requestFileInput(
 			type,
 			arg2, // arg2: allowMultiple
 			arg3, // arg3: acceptedTypes
 			arg4, // arg4: errorMessage
-			imageCropAspectRatio,
+			arg5,
 			inputImageTitle,
 			inputImageSubtitle,
 		);
 	} else {
-		if (typeof arg2 !== 'string' || typeof arg3 !== 'string' || typeof arg4 !== 'string') {
+		if (
+			typeof arg2 !== 'string' ||
+			typeof arg3 !== 'string' ||
+			typeof arg4 !== 'string' ||
+			(typeof arg5 !== 'string' && typeof arg5 !== 'undefined')
+		) {
+			console.log(arg2, arg3, arg4, arg5);
 			throw new Error('Missing or incorrect parameters for input type');
 		}
+
 		inputPopupStore.set({
 			visible: true,
 			content: '',
 			placeholder: arg2, // arg2: placeholder
 			type,
 			message: arg3, // arg3: message
+			value: arg5, // arg5: value
 		});
 
 		return await new Promise((resolve, reject) => {
@@ -456,8 +475,9 @@ async function requestFileInput(
 				if (state.closedByUser === true)
 					reject(new Error('User closed popup', { cause: { userClosed: true } }));
 
-				if (state.selectedFiles != null && state.selectedFiles.length > 0) {
-					const files = state.selectedFiles.map((filePreview) => filePreview.file);
+				const selectedFiles = state.selectedFiles as FilePreview[];
+				if (selectedFiles != null && selectedFiles.length > 0) {
+					const files = selectedFiles.map((filePreview) => filePreview.file);
 					resolve(allowMultiple ? files : files[0]);
 				} else {
 					reject(new Error('No file selected'));

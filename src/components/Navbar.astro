@@ -1,0 +1,78 @@
+---
+// Import necessary scripts and styles
+import '../styles/components/buttons/Hamburguer.scss';
+
+import Reloj from '@components/Reloj';
+
+import NavButton from './buttons/NavButton';
+import Contact from './Contact.astro';
+
+interface Props {
+	buttons: Array<{
+		name: string;
+		href: string;
+		submenu?: Array<{
+			href: string;
+			name: string;
+		}>;
+	}>;
+}
+
+const { buttons } = Astro.props;
+---
+
+<div class="fixed w-full h-[90px] overflow-hidden z-50 mix-blend-difference">
+	<div class="mx-10 h-full">
+		<div class="h-full w-full">
+			<div id="nav-switcher" class="max-lg:-translate-y-[100px]">
+				<div class="flex items-center h-[90px] justify-between text-xl text-white font-medium">
+					<a class="flex items-center" href="/">
+						<img src="/svg/isotipo_blanco.svg" alt="Isotipo de la marca" class="h-10 mr-4" />
+					</a>
+					<div class="flex items-center space-x-8">
+						{buttons.map((button, index) => <NavButton button={button} index={index} client:visible />)}
+					</div>
+					<Reloj client:load />
+					<Contact />
+				</div>
+				<div class="flex items-center h-[90px] justify-between text-xl text-white font-medium">
+					<a href="/">
+						<h1 class="font-raleway text-4xl font-extrabold text-inverse">Laboralistas</h1>
+					</a>
+					<div class="scale-50" id="button-container">
+						<div id="menu-btn" class="cursor-pointer mt-4">
+							<span class="icon"></span>
+							<span class="text">MENU</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+	import { gsap } from 'gsap';
+	import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+	gsap.registerPlugin(ScrollTrigger);
+
+	document.addEventListener('DOMContentLoaded', () => {
+		if (window.matchMedia('(min-width: 1024px)').matches) {
+			// 1024px es típicamente el punto de corte para `lg` en Tailwind
+			const navSwitcher = document.getElementById('nav-switcher');
+			if (navSwitcher) {
+				gsap.to(navSwitcher, {
+					y: -100,
+					ease: 'none',
+					scrollTrigger: {
+						trigger: document.getElementById('header'),
+						start: 'top top',
+						end: 'bottom top',
+						scrub: true,
+					},
+				});
+			}
+		}
+	});
+</script>

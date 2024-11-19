@@ -1,0 +1,171 @@
+---
+import '@styles/components/Menu.scss';
+
+import { Icon } from 'astro-icon/components';
+
+interface Props {
+	buttons: Array<{
+		href: string;
+		name: string;
+		submenu?: Array<{
+			href: string;
+			name: string;
+		}>;
+	}>;
+}
+
+const { buttons } = Astro.props;
+
+buttons.unshift({ name: 'Inicio', href: '/' });
+---
+
+<>
+	<!-- blocks -->
+	<div
+		id="square-container"
+		class="w-screen h-screen flex flex-wrap justify-start content-start box-border overflow-hidden z-[1001] pointer-events-none fixed top-0 left-0"
+	>
+	</div>
+
+	<!-- menu -->
+	<div
+		class="opacity-0 content-overlay fixed top-0 w-screen h-screen flex justify-start items-center gap-[5em] bg-accent text-white z-[10] pointer-events-none pt-32"
+	>
+		<div class="nav-links w-[80%] mx-auto">
+			{
+				buttons.map((button, index) => (
+					<div class="flex relative">
+						<div class={`nav-link flex relative ${button.submenu != null && 'peer'}`}>
+							<a href={button.href} class="px-0 py-2 text-2xl font-[800] text-white text-opacity-70 peer">
+								<span
+									data-text={button.name}
+									class="relative block before:w-0 before:text-white before:overflow-hidden before:absolute before:content-[attr(data-text)] before:transition-all before:duration-500 before:ease-in-out hover:before:w-full before:whitespace-nowrap whitespace-nowrap"
+								>
+									{button.name}
+								</span>
+							</a>
+							<span class="absolute text-white top-[0.3em] text-base -order-1 peer-hover:opacity-100 opacity-0 peer-hover:-left-6 left-0 transition-all duration-500 ease-in-out mr-2 pointer-events-none">
+								0{index + 1}
+							</span>
+						</div>
+						{button.submenu != null && (
+							<>
+								<div class="submenu pl-32 ml-20 flex-col flex pointer-events-none gap-2 peer-hover:pointer-events-auto justify-end hover:pointer-events-auto z-30 absolute top-[calc(50%-12px)] peer opacity-0 peer-hover:opacity-100 hover:opacity-100 delay-1000 ease-in-out duration-500">
+									{button.submenu.map((subbutton) => (
+										<a href={subbutton.href} class="opacity-70 hover:opacity-100">
+											{subbutton.name}
+										</a>
+									))}
+								</div>
+								<span class="w-0 h-[1px] absolute top-1/2 left-32 peer-hover:w-16 bg-white transition-all duration-500 ease-in-out delay-500" />
+							</>
+						)}
+					</div>
+				))
+			}
+			<div class="nav-link flex gap-5 mt-2">
+				<a href="#" class="opacity-70 hover:opacity-100"><Icon name="mdi:facebook" width={20} height={20} /></a>
+				<a href="#" class="opacity-70 hover:opacity-100"><Icon name="mdi:instagram" width={20} height={20} /></a
+				>
+				<a href="#" class="opacity-70 hover:opacity-100"><Icon name="mdi:twitter" width={20} height={20} /></a>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		import { gsap } from 'gsap';
+		import { locomotiveScroll } from 'src/layouts/locomotiveScroll';
+
+		window.addEventListener('DOMContentLoaded', () => {
+			const menu = document.querySelector('.content-overlay');
+			gsap.set(menu, { opacity: 0, pointerEvents: 'none' });
+
+			const squareContainer = document.getElementById('square-container');
+
+			if (squareContainer == null) return;
+
+			const squareSize = 100;
+			const screenWidth = window.innerWidth;
+			const screenHeight = window.innerHeight;
+			const numCols = Math.ceil(screenWidth / squareSize);
+			const numRows = Math.ceil(screenHeight / squareSize);
+			const numSquares = numCols * numRows;
+
+			squareContainer.style.width = `${numCols * squareSize}px`;
+			squareContainer.style.height = `${numRows * squareSize}px`;
+
+			let squares: HTMLDivElement[] = [];
+
+			function createSquares() {
+				if (squareContainer == null) return;
+				for (let i = 0; i < numSquares; i++) {
+					const square = document.createElement('div');
+					square.classList.add('square');
+					squareContainer.appendChild(square);
+					squares.push(square);
+				}
+			}
+
+			function animateSquares() {
+				// Primero, animamos la opacidad de los cuadrados a 1
+				gsap.fromTo(
+					squares,
+					{ opacity: 0 },
+					{
+						opacity: 1,
+						duration: 0.0005,
+						stagger: { each: 0.004, from: 'random' },
+						onComplete: () => {
+							// Luego, hacemos que el menú aparezca después de que los cuadrados estén visibles
+							gsap.to(menu, {
+								opacity: overlayVisible ? 1 : 0,
+								pointerEvents: overlayVisible ? 'all' : 'none',
+								duration: 0,
+							});
+						},
+					},
+				);
+
+				gsap.to(squares, {
+					opacity: 0,
+					duration: 0.0005,
+					stagger: { each: 0.004, from: 'random' },
+					delay: 1,
+				});
+			}
+
+			let overlayVisible = false;
+
+			const menuButton = document.querySelector('#menu-btn');
+
+			if (menuButton == null) return;
+
+			menuButton.addEventListener('click', () => {
+				squareContainer.innerHTML = '';
+				squares = [];
+				createSquares();
+				animateSquares();
+
+				// Alternar la visibilidad del overlay
+				overlayVisible = !overlayVisible;
+
+				// Evitar el desplazamiento cuando el overlay está visible
+				document.body.style.overflow = overlayVisible ? 'hidden' : 'auto';
+
+				if (menuButton.classList.contains('open')) {
+					menuButton.classList.remove('open');
+					menuButton.classList.add('close');
+				} else {
+					menuButton.classList.remove('close');
+					menuButton.classList.add('open');
+				}
+
+				if (overlayVisible) {
+					locomotiveScroll.stop();
+				} else {
+					locomotiveScroll.start();
+				}
+			});
+		});
+	</script>
+</>

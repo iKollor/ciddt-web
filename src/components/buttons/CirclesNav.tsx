@@ -3,8 +3,8 @@
 import { useStore } from '@nanostores/react';
 import { motion, useAnimation } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
+import type { pseudoUser } from 'src/hooks/useEditProfileManagement';
 import useTeamManagement from 'src/hooks/useTeamManagement';
-import type { User } from 'src/interfaces/User';
 
 import { animationFinished, chunkIndex } from '../../hooks/carrouselStores';
 
@@ -18,7 +18,7 @@ const NavigationButtons: React.FC<NavigationButtonsProps> = ({ className }) => {
 	const $animationFinished = useStore(animationFinished);
 	const progressBarControls = useAnimation();
 	const containerRef = useRef(null);
-	const [Data, setData] = useState<User[]>([]);
+	const [Data, setData] = useState<pseudoUser[]>([]);
 
 	const { getProfilesData } = useTeamManagement();
 
@@ -26,7 +26,8 @@ const NavigationButtons: React.FC<NavigationButtonsProps> = ({ className }) => {
 		if (teamId == null) return;
 		void getProfilesData(teamId)
 			.then((data) => {
-				setData(data);
+				const profiles = data.slice(1);
+				setData(profiles);
 			})
 			.catch((error) => {
 				console.error(error);
@@ -137,7 +138,7 @@ const NavigationButtons: React.FC<NavigationButtonsProps> = ({ className }) => {
 				clearInterval(indexInterval);
 			}
 		};
-	}, [$chunkIndex]); // Dependencia en $chunkIndex para reiniciar la animación cuando cambie
+	}, [$chunkIndex, Data]); // Dependencia en $chunkIndex para reiniciar la animación cuando cambie
 
 	// Estilos para la barra de progreso
 	const progressBarStyle = {
@@ -174,7 +175,6 @@ const NavigationButtons: React.FC<NavigationButtonsProps> = ({ className }) => {
 						animate={$chunkIndex === index ? 'selected' : 'unselected'}
 						onClick={() => {
 							chunkIndex.set(index);
-							console.log(chunkIndex.get());
 						}}
 					/>
 				))}

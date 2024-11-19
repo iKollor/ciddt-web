@@ -32,7 +32,7 @@ export type InputType =
 	| 'hidden';
 export interface FilePreview {
 	file: File;
-	previewUrl: string | null;
+	previewUrl?: string;
 }
 export interface InputPopupProps {
 	visible: boolean;
@@ -40,7 +40,7 @@ export interface InputPopupProps {
 	placeholder?: string;
 	type: InputType;
 	message: string;
-	selectedFiles?: FilePreview[];
+	selectedFiles?: FilePreview[] | FilePreview;
 	allowMultiple?: boolean;
 	acceptedTypes?: string;
 	closedByUser?: boolean;
@@ -48,4 +48,5 @@ export interface InputPopupProps {
 	imageCropAspectRatio?: number;
 	inputImageTitle?: string;
 	inputImageSubtitle?: string;
+	value?: string;
 }

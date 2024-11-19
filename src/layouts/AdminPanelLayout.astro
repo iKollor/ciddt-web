@@ -8,21 +8,28 @@ import Navbar from '@components/ciddt-admin/Navbar';
 import NavbarHeader from '@components/ciddt-admin/NavbarHeader.astro';
 import { auth } from '@firebase/server';
 import { ViewTransitions } from 'astro:transitions';
-import { type UserRecord } from 'firebase-admin/auth';
+import type { UserRecord } from 'firebase-admin/auth';
 import { loader } from 'src/hooks/pushBody';
 
 let userRecord: UserRecord | null = null;
 
-const sessionCookie = Astro.cookies.get('session')?.value;
-
-if (sessionCookie != null) {
-	const decodedCookie = await auth.verifySessionCookie(sessionCookie);
-	try {
-		userRecord = await auth.getUser(decodedCookie.uid);
-	} catch (error) {
-		console.log('No usuario');
-		return Astro.redirect('/ciddt-admin/login');
+/* Check if the user is authenticated */
+if (Astro.cookies.has('session')) {
+	console.log('Session cookie found');
+	const sessionCookie = Astro.cookies.get('session')?.value;
+	if (sessionCookie != null) {
+		try {
+			const decodedCookie = await auth.verifySessionCookie(sessionCookie);
+			userRecord = await auth.getUser(decodedCookie.uid);
+		} catch (error: any) {
+			// borra la cookie si no es válida
+			console.log('Error verifying session cookie', error.message);
+			Astro.cookies.delete('session');
+			return Astro.redirect('/ciddt-admin/login');
+		}
 	}
+} else {
+	return Astro.redirect('/ciddt-admin/login');
 }
 
 interface Props {
@@ -70,8 +77,6 @@ const { title } = Astro.props;
 		<script>
 			import { inputPopupStore, popupStore } from '../hooks/popupStores';
 			import { loader } from '../hooks/pushBody';
-			import { auth } from '@firebase/client';
-			import { navigate } from 'astro:transitions/client';
 
 			document.addEventListener('astro:before-preparation', () => {
 				loader.set({
@@ -90,22 +95,6 @@ const { title } = Astro.props;
 				popupStore.set({ visible: false, title: '', message: '', type: 'info' });
 				inputPopupStore.set({ visible: false, message: '', type: 'text', content: '' });
 			});
-
-			function verifyUser() {
-				if (auth.currentUser == null) {
-					navigate('/api/auth/signout');
-				}
-			}
-
-			document.addEventListener(
-				'astro:page-load',
-				() => {
-					setTimeout(() => {
-						verifyUser();
-					}, 1000);
-				},
-				{ once: true },
-			);
 		</script>
 	</body>
 </html>

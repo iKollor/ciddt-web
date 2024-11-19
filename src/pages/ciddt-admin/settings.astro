@@ -15,8 +15,8 @@ let userRecord: UserRecord | null = null;
 const sessionCookie = Astro.cookies.get('session')?.value;
 
 if (sessionCookie != null) {
-	const decodedCookie = await auth.verifySessionCookie(sessionCookie);
 	try {
+		const decodedCookie = await auth.verifySessionCookie(sessionCookie);
 		userRecord = await auth.getUser(decodedCookie.uid);
 	} catch (error: any) {
 		if (error.code === 'UND_ERR_CONNECT_TIMEOUT') {

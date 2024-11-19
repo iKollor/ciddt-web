@@ -1,15 +1,19 @@
 ---
 import VerMas from '@components/buttons/VerMas';
-import PostCard from '@components/PostCard';
+import PostCarrousel from '@components/PostCarrousel';
 ---
 
 <>
 	<div class="momentos__container h-screen">
-		<div class="carrousel__container w-full h-5/6 flex flex-row justify-center align-middle items-center">
-			<PostCard />
+		<div class="h-5/6 flex justify-center items-center">
+			<div class="w-full">
+				<PostCarrousel client:only="react" />
+			</div>
 		</div>
-		<div class="button__container w-full flex flex-row justify-end items-center">
-			<VerMas client:only />
+		<div class="w-full flex flex-row justify-end max-lg:justify-center items-center">
+			<div class="mr-20 max-lg:mr-0 max-lg:w-full max-lg:flex max-lg:justify-center">
+				<VerMas opcion="1" client:visible />
+			</div>
 		</div>
 	</div>
 </>

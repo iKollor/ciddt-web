@@ -1,10 +1,37 @@
 ---
 import AddProviderButton from '@components/ciddt-admin/AddProviderButton';
+import { auth } from '@firebase/server';
+import type { UserRecord } from 'firebase-admin/auth';
 import AdminPanelLayout from 'src/layouts/AdminPanelLayout.astro';
 
 /* Check current session */
 if (!Astro.cookies.has('session')) {
+	console.log('No session cookie');
 	return Astro.redirect('/ciddt-admin/login');
+}
+
+let userRecord: UserRecord | null = null;
+
+const sessionCookie = Astro.cookies.get('session')?.value;
+
+if (sessionCookie != null) {
+	console.log('Session cookie found');
+	try {
+		const decodedCookie = await auth.verifySessionCookie(sessionCookie);
+		userRecord = await auth.getUser(decodedCookie.uid);
+		if (userRecord == null) {
+			return Astro.redirect('/api/auth/signout');
+		}
+	} catch (error: any) {
+		if (error.code === 'UND_ERR_CONNECT_TIMEOUT') {
+			return;
+		}
+		if (error.code === 'auth/session-cookie-expired') {
+			console.log('Session cookie expired');
+			return Astro.redirect('/api/auth/signout');
+		}
+		return Astro.redirect('/api/auth/signout');
+	}
 }
 ---
 
@@ -17,7 +44,9 @@ if (!Astro.cookies.has('session')) {
 	<div class="mt-8 grid grid-cols-3 gap-4">
 		<div class="bg-edgewater-800 rounded-md p-4">
 			<h2 class="font-bold text-2xl flex items-center justify-center my-4">Meta</h2>
-			<p class="mt-4 text-center w-full min-h-[50px]">Agrega las publicaciones y Reels de Facebook e Instragram</p>
+			<p class="mt-4 text-center w-full min-h-[50px]">
+				Agrega las publicaciones y Reels de Facebook e Instragram
+			</p>
 			<div class="w-full flex items-center justify-center my-4">
 				<AddProviderButton provider="facebook" client:only />
 			</div>

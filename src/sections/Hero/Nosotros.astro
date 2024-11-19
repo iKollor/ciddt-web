@@ -1,7 +1,7 @@
 ---
 import '@styles/pages/Nosotros.scss';
 
-import Imagen from '@public/2x/nosotros.jpg';
+import Imagen from '@public/2x/nosotros.webp';
 import { Image } from 'astro:assets';
 ---
 
@@ -9,26 +9,27 @@ import { Image } from 'astro:assets';
 	<div class="nosotros__container">
 		<div class="divisor1">
 			<div class="text__container">
-				<p>Defendemos tus derechos laborales en cada desafío presente</p>
+				<p data-scroll data-scroll-speed="0.1">Defendemos tus derechos laborales en cada desafío presente</p>
 			</div>
 		</div>
 		<div class="divisor2">
-			<div class="img__container">
+			<div class="img__container select-none">
 				<Image class="image" src={Imagen} alt="Nosotros" />
 			</div>
 		</div>
 		<div class="divisor3">
 			<div class="text__container__arriba">
-				<p>
-					La pandemia por COVID-19 llevó a empresas y gobiernos a adoptar políticas de flexibilización
-					laboral, resultando en la precarización de muchos trabajadores. Ante este desafiante escenario y la
-					notable ausencia de espacios para debatir y proteger el derecho al trabajo, establecimos una
-					organización comprometida en resguardar, asesorar y defender los derechos laborales. <br />
-					<br />Además, nos propusimos fortalecer y apoyar activamente a las organizaciones sindicales del
-					país, brindando herramientas y capacitación en estos tiempos críticos.
+				<p data-scroll data-scroll-speed="0.3">
+					Laboralistas es un estudio jurídico especializado en la defensa de los derechos laborales y
+					sindicales. Su equipo está conformado por profesionales de alto nivel con amplia experiencia en el
+					litigio nacional e internacional en materia de derecho laboral y constitucional, que están
+					comprometidos con la justicia social y la promoción del trabajo digno en Ecuador. <br />
+					<br />El equipo de Laboralistas ofrece servicios de defensa jurídica en procesos administrativos y
+					judiciales, dicta capacitaciones en materia laboral y brinda acompañamiento permanente a las
+					organizaciones sindicales.
 				</p>
 			</div>
-			<div class="text__container">
+			<div class="text__container" data-scroll data-scroll-speed="-0.1">
 				<h1>Comunidad.</h1>
 				<h1>Trabajo.</h1>
 				<h1>Conciencia.</h1>
